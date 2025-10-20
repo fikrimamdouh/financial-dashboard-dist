@@ -1,0 +1,419 @@
+/* =================================================================
+ * POLARIS-THEME.CSS
+ * The Soul of the Polaris Strategic Command System
+ * Version: 1.1 (Enhanced with more variables)
+ * ================================================================= */
+
+/* -----------------------------------------------------------------
+ * 1. Root Variables & Global Setup (دستور التصميم)
+ * ----------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Tajawal:wght@400;500;700&display=swap' );
+
+:root {
+    /* الخطوط */
+    --font-family-main: 'Tajawal', sans-serif; /* الخط الرئيسي للبيانات والنصوص */
+    --font-family-display: 'Orbitron', sans-serif; /* الخط الخاص بالعناوين والشعارات (لإضفاء الطابع التقني) */
+    
+    /* أوزان الخطوط */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
+
+    /* الألوان الأساسية */
+    --color-bg: #010409; /* أسود مشبع بالزرقة (مثل سماء الليل) */
+    --color-surface: rgba(13, 17, 23, 0.8); /* سطح شبه شفاف */
+    --color-border: rgba(56, 139, 253, 0.3); /* لون الحدود المتوهجة */
+    
+    /* ألوان التوهج والتأثيرات */
+    --color-primary: #00BFFF; /* DeepSkyBlue - اللون الأساسي للأزرار والروابط */
+    --color-secondary: #7DF9FF; /* Electric Blue - لون ثانوي للتأثيرات */
+    
+    /* ألوان النصوص */
+    --color-text-primary: #E6EDF3; /* لون النصوص الأساسي (أبيض خافت) */
+    --color-text-secondary: #7D8590; /* لون النصوص الثانوية (رمادي مزرق) */
+    --color-text-heading: #FFFFFF; /* لون العناوين الرئيسية (أبيض ناصع) */
+    --color-text-inverted: var(--color-bg); /* لون النص فوق خلفية ملونة */
+
+    /* الظلال */
+    --glow-shadow-primary: 0 0 15px var(--color-primary);
+    --glow-shadow-secondary: 0 0 10px var(--color-secondary);
+
+    /* نصف قطر الحواف */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+
+    /* الانتقالات */
+    --transition-fast: all 0.2s ease-in-out;
+}
+
+/* -----------------------------------------------------------------
+ * 2. Body & Background Effects (بيئة العمل)
+ * ----------------------------------------------------------------- */
+body {
+    font-family: var(--font-family-main);
+    font-weight: var(--font-weight-normal);
+    direction: rtl;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    display: flex; /* يستخدم لتفعيل الشريط الجانبي في الصفحات الداخلية */
+    min-height: 100vh;
+}
+
+.grid-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), 
+        linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -2;
+}
+
+.glow-background {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%);
+    transform: translate(-50%, -50%);
+    animation: pulse 10s infinite ease-in-out;
+    z-index: -1;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+}
+
+/* -----------------------------------------------------------------
+ * 3. Layout & Core Components (الهيكل العام)
+ * ----------------------------------------------------------------- */
+.sidebar {
+    width: 80px;
+    height: 100vh;
+    background-color: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+}
+
+.app-logo {
+    color: var(--color-primary);
+    font-family: var(--font-family-display);
+    font-size: 2rem;
+    margin-bottom: 2.5rem;
+    text-shadow: var(--glow-shadow-primary);
+    text-decoration: none;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-family: var(--font-family-display);
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--color-text-heading);
+}
+
+.control-pane {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    backdrop-filter: blur(5px);
+}
+
+/* -----------------------------------------------------------------
+ * 4. Forms & Interactive Elements (النماذج والأزرار)
+ * ----------------------------------------------------------------- */
+.form-label {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.form-control, .form-select {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
+}
+
+.btn {
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-inverted);
+    font-weight: var(--font-weight-bold);
+}
+.btn-primary:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-inverted);
+    box-shadow: var(--glow-shadow-primary);
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary {
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+    font-weight: var(--font-weight-medium);
+}
+.btn-outline-secondary:hover {
+    color: var(--color-text-primary);
+    background-color: rgba(56, 139, 253, 0.1);
+    border-color: var(--color-border);
+}
+
+/* -----------------------------------------------------------------
+ * 5. Specific Component Styles (تنسيقات خاصة بالمكونات)
+ * ----------------------------------------------------------------- */
+
+/* Table Styles */
+.table {
+    color: var(--color-text-primary);
+}
+.table thead th {
+    color: var(--color-text-secondary);
+    border-bottom-color: var(--color-border);
+    font-weight: var(--font-weight-medium);
+}
+.table tbody td {
+    border-bottom-color: rgba(56, 139, 253, 0.1);
+    vertical-align: middle;
+}
+.table .total-row {
+    border-top: 2px solid var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Accordion Styles */
+.accordion-item {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+.accordion-button {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+}
+.accordion-button:not(.collapsed) {
+    color: var(--color-primary);
+    background-color: rgba(0, 191, 255, 0.05);
+}
+.accordion-button:focus {
+    box-shadow: none;
+}
+.accordion-button::after {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Modal Styles */
+.modal-content {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    backdrop-filter: blur(15px);
+    border-radius: var(--border-radius-lg);
+}
+.modal-header, .modal-footer {
+    border-color: var(--color-border);
+}
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Nav Tabs */
+.nav-tabs {
+    border-bottom-color: var(--color-border);
+}
+.nav-tabs .nav-link {
+    color: var(--color-text-secondary);
+    border-color: transparent;
+    border-bottom-color: transparent;
+    font-weight: var(--font-weight-medium);
+}
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: var(--color-text-primary);
+}
+.nav-tabs .nav-link.active {
+    color: var(--color-primary);
+    background-color: transparent;
+    border-color: var(--color-border);
+    border-bottom-color: var(--color-bg);
+}
+/* =================================================================
+ * POLARIS-THEME.CSS - ADDENDUM FOR AUDIT MODULE v4.0
+ * الإضافات الخاصة بوحدة المراجعة - النسخة النهائية
+ * ================================================================= */
+
+/* -----------------------------------------------------------------
+ * 6. Audit Module Specific Styles (تنسيقات وحدة المراجعة)
+ * ----------------------------------------------------------------- */
+
+/* Layout & Panels */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 500px; /* العمود الأيمن للوحة الفحص */
+    gap: 1.5rem;
+    height: calc(100vh - 280px); /* تم تعديل الارتفاع لاستيعاب اللوحات الجديدة */
+}
+
+.inspector-pane {
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    backdrop-filter: blur(5px);
+}
+
+.status-bar {
+    position: fixed;
+    bottom: 0;
+    right: 0; /* تم التعديل ليتناسب مع اتجاه RTL */
+    left: 0; /* تم التعديل ليتناسب مع اتجاه RTL */
+    margin-right: 80px; /* عرض الشريط الجانبي */
+    padding: 0.5rem 1rem;
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    z-index: 10;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 0.8rem;
+    backdrop-filter: blur(10px);
+}
+
+/* Income Summary Panel */
+.income-summary-panel {
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 0.75rem;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 1rem;
+}
+
+.summary-item .value {
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family-display);
+}
+
+.summary-item .value.profit {
+    color: #28a745; /* لون الربح (أخضر) */
+    text-shadow: 0 0 8px rgba(40, 167, 69, 0.7);
+}
+
+.summary-item .value.loss {
+    color: #dc3545; /* لون الخسارة (أحمر) */
+    text-shadow: 0 0 8px rgba(220, 53, 69, 0.7);
+}
+
+.summary-item .label {
+    font-size: 0.8rem;
+    color: var(--color93, 7, 0.1); /* خلفية صفراء شفافة */
+    border-right: 3px solid #ffc107; /* شريط أصفر على اليمين */
+}
+.unclassified-row:hover {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+}
+
+/* أيقونة التحذير المنطقي */
+.logical-warning-icon {
+    margin-right: 8px; /* مسافة على يمين الأيقونة */
+    cursor: help; /* تغيير شكل المؤشر للمساعدة */
+    color: #ffc107; /* لون أصفر للتحذير */
+    animation: blink-warning 2s infinite;
+}
+
+@keyframes blink-warning {
+    50% { opacity: 0.5; }
+}
+
+/* أيقونة الجداول التحليلية (Schedules) */
+.schedule-icon {
+    cursor: pointer;
+    margin-left: 8px; /* مسافة على يسار الأيقونة */
+    color: var(--color-text-secondary);
+    transition: var(--transition-fast);
+}
+.schedule-icon:hover {
+    color: var(--color-primary);
+    transform: scale(1.2);
+}
+.schedule-icon.active {
+    color: var(--color-primary); /* لون أزرق يعني أن الجدول موجود ومتطابق */
+}
+.schedule-icon.error {
+    color: #dc3545; /* لون أحمر يعني أن الجدول غير متطابق */
+    animation: pulse-error 1.5s infinite;
+}
+
+@keyframes pulse-error {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* تنسيق رأس المجموعة في الجدول */
+.group-header {
+    font-weight: var(--font-weight-bold);
+    background-color: rgba(13, 17, 23, 0.9);
+    cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.group-header .toggle-icon {
+    transition: transform 0.2s ease-in-out;
+}
+.group-header.expanded .toggle-icon {
+    transform: rotate(90deg);
+}
+
+/* تنسيق خاص بأزرار الفلترة */
+.btn-group .btn {
+    font-weight: var(--font-weight-medium);
+}

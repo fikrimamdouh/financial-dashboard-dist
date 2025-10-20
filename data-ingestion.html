@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استيعاب وتدقيق البيانات | Polaris</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/polaris-theme.css">
+    <style>
+        .upload-slot { border: 2px dashed var(--color-border ); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; background-color: rgba(13, 17, 23, 0.5); }
+        .upload-slot.drag-over { border-color: var(--color-primary); background-color: rgba(0, 191, 255, 0.05); }
+        .upload-slot.completed { border-color: #28a745; background-color: rgba(40, 167, 69, 0.05); }
+        .upload-slot.failed { border-color: #dc3545; background-color: rgba(220, 53, 69, 0.05); }
+        .upload-slot .upload-content { transition: opacity 0.3s ease; }
+        .upload-slot .upload-loader { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(13, 17, 23, 0.9); opacity: 0; visibility: hidden; transition: all 0.3s ease; border-radius: 12px; }
+        .upload-slot.loading .upload-content { opacity: 0.2; }
+        .upload-slot.loading .upload-loader { opacity: 1; visibility: visible; }
+        .validation-summary { font-size: 0.85rem; text-align: right; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+        .history-log { font-size: 0.8rem; background-color: rgba(0,0,0,0.2); border-radius: 6px; }
+        .history-log-item { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .history-log-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="grid-background"></div>
+    <div class="glow-background"></div>
+
+    <nav class="sidebar">
+        <a href="company-setup.html" class="app-logo" title="العودة لتأسيس الكيانات"><i class="fas fa-chevron-left"></i></a>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h1 id="pageTitle" class="page-title">محطة استيعاب البيانات</h1>
+            <div>
+                <button class="btn btn-outline-secondary" onclick="downloadTemplate()"><i class="fas fa-download me-2"></i>تحميل نموذج Excel</button>
+                <button id="nextStepBtn" class="btn btn-primary ms-2" onclick="processAndProceed()" disabled><i class="fas fa-check-double me-2"></i>اعتماد البيانات والمتابعة</button>
+            </div>
+        </div>
+        <div id="loader" class="text-center"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">جاري تحميل بروتوكول التأسيس...</p></div>
+        <div id="contentArea" class="control-pane" style="display: none;">
+            <!-- UI will be rendered here -->
+        </div>
+    </main>
+
+    <!-- Modal for Upload History -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="historyModalTitle">سجل الرفع</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="historyModalBody">
+                    <!-- History log will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        let clientSetup = {};
+        let validationStates = {};
+        let historyModal = null;
+
+        document.addEventListener('DOMContentLoaded', ( ) => {
+            const activeClientId = localStorage.getItem('activeClientId');
+            if (!activeClientId) {
+                handleFatalError('<h4>خطأ فادح: لم يتم العثور على عميل نشط.</h4><p>الرجاء العودة لصفحة "تأسيس الكيانات" أولاً.</p>');
+                return;
+            }
+            const setupData = localStorage.getItem(`clientSetup_${activeClientId}`);
+            if (!setupData) {
+                handleFatalError('<h4>خطأ فادح: لم يتم العثور على بروتوكول التأسيس للعميل النشط.</h4>');
+                return;
+            }
+            
+            try {
+                clientSetup = JSON.parse(setupData);
+            } catch (e) {
+                handleFatalError('<h4>خطأ فادح: بيانات بروتوكول التأسيس تالفة.</h4>');
+                return;
+            }
+
+            historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('contentArea').style.display = 'block';
+            renderUI();
+        });
+
+        function handleFatalError(message) {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `<div class="alert alert-danger">${message}<a href="company-setup.html" class="btn btn-primary mt-3">العودة لصفحة التأسيس</a></div>`;
+        }
+
+        function renderUI() {
+            const container = document.getElementById('contentArea');
+            const pageTitle = document.getElementById('pageTitle');
+            let html = '';
+
+            if (clientSetup.path === 'single') {
+                const entityName = clientSetup.details.companyName;
+                const entityId = clientSetup.details.cr.replace(/\s/g, '_');
+                pageTitle.innerHTML = `استيعاب بيانات: <span class="text-primary">${entityName}</span>`;
+                html = createUploadSectionHTML(entityId, 'ميزان المراجعة الرئيسي');
+            } else {
+                const groupName = clientSetup.details.groupName;
+                pageTitle.innerHTML = `استيعاب بيانات مجموعة: <span class="text-primary">${groupName}</span>`;
+                if (clientSetup.details.subsidiaries && clientSetup.details.subsidiaries.length > 0) {
+                    html = clientSetup.details.subsidiaries.map(sub => {
+                        const entityId = sub.cr.replace(/\s/g, '_'); 
+                        return `<div class="mb-5">${createUploadSectionHTML(entityId, `الكيان التابع: ${sub.name}`)}</div>`;
+                    }).join('<hr class="my-5">');
+                } else {
+                     html = '<div class="alert alert-warning">لم يتم العثور على كيانات تابعة في هذا المشروع.</div>';
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function createUploadSectionHTML(entityId, entityName) {
+            return `
+                <h5 class="font-family-display mb-3">${entityName}</h5>
+                <div class="row g-4 align-items-start">
+                    <div class="col-md-8">
+                        <h6>1. رفع ميزان المراجعة للفترة الحالية</h6>
+                        <div id="slot_${entityId}" class="upload-slot" onclick="this.querySelector('input').click()">
+                            <div class="upload-content">
+                                <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-secondary"></i>
+                                <p>اسحب وأفلت ملف Excel هنا، أو انقر للرفع</p>
+                                <p id="fileName_${entityId}" class="fw-bold mt-2"></p>
+                            </div>
+                            <div class="upload-loader"><div class="spinner-border text-primary"></div><p class="mt-2">جاري الفحص والتوثيق...</p></div>
+                            <input type="file" class="d-none" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, '${entityId}', 'current')">
+                        </div>
+                        <div class="text-end mt-2">
+                            <a href="#" class="small" onclick="showHistory('${entityId}', 'current')">عرض سجل الرفع</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                         <h6>&nbsp;</h6>
+                        <div id="summary_${entityId}" class="validation-summary">
+                            <p class="text-muted small">بانتظار رفع الملف للتحقق...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 mt-3">
+                    <div class="col-md-8">
+                        <h6>2. مطابقة أرصدة أول المدة (اختياري)</h6>
+                        <div id="slot_prev_${entityId}" class="upload-slot" onclick="this.querySelector('input').click()">
+                            <div class="upload-content">
+                                <i class="fas fa-history fa-3x mb-3 text-secondary"></i>
+                                <p>ارفع هنا (ميزان العام السابق أو القوائم المالية PDF)</p>
+                                <p id="fileName_prev_${entityId}" class="fw-bold mt-2"></p>
+                            </div>
+                            <input type="file" class="d-none" accept=".xlsx, .xls, .csv, .pdf" onchange="handleFileUpload(this, '${entityId}', 'previous')">
+                        </div>
+                         <div class="text-end mt-2">
+                            <a href="#" class="small" onclick="showHistory('${entityId}', 'previous')">عرض سجل الرفع</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function handleFileUpload(input, entityId, type) {
+            if (input.files.length === 0) return;
+            const file = input.files[0];
+            const slot = document.getElementById(`slot_${type === 'current' ? '' : 'prev_'}${entityId}`);
+            
+            slot.classList.remove('completed', 'failed');
+            if (type === 'current') slot.classList.add('loading');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileData = { name: file.name, size: file.size, type: file.type, uploadDate: new Date().toISOString(), user: "Current User" };
+
+                if (file.type.includes('pdf')) {
+                    fileData.status = "Acknowledged";
+                    updateAndLog(entityId, type, fileData, null);
+                    if (type === 'current') slot.classList.remove('loading');
+                    return;
+                }
+
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    const headerKeywords = ['حساب', 'مدين', 'دائن', 'رصيد', 'code', 'account', 'debit', 'credit', 'balance'];
+                    let headerRowIndex = -1;
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+                    for (let R = range.s.r; R <= Math.min(range.e.r, 10); ++R) { 
+                        let keywordCount = 0;
+                        for (let C = range.s.c; C <= range.e.c; ++C) {
+                            const cellAddress = { c: C, r: R };
+                            const cellRef = XLSX.utils.encode_cell(cellAddress);
+                            const cell = worksheet[cellRef];
+                            if (cell && cell.v) {
+                                const cellValue = String(cell.v).toLowerCase();
+                                if (headerKeywords.some(keyword => cellValue.includes(keyword))) {
+                                    keywordCount++;
+                                }
+                            }
+                        }
+                        if (keywordCount >= 3) { 
+                            headerRowIndex = R;
+                            break;
+                        }
+                    }
+
+                    if (headerRowIndex === -1) {
+                        throw new Error("لم يتم العثور على صف العناوين في الملف. يرجى التأكد من وجود عناوين واضحة للأعمدة.");
+                    }
+
+                    const json = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex });
+                    
+                    const cleanedJson = json.filter(row => {
+                        const hasTotalWord = Object.values(row).some(val => typeof val === 'string' && (val.includes('إجمالي') || val.toLowerCase().includes('total')));
+                        const isEmptyRow = Object.values(row).every(val => val === null || val === '');
+                        return !hasTotalWord && !isEmptyRow;
+                    });
+
+                    const standardizedJson = cleanedJson.map(standardizeRow);
+                    
+                    if (type === 'current') {
+                        const validationResult = validateTrialBalance(standardizedJson);
+                        fileData.status = validationResult.isValid ? "Valid & Balanced" : `Failed: ${validationResult.message.replace(/<[^>]*>?/gm, '')}`;
+                        updateAndLog(entityId, type, fileData, standardizedJson, validationResult);
+                        slot.classList.remove('loading');
+                    } else {
+                         fileData.status = "Acknowledged";
+                         updateAndLog(entityId, type, fileData, standardizedJson);
+                    }
+                } catch (error) {
+                    console.error("File processing error:", error);
+                    fileData.status = `Error: ${error.message}`;
+                    const friendlyError = { isValid: false, message: error.message };
+                    updateAndLog(entityId, type, fileData, null, friendlyError);
+                    if (type === 'current') slot.classList.remove('loading');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function updateAndLog(entityId, type, fileData, jsonData, validationResult = null) {
+            const activeClientId = localStorage.getItem('activeClientId');
+            const storageKey = `uploadHistory_${activeClientId}_${entityId}_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            history.unshift(fileData); 
+            localStorage.setItem(storageKey, JSON.stringify(history));
+
+            if (jsonData && (!validationResult || validationResult.isValid)) {
+                const dataKey = `data_${activeClientId}_${entityId}_${type}`;
+                // Store only the leaf accounts data to keep storage light and accurate
+                if (validationResult && validationResult.leafAccounts) {
+                    localStorage.setItem(dataKey, JSON.stringify(validationResult.leafAccounts));
+                } else {
+                    localStorage.setItem(dataKey, JSON.stringify(jsonData));
+                }
+            }
+
+            const fileNameEl = document.getElementById(`fileName_${type === 'current' ? '' : 'prev_'}${entityId}`);
+            fileNameEl.innerHTML = `<span class="text-info">${fileData.name}</span>`;
+
+            if (type === 'current') {
+                const slot = document.getElementById(`slot_${entityId}`);
+                const summaryEl = document.getElementById(`summary_${entityId}`);
+                if (validationResult.isValid) {
+                    validationStates[entityId] = true;
+                    slot.classList.add('completed');
+                    summaryEl.innerHTML = validationResult.summaryHTML;
+                } else {
+                    validationStates[entityId] = false;
+                    slot.classList.add('failed');
+                    summaryEl.innerHTML = `<div class="alert alert-danger p-2 small">${validationResult.message}</div>`;
+                }
+                checkCompletion();
+            }
+        }
+        
+        function showHistory(entityId, type) {
+            const activeClientId = localStorage.getItem('activeClientId');
+            const storageKey = `uploadHistory_${activeClientId}_${entityId}_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const modalTitle = document.getElementById('historyModalTitle');
+            const modalBody = document.getElementById('historyModalBody');
+
+            modalTitle.textContent = `سجل الرفع لـ: ${type === 'current' ? 'الميزان الحالي' : 'مستندات العام السابق'}`;
+            
+            if (history.length === 0) {
+                modalBody.innerHTML = '<p class="text-muted">لا يوجد سجلات رفع لهذه الخانة.</p>';
+            } else {
+                modalBody.innerHTML = history.map(item => `
+                    <div class="history-log-item p-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-primary">${item.name}</strong>
+                            <div class="small text-muted">
+                                <span>${new Date(item.uploadDate).toLocaleString('ar-EG')}</span> | 
+                                <span>${(item.size / 1024).toFixed(1)} KB</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-${item.status.includes('Valid') ? 'success' : 'danger'}">${item.status}</span>
+                    </div>
+                `).join('');
+            }
+            historyModal.show();
+        }
+
+    function standardizeRow(row) {
+    function findValue(row, possibleNames) {
+        for (const name of possibleNames) {
+            if (row[name] !== undefined && row[name] !== null && row[name] !== '') {
+                return parseFloat(row[name]) || 0;
+            }
+        }
+        return 0;
+    }
+
+    function findText(row, possibleNames) {
+        for (const name of possibleNames) {
+            if (row[name] !== undefined && row[name] !== null && row[name] !== '') {
+                return String(row[name]).trim();
+            }
+        }
+        return '';
+    }
+
+    const standardized = {
+        // رقم الحساب - جميع الاحتمالات
+        account_id: findText(row, [
+            'كود الحساب', 'رقم الحساب', 'Account Code', 'Account ID', 'رمز الحساب'
+        ]),
+        
+        // اسم الحساب - جميع الاحتمالات
+        account_name: findText(row, [
+            '  الحساب', 'اسم الحساب', 'Account Name', 'الحساب', 'Account',
+            'وصف الحساب', 'Description', 'البيان', 'اسم', 'Name'
+        ]),
+        
+        // رصيد أول المدة (مدين)
+        ob_debit: findValue(row, [
+            'اول المدة مدين', 'رصيد أول المدة مدين', 'رصيد أول مدة مدين', 
+            'Opening Balance Debit', 'OB Debit', 'أول المدة مدين'
+        ]),
+        
+        // رصيد أول المدة (دائن)
+        ob_credit: findValue(row, [
+            'اول المدة دائن', 'رصيد أول المدة دائن', 'رصيد أول مدة دائن',
+            'Opening Balance Credit', 'OB Credit', 'أول المدة دائن'
+        ]),
+        
+        // الحركة (مدين)
+        move_debit: findValue(row, [
+            'الحركة مدين', 'حركة مدين', 'Movement Debit', 'Move Debit', 'إجمالي مدين'
+        ]),
+        
+        // الحركة (دائن) - جميع الاحتمالات
+        move_credit: findValue(row, [
+            'الحركة داين', 'الحركة دائن', 'حركة دائن', 'Movement Credit', 
+            'Move Credit', 'إجمالي دائن'
+        ]),
+        
+        // رصيد آخر المدة (مدين)
+        cb_debit: findValue(row, [
+            'الرصيد مدين', 'رصيد آخر المدة مدين', 'رصيد اخر مدة مدين',
+            'Closing Balance Debit', 'CB Debit', 'آخر المدة مدين'
+        ]),
+        
+        // رصيد آخر المدة (دائن)
+        cb_credit: findValue(row, [
+            'الرصيد دائن', 'رصيد آخر المدة دائن', 'رصيد اخر مدة دائن',
+            'Closing Balance Credit', 'CB Credit', 'آخر المدة دائن'
+        ])
+    };
+
+    return standardized;
+}
+
+
+
+
+        function validateTrialBalance(accounts) {
+            if (!accounts || accounts.length === 0) return { isValid: false, message: "<b>رفض:</b> الملف فارغ." };
+            
+            const accountsWithId = accounts.filter(acc => acc.account_id && String(acc.account_id).trim() !== '');
+            if (accountsWithId.length === 0) {
+                 return { isValid: false, message: "<b>رفض:</b> لم يتم العثور على عمود 'رقم الحساب' أو أنه فارغ. هذا العمود ضروري للتحليل الهيكلي." };
+            }
+            const allAccountIds = new Set(accountsWithId.map(acc => String(acc.account_id).trim()));
+
+            const leafAccounts = accountsWithId.filter(currentAccount => {
+                const currentId = String(currentAccount.account_id).trim();
+                for (const id of allAccountIds) {
+                    if (id.startsWith(currentId) && id.length > currentId.length) {
+                        return false; 
+                    }
+                }
+                return true; 
+            });
+
+            if (leafAccounts.length === 0) {
+                return { isValid: false, message: "<b>رفض:</b> لم يتمكن النظام من تحديد أي حسابات فرعية (نهائية) في الميزان. قد يكون هيكل أرقام الحسابات غير واضح." };
+            }
+
+            let totalDebit = 0, totalCredit = 0;
+            leafAccounts.forEach(acc => {
+                totalDebit += parseFloat(acc.cb_debit || 0);
+                totalCredit += parseFloat(acc.cb_credit || 0);
+            });
+
+            const difference = totalDebit - totalCredit;
+            if (Math.abs(difference) > 0.01) {
+                return { isValid: false, message: `<b>رفض: الميزان غير متزن.</b><br>تم حساب المجاميع من الحسابات الفرعية فقط.<br>الفارق: ${difference.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` };
+            }
+
+            const summaryHTML = `
+                <div class="alert alert-success p-2 small">
+                    <h6 class="alert-heading"><i class="fas fa-check-circle"></i> قبول مبدئي (تحليل هيكلي)</h6>
+                    <ul class="list-unstyled mb-0 mt-2">
+                        <li><strong>الحالة:</strong> <span class="fw-bold">متزن</span></li>
+                        <li><strong>الحسابات الفرعية المعتمدة:</strong> ${leafAccounts.length}</li>
+                        <li><strong>إجمالي المدين/الدائن:</strong> ${totalDebit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</li>
+                    </ul>
+                </div>`;
+            return { isValid: true, summaryHTML, leafAccounts };
+        }
+
+        function checkCompletion() {
+            let allValid = false;
+            if (clientSetup.path === 'single') {
+                allValid = validationStates[clientSetup.details.cr.replace(/\s/g, '_')] === true;
+            } else {
+                const requiredIds = clientSetup.details.subsidiaries.map(sub => sub.cr.replace(/\s/g, '_'));
+                allValid = requiredIds.length > 0 && requiredIds.every(id => validationStates[id] === true);
+            }
+            document.getElementById('nextStepBtn').disabled = !allValid;
+        }
+
+     function processAndProceed() {
+    console.log("🚀 Starting data finalization for mapping...");
+    const activeClientId = localStorage.getItem('activeClientId');
+    if (!activeClientId) {
+        alert("خطأ: لا يمكن المتابعة بدون وجود عميل نشط.");
+        return;
+    }
+
+    const clientSetupData = localStorage.getItem(`clientSetup_${activeClientId}`);
+    if (!clientSetupData) {
+        alert("خطأ: لم يتم العثور على بيانات تأسيس العميل.");
+        return;
+    }
+    const clientSetup = JSON.parse(clientSetupData);
+
+    let allAccounts = [];
+    const entities = clientSetup.path === 'single' 
+        ? [{ cr: clientSetup.details.cr.replace(/\s/g, '_') }] 
+        : clientSetup.details.subsidiaries.map(sub => ({ cr: sub.cr.replace(/\s/g, '_') }));
+
+    for (const entity of entities) {
+        const dataKey = `data_${activeClientId}_${entity.cr}_current`;
+        const storedData = localStorage.getItem(dataKey);
+        if (!storedData) {
+            alert(`خطأ: لم يتم العثور على بيانات الميزان المعتمدة للكيان ${entity.cr}.`);
+            return;
+        }
+        allAccounts.push(...JSON.parse(storedData));
+    }
+
+   const finalTrialBalance = allAccounts.map(acc => ({
+    account_id: acc.account_id,
+    name: acc.account_name,
+    category: null,
+    ob_debit: parseFloat(acc.ob_debit) || 0,
+    ob_credit: parseFloat(acc.ob_credit) || 0,
+    move_debit: parseFloat(acc.move_debit) || 0,
+    move_credit: parseFloat(acc.move_credit) || 0,
+    book_balance_debit: parseFloat(acc.cb_debit) || 0,
+    book_balance_credit: parseFloat(acc.cb_credit) || 0,
+    adjustments: 0,
+    final_balance: (parseFloat(acc.cb_debit) || 0) - (parseFloat(acc.cb_credit) || 0),
+    pyb: null,
+    review_status: 'pending'
+}));
+
+
+
+    const auditFile = {
+        clientInfo: {
+            id: activeClientId,
+            name: clientSetup.details.companyName || clientSetup.details.groupName,
+        },
+        settings: { currency: 'SAR', materiality: null },
+        trialBalance: finalTrialBalance,
+        adjustments: [],
+        auditLog: [{
+            timestamp: new Date().toISOString(),
+            action: "تم إنشاء ملف المراجعة الأولي من مرحلة استيعاب البيانات."
+        }]
+    };
+
+    try {
+        const auditFileKey = `polarisAuditFile_${activeClientId}`;
+        localStorage.setItem(auditFileKey, JSON.stringify(auditFile));
+        console.log("✅ Initial audit file created for mapping:", auditFile);
+    } catch (e) {
+        console.error("Failed to save the initial audit file:", e);
+        alert("حدث خطأ أثناء حفظ ملف المراجعة. قد تكون مساحة التخزين ممتلئة.");
+        return;
+    }
+
+    const newStatus = { step: 2, text: "جاهز لربط الحسابات", icon: "fa-link", color: "text-primary" };
+    localStorage.setItem(`projectStatus_${activeClientId}`, JSON.stringify(newStatus));
+    
+    alert("تم اعتماد البيانات بنجاح. سيتم نقلك الآن لربط وتصنيف الحسابات.");
+    
+    // **الانتقال إلى صفحة ربط الحسابات**
+    window.location.href = 'account-mapping.html'; 
+}
+
+
+
+        function downloadTemplate() {
+            const entityName = clientSetup.path === 'single' ? clientSetup.details.companyName : clientSetup.details.groupName;
+            const fileName = `Template_TB_${entityName.replace(/\s/g, '_')}.xlsx`;
+            const headers = ["رقم الحساب", "اسم الحساب", "رصيد أول المدة مدين", "رصيد أول المدة دائن", "الحركة مدين", "الحركة دائن", "رصيد آخر المدة مدين", "رصيد آخر المدة دائن"];
+            const ws = XLSX.utils.aoa_to_sheet([headers]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ميزان المراجعة");
+            XLSX.writeFile(wb, fileName);
+        }
+    </script>
+</body>
+</html>

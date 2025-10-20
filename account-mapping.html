@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحطة المركزية عالم فكري ممدوح (المحاسبي)</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+/* ================================================================== */
+/* --- START: POLARIS V9 - REVOLUTIONARY TABLE DESIGN --- */
+/* ================================================================== */
+
+:root {
+    --color-bg: #0d1117;
+    --color-surface: #161b22;
+    --color-primary: #00aaff;
+    --color-primary-glow: rgba(0, 170, 255, 0.5);
+    --color-text-primary: #c9d1d9;
+    --color-text-secondary: #8b949e;
+    --color-border: #30363d;
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --font-family-main: 'Tajawal', sans-serif;
+    --font-family-display: 'Cairo', sans-serif;
+}
+
+body {
+    font-family: var(--font-family-main);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+}
+
+.container-fluid { padding: 2rem; }
+
+/* --- HEADER & GENERAL LAYOUT --- */
+.page-header h1 {
+    font-family: var(--font-family-display);
+    font-weight: 900;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 10px var(--color-primary-glow);
+}
+.page-header h4 { color: var(--color-text-secondary); font-weight: 500; }
+
+.control-pane, .inspector-pane, .status-bar, .modal-content, .kpi-pane {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+}
+
+.control-pane { padding: 1rem; }
+
+/* --- BUTTONS & FORMS --- */
+.btn {
+    font-weight: 700;
+    border-radius: var(--border-radius-md);
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+}
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+.btn-primary:hover {
+    box-shadow: 0 0 15px var(--color-primary-glow);
+    transform: translateY(-2px);
+}
+.btn-success {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+}
+.btn-success:hover {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+    transform: translateY(-2px);
+}
+
+.form-select, .form-control, .form-control[type="search"] {
+    background-color: var(--color-bg);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+.form-select:focus, .form-control:focus, .form-control[type="search"]:focus {
+    box-shadow: 0 0 0 0.25rem var(--color-primary-glow);
+    border-color: var(--color-primary);
+}
+
+/* --- REVOLUTIONARY TABLE DESIGN --- */
+.table-responsive {
+    max-height: 65vh;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-border);
+}
+.table { border-collapse: separate; border-spacing: 0; }
+.table thead th {
+    position: sticky; top: 0;
+    background-color: #1c222b;
+    z-index: 10;
+    color: var(--color-text-primary);
+    border-bottom: 2px solid var(--color-primary) !important;
+}
+.table td {
+    border-color: var(--color-border);
+    vertical-align: middle;
+    padding: 1rem;
+}
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+.table-hover tbody tr:hover { background-color: rgba(0, 170, 255, 0.08); }
+.table-hover tbody tr.table-active { background-color: rgba(0, 170, 255, 0.15); }
+
+/* Account Card Layout */
+.account-card-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem; /* Space between main info and financials */
+}
+.account-card-identity { flex-grow: 1; }
+.account-card-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e6edf3 !important;
+}
+.btn-outline-success {
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+.btn-outline-success:hover {
+    background-color: var(--color-success);
+    color: white;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+    transform: translateY(-2px);
+}
+/* إبراز الحسابات ذات التغيرات الجوهرية */
+.table tr.high-variance {
+    background-color: rgba(255, 193, 7, 0.2); /* أصفر فاتح */
+}
+
+/* إبراز الحسابات ذات الأرصدة غير المنطقية */
+.table tr.abnormal-balance {
+    background-color: rgba(220, 53, 69, 0.2); /* أحمر فاتح */
+}
+
+/* شارات نسبة التغير */
+.variance-badge {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+.variance-badge.positive {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--color-success);
+}
+.variance-badge.negative {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: var(--color-danger);
+}
+.account-card-id {
+    font-size: 1rem;
+    font-family: monospace;
+    color: var(--color-text-secondary);
+    background-color: rgba(139, 148, 158, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+.account-card-financials {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    background-color: rgba(0,0,0,0.2);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-md);
+}
+.financial-item {
+    flex: 1;
+    border-left: 1px solid var(--color-border);
+    padding: 0 0.5rem;
+}
+.financial-item:first-child { border-left: none; }
+.financial-item .label {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    display: block;
+}
+.financial-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: monospace;
+    display: block;
+}
+.negative-balance { color: var(--color-danger) !important; }
+
+/* --- KPI & STATUS BARS (No changes) --- */
+.kpi-pane, .status-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem; padding: 1.25rem; text-align: center;
+}
+.kpi-item, .status-item {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+}
+.kpi-item .kpi-icon, .status-item i {
+    font-size: 1.5rem; color: var(--color-primary);
+    margin-bottom: 0.5rem; opacity: 0.8;
+}
+.kpi-item .kpi-value {
+    font-family: var(--font-family-display);
+    font-size: 1.75rem; font-weight: 700;
+    color: var(--color-text-primary); line-height: 1.2;
+}
+.kpi-item .kpi-label, .status-item span {
+    font-size: 0.9rem; color: var(--color-text-secondary);
+}
+.status-item strong {
+    font-size: 1.1rem; color: var(--color-text-primary); font-weight: 700;
+}
+
+/* --- MISC & ICONS (No changes) --- */
+.modal-header, .modal-footer { border-color: var(--color-border); }
+.unclassified-cell { display: flex; align-items: center; gap: 5px; }
+.confirm-btn {
+    background: none; border: none; color: var(--color-success);
+    cursor: pointer; padding: 2px 5px; transition: all 0.2s ease;
+}
+.confirm-btn:hover {
+    color: white; background-color: var(--color-success);
+    border-radius: 4px; transform: scale(1.1);
+}
+.logical-warning-icon {
+    color: var(--color-warning);
+    cursor: help; animation: blink-warning 2s infinite;
+}
+@keyframes blink-warning { 50% { opacity: 0.5; } }
+.action-icon {
+    color: var(--color-text-secondary);
+    cursor: pointer; transition: all 0.2s ease;
+}
+.action-icon:hover { color: var(--color-primary); transform: scale(1.2); }
+
+/* --- INSPECTOR PANE (No changes, but kept for completeness) --- */
+.inspector-pane { padding: 1.5rem; height: 100%; }
+.inspector-pane .card-title {
+    font-size: 1.5rem; font-weight: 900;
+    color: #e6edf3; margin-bottom: 0.25rem;
+}
+.inspector-pane .card-subtitle {
+    font-size: 1.1rem; font-family: monospace;
+    color: var(--color-warning) !important;
+    background-color: rgba(255, 193, 7, 0.1);
+    padding: 0.2rem 0.5rem; border-radius: var(--border-radius-md);
+    display: inline-block;
+}
+.inspector-pane .list-group-item {
+    padding-top: 0.8rem; padding-bottom: 0.8rem;
+    color: var(--color-text-primary);
+}
+.inspector-pane .list-group-item span:last-child,
+.inspector-pane .badge {
+    font-weight: 700; font-size: 1.1rem; color: #e6edf3;
+}
+.inspector-pane .badge.bg-secondary { background-color: #444 !important; }
+.inspector-pane .badge.bg-warning { color: #000 !important; }
+.inspector-pane h6 {
+    font-family: var(--font-family-display); font-weight: 700;
+    color: var(--color-primary); margin-top: 1.5rem;
+    padding-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);
+}
+.inspector-pane #adjustment-log-container .text-muted {
+    color: var(--color-text-secondary) !important;
+    font-size: 0.95rem;
+}
+.journal-entry {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.journal-header {
+    background: #343a40;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.journal-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted #ccc;
+}
+
+.journal-line:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    background: #e9ecef;
+    margin-top: 5px;
+    padding: 8px 5px;
+}
+
+.account-debit {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.account-credit {
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.amount {
+    font-weight: bold;
+    min-width: 100px;
+    text-align: right;
+}
+/* تنسيق لوحة التحليل المالي */
+/* ================================================================== */
+/* --- START: FINANCIAL DASHBOARD V4 - ULTRA COMPACT ROW STYLE --- */
+/* ================================================================== */
+
+.financial-dashboard {
+    background-color: transparent; /* بدون خلفية مستقلة */
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    border: none;
+}
+
+.dashboard-header {
+    text-align: right; /* محاذاة لليمين */
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard-title {
+    font-family: var(--font-family-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+.dashboard-subtitle { display: none; } /* إخفاء العنوان الفرعي */
+
+/* بطاقة النسبة المدمجة جداً (شكل السطر) */
+.ratio-card {
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-md);
+    padding: 0.5rem 0.75rem; /* حشو صغير جداً */
+    height: auto; /* ارتفاع تلقائي */
+    border: 1px solid var(--color-border);
+    display: flex; /* <-- أهم تغيير: عرض أفقي */
+    align-items: center; /* محاذاة رأسية في المنتصف */
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+.ratio-card:hover {
+    transform: none; /* لا حاجة للحركة */
+    box-shadow: none;
+    border-color: var(--color-primary);
+}
+
+/* إخفاء العناصر غير الضرورية في هذا التصميم */
+.ratio-card::before, .ratio-header, .ratio-content, .ratio-progress {
+    display: none;
+}
+
+/* إعادة بناء البطاقة لتكون سطرًا واحدًا */
+.ratio-card {
+    gap: 0.75rem; /* مسافة بين العناصر */
+}
+
+/* إضافة العناصر من جديد داخل البطاقة باستخدام CSS */
+.ratio-card::after {
+    content: ''; /* تفريغ المحتوى القديم */
+}
+
+/* عرض العناصر الجديدة داخل البطاقة */
+.ratio-card .icon-placeholder,
+.ratio-card .label-placeholder,
+.ratio-card .value-placeholder {
+    display: block;
+}
+
+.ratio-card .icon-placeholder {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+.ratio-card .label-placeholder {
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    flex-grow: 1; /* يأخذ المساحة المتبقية */
+    white-space: nowrap;
+}
+.ratio-card .value-placeholder {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+.ratio-card.negative .value-placeholder {
+    color: var(--color-danger);
+}
+
+/* تعديل كلاسات الأعمدة لتناسب التصميم الجديد */
+/* هذا يضمن أن تكون 4 بطاقات في الصف على الشاشات الكبيرة */
+.financial-dashboard .row > * {
+    flex: 0 0 auto;
+    width: 25%;
+}
+
+@media (max-width: 1200px) {
+    .financial-dashboard .row > * { width: 33.33%; }
+}
+@media (max-width: 992px) {
+    .financial-dashboard .row > * { width: 50%; }
+}
+@media (max-width: 576px) {
+    .financial-dashboard .row > * { width: 100%; }
+}
+
+/* ================================================================== */
+/* --- END: FINANCIAL DASHBOARD V4 --- */
+/* ================================================================== */
+/* تظليل الحسابات ذات الأرصدة الشاذة */
+.table tr.abnormal-balance {
+    background-color: rgba(220, 53, 69, 0.15) !important; /* أحمر فاتح */
+}
+
+/* تظليل الحسابات غير المصنفة */
+.table tr.unclassified-account {
+    background-color: rgba(0, 170, 255, 0.15) !important; /* أزرق فاتح */
+}
+/* --- أزرار تأكيد وتراجع تعديل الفئة --- */
+.category-actions {
+    display: inline-flex;
+    gap: 5px;
+    margin-right: 5px; /* مسافة بين الأزرار والقائمة */
+    vertical-align: middle;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.action-btn.confirm {
+    color: var(--color-success);
+}
+.action-btn.confirm:hover {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.action-btn.undo {
+    color: var(--color-warning);
+}
+.action-btn.undo:hover {
+    background-color: var(--color-warning);
+    color: #0d1117;
+}
+/* --- تنسيقات لوحة المفتش المدمجة --- */
+.risks-container, .adjustments-container {
+    max-height: 200px; /* ارتفاع مناسب لكل قسم */
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 0.5rem;
+}
+.risk-item {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid var(--color-warning);
+}
+.risk-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+.risk-title strong {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+}
+.risk-procedure {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* تنسيق سجل القيود المصغر */
+.journal-entry-small {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(255,255,255,0.03);
+}
+.journal-line-small {
+    display: flex;
+    justify-content: space-between;
+}
+.amount-small { font-weight: bold; }
+.desc-small {
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    font-family: var(--font-family-main);
+}
+/* --- تنسيق ملحوظة المجلس المدمجة --- */
+.council-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background-color: rgba(255, 193, 7, 0.1); /* خلفية بلون تحذيري خفيف */
+    border-left: 3px solid var(--color-warning);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem;
+    margin-top: 1.5rem;
+}
+.council-note .icon {
+    color: var(--color-warning);
+    font-size: 1.2rem;
+    margin-top: 3px;
+}
+.council-note .note-text {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+.council-note .note-text strong {
+    color: var(--color-text-primary);
+}
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div id="loader" class="text-center my-5">
+            <h3 style="color: var(--color-text-secondary); font-family: var(--font-family-main);">جاري تهيئة محطة عمل المراجعة...</h3>
+        </div>
+
+        <div id="appContainer" style="display: none;">
+            <header class="page-header mb-4">
+                <h1><i class="fas fa-rocket text-primary me-3"></i>المحطة المركزية عالم فكري ممدوح (المحاسبي)</h1>
+                <h4 id="clientNameSubtitle"></h4>
+            </header>
+            
+          <!-- قسم النسب المالية والتحليلات -->
+<!-- قسم النسب المالية والتحليلات V3 - شامل -->
+<!-- قسم النسب المالية والتحليلات V3.1 - تنسيق محسن -->
+<div class="financial-dashboard">
+    <div class="dashboard-header">
+        <h4 class="dashboard-title"><i class="fas fa-chart-pie me-2"></i>لوحة التحليل المالي</h4>
+        <p class="dashboard-subtitle">نظرة شاملة على مؤشرات الأداء الرئيسية</p>
+    </div>
+
+    <div class="row g-3">
+        <!-- ================== الصف الأول: الربحية والسيولة ================== -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card profitability"><div class="ratio-header"><p class="ratio-label">هامش الربح الإجمالي</p><i class="fas fa-percent ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="grossMargin">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card profitability"><div class="ratio-header"><p class="ratio-label">هامش الربح التشغيلي</p><i class="fas fa-cash-register ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="operatingMargin">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card profitability"><div class="ratio-header"><p class="ratio-label">هامش صافي الربح</p<i class="fas fa-wallet ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="netMargin">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card liquidity"><div class="ratio-header"><p class="ratio-label">نسبة التداول</p><i class="fas fa-hand-holding-usd ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="currentRatio">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+
+        <!-- ================== الصف الثاني: السيولة والمديونية ================== -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card liquidity"><div class="ratio-header"><p class="ratio-label">النسبة السريعة</p><i class="fas fa-shipping-fast ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="quickRatio">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card debt"><div class="ratio-header"><p class="ratio-label">نسبة المديونية</p><i class="fas fa-university ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="debtRatio">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card debt"><div class="ratio-header"><p class="ratio-label">الديون إلى حقوق الملكية</p><i class="fas fa-balance-scale-left ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="debtToEquity">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card activity"><div class="ratio-header"><p class="ratio-label">معدل دوران الأصول</p><i class="fas fa-sync-alt ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="assetTurnover">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        
+        <!-- ================== الصف الثالث: النشاط والعائد ================== -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card activity"><div class="ratio-header"><p class="ratio-label">دوران المخزون (مرة)</p><i class="fas fa-boxes ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="inventoryTurnover">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card activity"><div class="ratio-header"><p class="ratio-label">فترة التحصيل (يوم)</p><i class="fas fa-calendar-check ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="collectionPeriod">--</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card additional"><div class="ratio-header"><p class="ratio-label">العائد على الأصول (ROA)</p><i class="fas fa-chart-line ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="roa">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="ratio-card profitability"><div class="ratio-header"><p class="ratio-label">العائد على حقوق الملكية</p><i class="fas fa-users-cog ratio-icon"></i></div><div class="ratio-content"><h3 class="ratio-value" id="roe">--%</h3><div class="ratio-progress"><div class="progress-bar"></div></div></div></div>
+        </div>
+    </div>
+</div>
+
+            <div class="control-pane mb-3">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#materialityModal"><i class="fas fa-bullseye me-2"></i>الأهمية النسبية</button>
+                    <select class="form-select w-auto" id="filterCategory">
+                        <option value="all">جميع الفئات</option>
+                        <option value="assets">الأصول</option>
+                        <option value="liabilities">الالتزامات</option>
+                        <option value="equity">حقوق الملكية</option>
+                        <option value="revenue">الإيرادات</option>
+                        <option value="expenses">المصروفات</option>
+                        <option value="unclassified">غير مصنف</option>
+                    </select>
+                    <select class="form-select w-auto" id="filterStatus">
+                        <option value="all">جميع الحالات</option>
+                        <option value="pending">قيد المراجعة</option>
+                        <option value="reviewed">تمت المراجعة</option>
+                        <option value="flagged">تحتاج تدقيق</option>
+                    </select>
+                    <input type="search" class="form-control w-auto flex-grow-1" id="searchInput" placeholder="ابحث بالاسم أو الرقم...">
+<button class="btn btn-outline-primary" id="logicalCheckButton" title="تدقيق منطقية الأرصدة والحسابات غير المصنفة"><i class="fas fa-tasks me-2"></i>تدقيق المنطقية</button>
+<button class="btn btn-outline-success" id="saveChangesButton" title="حفظ التغييرات"><i class="fas fa-save me-2"></i>حفظ التغييرات</button>
+                    <button class="btn btn-outline-secondary" id="exportButton"><i class="fas fa-file-excel me-2"></i>تصدير</button>
+                    <button class="btn btn-success ms-auto" id="consolidationButton" onclick="navigateToConsolidation()">
+                        <i class="fas fa-layer-group me-2"></i>الاعتماد والانتقال للقوائم
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="trialBalanceTable">
+                            <thead>
+                                <tr>
+                                    <th>الحساب</th>
+                                    <th>الفئة</th>
+                                    <th>التصنيف الفرعي</th>
+                                    <th>الرصيد الدفتري</th>
+                                    <th>التسويات</th>
+                                    <th>الرصيد النهائي</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="inspector-pane">
+                        <h5><i class="fas fa-search-location text-primary me-2"></i>لوحة المفتش الذكي</h5>
+                        <hr class="my-3" style="border-color: var(--color-border);">
+                        <div id="inspectorContent">
+                            <p class="text-center mt-5 text-muted">الرجاء تحديد حساب من الجدول لعرض تفاصيله وإجراءات المراجعة المقترحة.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-bar mt-3">
+                <div class="status-item">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>الأهمية النسبية</span>
+                    <strong id="materialityDisplay">لم تحدد</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>صافي الربح المعدل</span>
+                    <strong id="netProfitDisplay">لم يحسب</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-pen"></i>
+                    <span>أثر التسويات</span>
+                    <strong id="adjustmentsEffectDisplay">0</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>نسبة الإنجاز</span>
+                    <strong id="completionDisplay">0%</strong>
+                </div>
+            </div>
+        </div>
+        <!-- All Modals -->
+        <!-- Materiality Modal -->
+        <div class="modal fade" id="materialityModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">تحديد الأهمية النسبية</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">سيتم استخدام هذا الرقم لتحديد الحسابات الهامة وتوجيه إجراءات المراجعة.</p>
+                        <div class="mb-3">
+                            <label class="form-label">أساس الحساب</label>
+                            <select class="form-select" id="materialityBasis">
+                                <option value="profit">5% من صافي الربح قبل الزكاة</option>
+                                <option value="revenue">1% من إجمالي الإيرادات</option>
+                                <option value="assets">0.5% من إجمالي الأصول</option>
+                                <option value="fixed">مبلغ مقطوع</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="fixedAmountInput" style="display: none;">
+                            <label class="form-label">المبلغ النهائي</label>
+                            <input type="number" class="form-control" id="materialityAmount" placeholder="أدخل المبلغ">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="saveMateriality()">حفظ واعتماد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AJE Modal -->
+        <div class="modal fade" id="ajeModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ajeModalLabel">إدخال قيد تسوية / إعادة تصنيف</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="isRceSwitch">
+                            <label class="form-check-label" for="isRceSwitch">هذا القيد هو **إعادة تصنيف (RCE)** ولا يؤثر على صافي الربح.</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <input type="text" class="form-control" id="ajeDescription">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الحساب المدين</label>
+                                <select class="form-select" id="ajeDebitAccount"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الحساب الدائن</label>
+                                <select class="form-select" id="ajeCreditAccount"></select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" id="ajeAmount">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="saveAdjustment()">حفظ القيد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Council of Elders Modal -->
+        <div class="modal fade" id="vAIAssistantModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-users text-primary me-2"></i>استشارة مجلس الحكماء</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>الحساب قيد التحليل:</strong> <span id="vAIAccountName" class="fw-bold"></span></p>
+                        <div class="mb-3">
+                            <label for="vAIQuestion" class="form-label">سؤالك للمجلس:</label>
+                            <textarea class="form-control" id="vAIQuestion" rows="3"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="getVAIResponse()">
+                            <span id="vAIBtnText">احصل على استشارة</span>
+                            <div id="vAISpinner" class="spinner-border spinner-border-sm" role="status" style="display: none;"></div>
+                        </button>
+                        <div id="vAIAssistantResponse" class="mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workpapers Modal -->
+        <div class="modal fade" id="workpapersModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="workpapersModalTitle">أوراق العمل</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>الحساب:</strong> <span id="workpapersAccountName" class="fw-bold"></span></p>
+                        
+                        <button class="btn btn-primary btn-sm" onclick="uploadWorkpaper()">رفع وحفظ</button>
+                        <hr>
+                        <h6>المستندات المرفقة:</h6>
+                        <ul class="list-group" id="workpapersList">
+                            <li class="list-group-item">لا توجد مستندات مرفقة حالياً.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+// ================================================================
+// المهمة الاستراتيجية الأولى: بناء قاعدة معارف مجلس الحكمة
+// ================================================================
+
+const councilKnowledgeBase = {
+    // مخاطر عامة تنطبق على معظم الحسابات
+    generalRisks: [
+        "خطر العرض والإفصاح: تأكد من تصنيف الحساب بشكل نهائي وصحيح في القوائم المالية.",
+        "خطر الاكتمال: هل تم تسجيل جميع المعاملات المتعلقة بهذا الحساب؟",
+        "خطر الحدوث: هل المعاملات المسجلة حدثت بالفعل وتخص الشركة؟"
+    ],
+    // مخاطر مخصصة بناءً على التصنيف الفرعي للحساب
+    specificRisks: {
+        'trade_receivables': [ // العملاء
+            "خطر التحصيل: يجب تحليل أعمار الديون بشكل دقيق.",
+            "خطر كفاية المخصص: هل مخصص الديون المشكوك في تحصيلها كافٍ لتغطية الديون المتعثرة؟"
+        ],
+        'inventory': [ // المخزون
+            "خطر التقييم: هل تم تقييم المخزون بالتكلفة أو صافي القيمة القابلة للتحقق أيهما أقل؟",
+            "خطر التقادم: يجب فحص المخزون لتحديد أي أصناف بطيئة الحركة أو تالفة وتكوين المخصص اللازم."
+        ],
+        'fixed_assets': [ // الأصول الثابتة
+            "خطر الوجود: يجب إجراء جرد مادي لعينة من الأصول للتحقق من وجودها الفعلي.",
+            "خطر الإهلاك: هل السياسة المتبعة للإهلاك معقولة وتطبق بشكل ثابت؟"
+        ],
+        'trade_payables': [ // الموردون
+            "خطر الالتزامات غير المسجلة: يجب البحث عن أي فواتير أو التزامات غير مسجلة تخص الفترة."
+        ],
+        'main_revenue': [ // الإيرادات الرئيسية
+            "خطر الاعتراف بالإيراد: هل تم الاعتراف بالإيراد في الفترة الصحيحة وفقًا لمعيار الإيراد من العقود مع العملاء؟"
+        ],
+        'salaries': [ // الرواتب
+            "خطر الموظفين الوهميين: يجب مطابقة كشوف المرتبات مع سجلات الموظفين الفعلية.",
+            "خطر الامتثال: هل تم حساب وسداد حصص التأمينات الاجتماعية والضرائب بشكل صحيح؟"
+        ]
+    }
+};
+
+        // --- GLOBAL VARIABLES & MAPS ---
+        let auditFile = {};
+        let userPrefs = {};
+        let ajeModal, materialityModal, vAIAssistantModal, workpapersModal;
+        let currentVAIContext = {};
+        let currentWorkpaperAccountId = null;
+        const CURRENCY = 'SAR';
+        const VARIANCE_THRESHOLD = 25;
+
+  const subCategoryMap = {
+    'assets': [
+        { group: 'الأصول المتداولة - نقدية وما في حكمها', value: 'cash_on_hand', label: 'النقدية بالصندوق' },
+        { group: 'الأصول المتداولة - نقدية وما في حكمها', value: 'cash_at_banks', label: 'النقدية لدى البنوك' },
+        { group: 'الأصول المتداولة - الذمم', value: 'trade_receivables', label: 'العملاء (الذمم المدينة)' },
+        { group: 'الأصول المتداولة - الذمم', value: 'related_parties_receivables', label: 'ذمم أطراف ذات علاقة' },
+        { group: 'الأصول المتداولة - الذمم', value: 'employee_advances', label: 'سلف الموظفين' },
+        { group: 'الأصول المتداولة - الذمم', value: 'custody_accounts', label: 'حسابات العهد' },
+        { group: 'الأصول المتداولة - أخرى', value: 'prepaid_expenses', label: 'مصروفات مدفوعة مقدماً' },
+        { group: 'الأصول المتداولة - أخرى', value: 'accrued_revenue', label: 'إيرادات مستحقة القبض' },
+        { group: 'الأصول المتداولة - أخرى', value: 'inventory', label: 'المخزون' },
+        { group: 'الأصول غير المتداولة', value: 'fixed_assets', label: 'الأصول الثابتة (صافي)' },
+        { group: 'الأصول غير المتداولة', value: 'wip_projects', label: 'مشاريع تحت التنفيذ' },
+        { group: 'الأصول غير المتداولة', value: 'intangible_assets', label: 'أصول غير ملموسة' },
+        { group: 'الأصول غير المتداولة', value: 'long_term_investments', label: 'استثمارات طويلة الأجل' }
+    ],
+    'liabilities': [
+        { group: 'الالتزامات المتداولة', value: 'trade_payables', label: 'الموردون (الذمم الدائنة)' },
+        { group: 'الالتزامات المتداولة', value: 'related_parties_payables', label: 'ذمم دائنة لأطراف ذات علاقة' },
+        { group: 'الالتزامات المتداولة', value: 'accrued_expenses', label: 'مصروفات مستحقة الدفع' },
+        { group: 'الالتزامات المتداولة', value: 'unearned_revenue', label: 'إيرادات غير مكتسبة' },
+        { group: 'الالتزامات المتداولة', value: 'vat_payable', label: 'ضريبة القيمة المضافة المستحقة' },
+        { group: 'الالتزامات المتداولة', value: 'short_term_loans', label: 'قروض قصيرة الأجل' },
+        { group: 'الالتزامات غير المتداولة', value: 'long_term_loans', label: 'قروض طويلة الأجل' },
+        { group: 'الالتزامات غير المتداولة', value: 'provisions', label: 'مخصصات' },
+        { group: 'الالتزامات غير المتداولة', value: 'end_of_service_benefit', label: 'مخصص مكافأة نهاية الخدمة' }
+    ],
+    'equity': [
+        { group: 'حقوق الملكية', value: 'capital', label: 'رأس المال' },
+        { group: 'حقوق الملكية', value: 'retained_earnings', label: 'أرباح مبقاة / خسائر مدورة' },
+        { group: 'حقوق الملكية', value: 'current_year_profit', label: 'أرباح العام الحالي' },
+        { group: 'حقوق الملكية', value: 'reserves', label: 'احتياطيات' },
+        { group: 'حقوق الملكية', value: 'owners_current_account', label: 'جاري الشركاء / المالك' }
+    ],
+    'revenue': [
+        { group: 'الإيرادات', value: 'main_revenue', label: 'إيرادات النشاط الرئيسي' },
+        { group: 'الإيرادات', value: 'other_revenue', label: 'إيرادات أخرى' },
+        { group: 'الإيرادات', value: 'investment_gains', label: 'أرباح استثمارات' },
+        { group: 'الإيرادات (مقابل)', value: 'sales_discount', label: 'خصم مسموح به (مقابل)' },
+        { group: 'الإيرادات (مقابل)', value: 'sales_returns', label: 'مردودات المبيعات (مقابل)' }
+    ],
+    'expenses': [
+        { group: 'تكلفة الإيرادات', value: 'cogs', label: 'تكلفة البضاعة/الخدمات' },
+        { group: 'مصاريف التشغيل', value: 'salaries', label: 'رواتب وأجور وما في حكمها' },
+        { group: 'مصاريف التشغيل', value: 'rent', label: 'مصروف إيجار' },
+        { group: 'مصاريف التشغيل', value: 'utilities', label: 'مصروف كهرباء ومياه واتصالات' },
+        { group: 'مصاريف التشغيل', value: 'maintenance', label: 'مصروف صيانة' },
+        { group: 'مصاريف التشغيل', value: 'fuel_transport', label: 'محروقات ونقل' },
+        { group: 'مصاريف عمومية وإدارية', value: 'general_admin', label: 'مصاريف عمومية وإدارية' },
+        { group: 'مصاريف عمومية وإدارية', value: 'gov_fees', label: 'رسوم حكومية' },
+        { group: 'مصاريف عمومية وإدارية', value: 'professional_fees', label: 'أتعاب مهنية واستشارية' },
+        { group: 'مصاريف البيع والتسويق', value: 'selling_marketing', label: 'مصاريف بيع وتسويق' },
+        { group: 'مصاريف البيع والتسويق', value: 'commission_expense', label: 'مصروف عمولة' },
+        { group: 'مصاريف أخرى', value: 'depreciation', label: 'مصروف إهلاك' },
+        { group: 'مصاريف أخرى', value: 'amortization', label: 'مصروف إطفاء' },
+        { group: 'مصاريف أخرى', value: 'financing_costs', label: 'تكاليف تمويل' },
+        { group: 'مصاريف أخرى', value: 'bank_charges', label: 'رسوم بنكية' }
+    ]
+};
+
+
+        const keywordMapping = [
+            { keyword: 'تكلفة', category: 'expenses', sub_category: 'cogs' },
+            { keyword: 'مصروف', category: 'expenses', sub_category: 'general_admin' },
+            { keyword: 'مصاريف', category: 'expenses', sub_category: 'general_admin' },
+            { keyword: 'اهلاك', category: 'expenses', sub_category: 'depreciation' },
+            { keyword: 'إهلاك', category: 'expenses', sub_category: 'depreciation' },
+            { keyword: 'رواتب', category: 'expenses', sub_category: 'salaries' },
+            { keyword: 'ايجار', category: 'expenses', sub_category: 'rent' },
+            { keyword: 'إيجار', category: 'expenses', sub_category: 'rent' },
+            { keyword: 'عمولة', category: 'expenses', sub_category: 'commission_expense' },
+            { keyword: 'خصم مكتسب', category: 'revenue', sub_category: 'other_revenue' },
+            { keyword: 'خصم مسموح به', category: 'revenue', sub_category: 'sales_discount' },
+            { keyword: 'صندوق', category: 'assets', sub_category: 'cash_on_hand' },
+            { keyword: 'بنك', category: 'assets', sub_category: 'cash_at_banks' },
+            { keyword: 'بنوك', category: 'assets', sub_category: 'cash_at_banks' },
+            { keyword: 'عملاء', category: 'assets', sub_category: 'trade_receivables' },
+            { keyword: 'مدينون', category: 'assets', sub_category: 'trade_receivables' },
+            { keyword: 'سلف', category: 'assets', sub_category: 'employee_advances' },
+            { keyword: 'عهدة', category: 'assets', sub_category: 'custody_accounts' },
+            { keyword: 'عهد', category: 'assets', sub_category: 'custody_accounts' },
+            { keyword: 'مقدم', category: 'assets', sub_category: 'prepaid_expenses' },
+            { keyword: 'مخزون', category: 'assets', sub_category: 'inventory' },
+            { keyword: 'موردون', category: 'liabilities', sub_category: 'trade_payables' },
+            { keyword: 'دائنون', category: 'liabilities', sub_category: 'trade_payables' },
+            { keyword: 'مستحق', category: 'liabilities', sub_category: 'accrued_expenses' },
+            { keyword: 'قرض', category: 'liabilities', sub_category: 'short_term_loans' },
+            { keyword: 'قروض', category: 'liabilities', sub_category: 'short_term_loans' },
+            { keyword: 'مخصص', category: 'liabilities', sub_category: 'provisions' },
+            { keyword: 'رأس المال', category: 'equity', sub_category: 'capital' },
+            { keyword: 'ارباح', category: 'equity', sub_category: 'retained_earnings' },
+            { keyword: 'أرباح', category: 'equity', sub_category: 'retained_earnings' },
+            { keyword: 'ايراد', category: 'revenue', sub_category: 'main_revenue' },
+            { keyword: 'إيراد', category: 'revenue', sub_category: 'main_revenue' },
+            { keyword: 'مبيعات', category: 'revenue', sub_category: 'main_revenue' }
+        ];
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', initializeApplication);
+
+               // *** ضع هذا الجزء الجديد مكانه ***
+
+   function initializeApplication() {
+    ajeModal = new bootstrap.Modal(document.getElementById('ajeModal'));
+    materialityModal = new bootstrap.Modal(document.getElementById('materialityModal'));
+    vAIAssistantModal = new bootstrap.Modal(document.getElementById('vAIAssistantModal'));
+    workpapersModal = new bootstrap.Modal(document.getElementById('workpapersModal'));
+
+    // --- معادلة الربط النهائية ---
+    const activeClientId = localStorage.getItem('activeClientId');
+    if (!activeClientId) {
+        handleFatalError('<h4>خطأ فادح: لم يتم العثور على عميل نشط.</h4><p>الرجاء العودة لصفحة "تأسيس الكيانات" أولاً.</p>');
+        return;
+    }
+    
+    // 1. ابحث عن الحقيبة الحقيقية القادمة من صفحة الاستيعاب
+    const realDataKey = `polarisAuditFile_${activeClientId}`;
+    const savedAuditFile = localStorage.getItem(realDataKey);
+
+    if (savedAuditFile) {
+        console.log("✅ تم العثور على بيانات حقيقية! جاري تحميلها من مرحلة الاستيعاب.");
+        auditFile = JSON.parse(savedAuditFile);
+        
+        // التأكد من أن البيانات تحتوي على الحقول اللازمة لهذه الصفحة
+        auditFile.settings = auditFile.settings || {};
+        auditFile.adjustments = auditFile.adjustments || [];
+        auditFile.auditLog = auditFile.auditLog || [];
+        auditFile.trialBalance.forEach(acc => {
+            // **هنا نقطة الربط الحاسمة**
+            acc.book_balance = acc.final_balance; 
+            
+            // تحضير الحقول الأخرى
+            acc.review_status = acc.review_status || 'pending';
+            acc.category = acc.category || null;
+            acc.sub_category = acc.sub_category || null;
+            acc.is_confirmed = acc.is_confirmed === undefined ? false : acc.is_confirmed;
+            acc.workpapers = acc.workpapers || [];
+        });
+
+    } else {
+        // 2. في حالة عدم وجود حقيبة حقيقية، استخدم بيانات وهمية للعرض فقط
+        console.warn("لم يتم العثور على بيانات حقيقية. سيتم إنشاء بيانات وهمية لغرض العرض فقط.");
+        const dummyClientId = 'client_12345';
+        createDummyAuditFile(dummyClientId);
+        const dummyData = localStorage.getItem(`polarisAuditFile_v6_${dummyClientId}`);
+        auditFile = JSON.parse(dummyData);
+    }
+    
+    // 3. استكمل تشغيل الصفحة كالمعتاد
+    autoCategorizeAccounts();
+    userPrefs = loadUserPrefs(auditFile.clientInfo.id);
+    setupEventListeners();
+    processAndRender();
+    
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+}
+
+
+        function loadAuditFile(clientId) {
+            const auditFileKey = `polarisAuditFile_v6_${clientId}`; // Version bump
+            const savedAuditFile = localStorage.getItem(auditFileKey);
+            if (!savedAuditFile) { return false; }
+            try {
+                auditFile = JSON.parse(savedAuditFile);
+                // Data migration for robustness
+                auditFile.settings = auditFile.settings || {};
+                auditFile.adjustments = auditFile.adjustments || [];
+                auditFile.auditLog = auditFile.auditLog || [];
+                auditFile.trialBalance.forEach(acc => {
+                    acc.book_balance = acc.book_balance === undefined ? (acc.ob || 0) : acc.book_balance;
+                    acc.review_status = acc.review_status || 'pending';
+                    acc.category = acc.category || null;
+                    acc.is_confirmed = acc.is_confirmed === undefined ? true : acc.is_confirmed;
+                    acc.workpapers = acc.workpapers || [];
+                });
+                return true;
+            } catch (e) {
+                handleFatalError("خطأ في تحميل ملف المراجعة. الملف تالف.");
+                return false;
+            }
+        }
+
+        function saveAuditFile() {
+    try {
+        // **الإصلاح الجوهري: استخدام نفس مفتاح العميل النشط للحفظ**
+        const activeClientId = localStorage.getItem('activeClientId');
+        if (!activeClientId) {
+            console.error("CRITICAL: Cannot save file. No active client ID found.");
+            return; // منع الحفظ بدون معرّف
+        }
+        const realDataKey = `polarisAuditFile_${activeClientId}`;
+        localStorage.setItem(realDataKey, JSON.stringify(auditFile));
+        console.log(`✅ Audit file saved successfully to key: ${realDataKey}`);
+    } catch (e) {
+        console.error("CRITICAL: Failed to save audit file!", e);
+        alert("خطأ حرج في حفظ ملف المراجعة. قد يكون حد التخزين ممتلئ.");
+    }
+}
+
+
+        function loadUserPrefs(clientId) {
+            const prefsKey = `polarisUserPrefs_${clientId}`;
+            const savedPrefs = localStorage.getItem(prefsKey);
+            try {
+                return savedPrefs ? JSON.parse(savedPrefs) : { filterCategory: 'all', filterStatus: 'all', searchTerm: '' };
+            } catch (e) {
+                return { filterCategory: 'all', filterStatus: 'all', searchTerm: '' };
+            }
+        }
+
+               function setupEventListeners() {
+            document.getElementById('clientNameSubtitle').textContent = auditFile.clientInfo.name || 'عميل غير محدد';
+            document.getElementById('filterCategory').value = userPrefs.filterCategory;
+            document.getElementById('filterStatus').value = userPrefs.filterStatus;
+            document.getElementById('searchInput').value = userPrefs.searchTerm;
+
+            document.getElementById('filterCategory').addEventListener('change', (e) => { userPrefs.filterCategory = e.target.value; saveUserPrefs(); processAndRender(); });
+            document.getElementById('filterStatus').addEventListener('change', (e) => { userPrefs.filterStatus = e.target.value; saveUserPrefs(); processAndRender(); });
+            document.getElementById('searchInput').addEventListener('input', (e) => { userPrefs.searchTerm = e.target.value; saveUserPrefs(); processAndRender(); });
+            
+            document.getElementById('materialityBasis').addEventListener('change', (e) => {
+                document.getElementById('fixedAmountInput').style.display = e.target.value === 'fixed' ? 'block' : 'none';
+            });
+            
+            // *** التغيير هنا: ربط الزر الجديد بالوظيفة الجديدة ***
+            document.getElementById('logicalCheckButton').addEventListener('click', performLogicalCheck);
+            
+            document.getElementById('saveChangesButton').addEventListener('click', saveChangesManually);
+            document.getElementById('exportButton').addEventListener('click', exportToExcel);
+            setupAjeModal();
+        }
+        function performLogicalCheck() {
+            const rows = document.querySelectorAll('#trialBalanceTable tbody tr');
+            let abnormalCount = 0;
+            let unclassifiedCount = 0;
+
+            rows.forEach(row => {
+                // إزالة التظليل القديم أولاً
+                row.classList.remove('abnormal-balance', 'unclassified-account');
+
+                const accountId = row.dataset.accountId;
+                const account = auditFile.trialBalance.find(acc => String(acc.account_id) === String(accountId));
+                if (!account) return;
+
+                const finalBalance = (account.book_balance || 0) + calculateAdjustments(account.account_id);
+
+                // 1. تدقيق الحسابات غير المصنفة
+                if (!account.category) {
+                    row.classList.add('unclassified-account');
+                    unclassifiedCount++;
+                }
+
+                // 2. تدقيق الأرصدة الشاذة
+                const isAsset = account.category === 'assets';
+                const isLiabilityOrEquity = account.category === 'liabilities' || account.category === 'equity';
+                const isRevenue = account.category === 'revenue' && !['sales_discount', 'sales_returns'].includes(account.sub_category);
+                const isContraRevenue = ['sales_discount', 'sales_returns'].includes(account.sub_category);
+                const isExpense = account.category === 'expenses';
+
+                let isAbnormal = false;
+                if (isAsset && finalBalance < 0) isAbnormal = true;
+                if (isLiabilityOrEquity && finalBalance > 0) isAbnormal = true;
+                if (isRevenue && finalBalance > 0) isAbnormal = true;
+                if (isContraRevenue && finalBalance < 0) isAbnormal = true;
+                if (isExpense && finalBalance < 0) isAbnormal = true;
+                
+                if (isAbnormal) {
+                    row.classList.add('abnormal-balance');
+                    abnormalCount++;
+                }
+            });
+
+            // عرض رسالة للمستخدم بنتيجة التدقيق
+            alert(`تم الانتهاء من التدقيق.\n\n- تم العثور على ${abnormalCount} حسابات ذات أرصدة شاذة (مظللة بالأحمر).\n- تم العثور على ${unclassifiedCount} حسابات غير مصنفة (مظللة بالأزرق).`);
+            addAuditLogEntry("تم إجراء تدقيق منطقية الأرصدة.");
+            saveAuditFile();
+        }
+
+
+
+
+        function autoCategorizeAccounts() {
+            let hasChanges = false;
+            auditFile.trialBalance.forEach(account => {
+                if (account.category) return;
+                const accountName = account.name ? account.name.toLowerCase() : '';
+                for (const mapping of keywordMapping) {
+                    if (accountName.includes(mapping.keyword)) {
+                        account.category = mapping.category;
+                        account.sub_category = mapping.sub_category;
+                        account.is_confirmed = false;
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            });
+            if (hasChanges) {
+                addAuditLogEntry("تم إجراء تصنيف تلقائي للحسابات بالخوارزمية المحسنة.");
+                saveAuditFile();
+            }
+        }
+
+        function processAndRender() {
+    // 1. احصل على الجزء المخصص لعرض صفوف الجدول
+    const tbody = document.querySelector('#trialBalanceTable tbody');
+    
+    // 2. قم بإفراغه بالكامل من الصفوف القديمة
+    tbody.innerHTML = ''; 
+    
+    // 3. قم بفلترة الحسابات بناءً على الاختيارات الحالية
+    const filteredAccounts = filterAccounts();
+    
+    // 4. قم بإنشاء صف جديد لكل حساب وقم بإضافته إلى الجدول
+    filteredAccounts.forEach(account => {
+        const row = createAccountRow(account); // هذه الدالة ستقوم ببناء الصفوف الجديدة
+        tbody.appendChild(row);
+    });
+    
+    // 5. قم بتحديث الأشرطة السفلية بالأرقام الجديدة
+    updateStatusBar();
+    updateKpiPane();
+}
+
+        // FIXED: Search logic now works correctly.
+        // ضع هذه الدالة الجديدة والذكية مكانها
+
+// ==================================================================
+// --- START: CLEAN CODE BLOCK TO PASTE ---
+// ==================================================================
+
+function filterAccounts() {
+    const searchTerm = userPrefs.searchTerm.toLowerCase().trim();
+    
+    return auditFile.trialBalance.filter(account => {
+        if (!account || !account.account_id) return false;
+
+        // --- Filter Logic ---
+        const categoryFilterMatch = userPrefs.filterCategory === 'all' || 
+            (userPrefs.filterCategory === 'unclassified' ? !account.category : account.category === userPrefs.filterCategory);
+
+        const statusFilterMatch = userPrefs.filterStatus === 'all' || account.review_status === userPrefs.filterStatus;
+
+        // --- Smart Search Logic ---
+        if (searchTerm === '') {
+            return categoryFilterMatch && statusFilterMatch;
+        }
+
+        const categoryLabel = account.category ? getCategoryLabel(account.category).toLowerCase() : '';
+        const subCategoryLabel = (account.category && account.sub_category && subCategoryMap[account.category]) 
+            ? (subCategoryMap[account.category].find(sc => sc.value === account.sub_category)?.label.toLowerCase() || '') 
+            : '';
+
+        const searchMatch = 
+            (account.name && account.name.toLowerCase().includes(searchTerm)) || 
+            (account.account_id && String(account.account_id).toLowerCase().includes(searchTerm)) ||
+            (categoryLabel && categoryLabel.includes(searchTerm)) ||
+            (subCategoryLabel && subCategoryLabel.includes(searchTerm));
+
+        return categoryFilterMatch && statusFilterMatch && searchMatch;
+    });
+}
+
+// ==================================================================
+// --- START: FUNCTIONALITY FIX FOR createAccountRow ---
+// ==================================================================
+            function createAccountRow(account) {
+    const adjustments = calculateAdjustments(account.account_id);
+    const bookBalance = account.book_balance || 0;
+    const finalBalance = bookBalance + adjustments;
+    
+    const row = document.createElement('tr');
+    row.dataset.accountId = account.account_id;
+    row.addEventListener('click', (e) => {
+        if (e.target.closest('tr') === row && !e.target.closest('select, button, .action-icon, .action-btn')) {
+            updateInspectorPane(account.account_id);
+        }
+    });
+
+    const allCategories = [
+        { value: 'assets', label: 'أصول' }, { value: 'liabilities', label: 'التزامات' },
+        { value: 'equity', label: 'حقوق الملكية' }, { value: 'revenue', label: 'إيرادات' },
+        { value: 'expenses', label: 'مصروفات' }
+    ];
+
+    // **إعادة بناء منطق عرض الفئة والتصنيف الفرعي بالكامل**
+    const categoryCellContent = `
+        <div class="d-flex align-items-center">
+            <div class="category-actions" id="actions-${account.account_id}" style="display: none;">
+                <button class="action-btn confirm" title="تأكيد التغيير" onclick="confirmCategoryChange(event, '${account.account_id}')"><i class="fas fa-check-circle"></i></button>
+                <button class="action-btn undo" title="تراجع" onclick="undoCategoryChange(event, '${account.account_id}')"><i class="fas fa-undo"></i></button>
+            </div>
+            <select class="form-select form-select-sm" onchange="handleCategoryChange(this, '${account.account_id}')">
+                <option value="">اختر فئة...</option>
+                ${allCategories.map(c => `<option value="${c.value}" ${account.category === c.value ? 'selected' : ''}>${c.label}</option>`).join('')}
+            </select>
+        </div>
+    `;
+
+    // **هذا هو الجزء الذي تم إصلاحه بشكل جذري**
+    // يتم الآن إنشاء قائمة التصنيف الفرعي مع التحقق الصحيح من وجود فئة رئيسية
+    const subCategoryDropdown = `<select class="form-select form-select-sm" onchange="updateSubCategory(this, '${account.account_id}')" ${!account.category ? 'disabled' : ''}>
+                                    ${generateSubCategoryOptions(account.category, account.sub_category)}
+                                 </select>`;
+    
+    row.innerHTML = `
+        <td>
+            <span class="account-name">${account.name || 'غير مسمى'}</span>
+            <div class="text-muted small">${account.account_id}</div>
+        </td>
+        <td>${categoryCellContent}</td>
+        <td>${subCategoryDropdown}</td>
+        <td class="${bookBalance < 0 ? 'negative-balance' : ''}">${formatCurrency(bookBalance)}</td>
+        <td class="${adjustments !== 0 && adjustments < 0 ? 'negative-balance' : ''}">${formatCurrency(adjustments)}</td>
+        <td class="fw-bold ${finalBalance < 0 ? 'negative-balance' : ''}">${formatCurrency(finalBalance)}</td>
+        <td>
+            <select class="form-select form-select-sm" onchange="updateReviewStatus(this, '${account.account_id}')">
+                <option value="pending" ${account.review_status === 'pending' ? 'selected' : ''}>قيد المراجعة</option>
+                <option value="reviewed" ${account.review_status === 'reviewed' ? 'selected' : ''}>تمت المراجعة</option>
+                <option value="flagged" ${account.review_status === 'flagged' ? 'selected' : ''}>تحتاج تدقيق</option>
+            </select>
+        </td>
+    `;
+    return row;
+}
+
+        function undoCategoryChange(event, accountId) {
+            event.stopPropagation(); // منع أي أحداث أخرى
+
+            // لا حاجة لفعل أي شيء للبيانات، فقط أعد رسم الواجهة
+            // سيتم استعادة القيمة القديمة من auditFile تلقائيًا
+            processAndRender();
+            
+            // حذف التغيير المؤقت
+            delete pendingCategoryChange[accountId];
+        }
+
+// --- الخطوة 3.2: إصلاح لوحة المفتش الذكي ---
+// ==================================================================
+function updateInspectorPane(accountId) {
+    const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+    if (!account) return;
+
+    document.querySelectorAll('#trialBalanceTable tbody tr').forEach(r => r.classList.remove('table-active'));
+    const activeRow = document.querySelector(`tr[data-account-id="${accountId}"]`);
+    if (activeRow) activeRow.classList.add('table-active');
+
+    // --- 1. حساب كل الأرصدة والتفاصيل الرقمية بالكامل ---
+    const ob_debit = account.ob_debit || 0;
+    const ob_credit = account.ob_credit || 0;
+    const moveDebit = account.move_debit || 0;
+    const moveCredit = account.move_credit || 0;
+    const bookBalance = (ob_debit + moveDebit) - (ob_credit + moveCredit);
+    const adjustments = calculateAdjustments(accountId);
+    const finalBalance = bookBalance + adjustments;
+    const accountAdjustments = auditFile.adjustments.filter(adj => adj.debit_account === accountId || adj.credit_account === accountId);
+
+    // --- 2. **التعديل هنا: تحويل المخاطر إلى ملحوظة مدمجة** ---
+    let risksAndProceduresHTML = '';
+    const subCategory = account.sub_category;
+    let relevantRisks = [...councilKnowledgeBase.generalRisks];
+    if (subCategory && councilKnowledgeBase.specificRisks[subCategory]) {
+        relevantRisks.push(...councilKnowledgeBase.specificRisks[subCategory]);
+    }
+    
+    // دمج المخاطر في نص واحد
+    risksAndProceduresHTML = relevantRisks.map(risk => {
+        const [riskTitle] = risk.split(':');
+        return `<strong>${riskTitle}</strong>`;
+    }).join('، '); // استخدام فاصلة عربية للفصل بين المخاطر
+
+    // --- 3. بناء محتوى HTML المدمج للوحة المفتش ---
+    const content = document.getElementById('inspectorContent');
+    content.innerHTML = `
+        <div class="card" style="background: none; border: none;">
+            <div class="card-body p-0">
+                <h5 class="card-title font-family-display">${account.name || 'غير مسمى'}</h5>
+                <p class="card-subtitle mb-3 text-muted">${account.account_id}</p>
+
+                <h6 class="mt-4">تفاصيل حركة الحساب</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: none; border-color: var(--color-border);">
+                        <span>رصيد أول المدة (مدين)</span>
+                        <span class="badge bg-secondary rounded-pill">${formatCurrency(ob_debit)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: none; border-color: var(--color-border);">
+                        <span>رصيد أول المدة (دائن)</span>
+                        <span class="badge bg-secondary rounded-pill">${formatCurrency(ob_credit)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: none; border-color: var(--color-border);">
+                        <span>(+) إجمالي الحركة المدينة</span>
+                        <span class="text-success fw-bold">+ ${formatCurrency(moveDebit)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: none; border-color: var(--color-border);">
+                        <span>(-) إجمالي الحركة الدائنة</span>
+                        <span class="text-danger fw-bold">- ${formatCurrency(moveCredit)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center fw-bold" style="background-color: rgba(255,255,255,0.05); border-color: var(--color-border);">
+                        <span>= الرصيد الدفتري</span>
+                        <span>${formatCurrency(bookBalance)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: none; border-color: var(--color-border);">
+                        <span>(+/-) قيود التسوية</span>
+                        <span class="badge bg-warning text-dark rounded-pill">${formatCurrency(adjustments)}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center fw-bold fs-5" style="background-color: var(--color-primary-glow); border-color: var(--color-primary);">
+                        <span>= الرصيد النهائي</span>
+                        <span>${formatCurrency(finalBalance)}</span>
+                    </li>
+                </ul>
+
+                <!-- **القسم الجديد والمدمج** -->
+                <div class="council-note">
+                    <i class="fas fa-shield-alt icon"></i>
+                    <p class="note-text">
+                        <strong>ملحوظة المجلس:</strong> انتبه لمخاطر مثل: ${risksAndProceduresHTML}.
+                    </p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button class="btn btn-primary" onclick="openAjeModal('${accountId}')"><i class="fas fa-plus me-2"></i>إضافة قيد تسوية</button>
+                    <button class="btn btn-outline-primary" onclick="openVAIModal('${accountId}')"><i class="fas fa-users me-2"></i>استشارة المجلس</button>
+                </div>
+                
+                <h6 class="mt-4">سجل قيود التسوية على الحساب</h6>
+                <div id="adjustment-log-container" class="adjustments-container">
+                    ${accountAdjustments.length > 0 ? 
+                        accountAdjustments.map((adj, index) => {
+                            const debitAccountName = auditFile.trialBalance.find(acc => String(acc.account_id) === String(adj.debit_account))?.name || `حساب ${adj.debit_account}`;
+                            const creditAccountName = auditFile.trialBalance.find(acc => String(acc.account_id) === String(adj.credit_account))?.name || `حساب ${adj.credit_account}`;
+                            const entryDate = adj.timestamp ? new Date(adj.timestamp).toLocaleDateString('ar-EG') : '';
+                            return `
+                            <div class="journal-entry">
+                                <div class="journal-header">
+                                    <span>${adj.type === 'RCE' ? 'إعادة تصنيف' : 'قيد تسوية'} #${index + 1}</span>
+                                    <span class="small">${entryDate}</span>
+                                </div>
+                                <div class="journal-line">
+                                    <span class="account-debit">من ح/ ${debitAccountName}</span>
+                                    <span class="amount">${formatCurrency(adj.amount)}</span>
+                                </div>
+                                <div class="journal-line">
+                                    <span class="account-credit">إلى ح/ ${creditAccountName}</span>
+                                    <span class="amount"></span>
+                                </div>
+                                <div class="journal-line-description">
+                                    <span>${adj.description || 'قيد تسوية'}</span>
+                                </div>
+                            </div>
+                            `;
+                        }).join('') 
+                        : `<div class="text-center p-3" style="background-color: rgba(255,255,255,0.03); border-radius: var(--border-radius-md);"><i class="fas fa-file-alt fa-lg text-muted mb-2"></i><p class="text-muted small mb-0">لا توجد قيود تسوية.</p></div>`
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==================================================================
+// --- END: CLEAN CODE BLOCK TO PASTE ---
+// ==================================================================
+
+       
+
+        function generateSubCategoryOptions(category, selectedSubCategory) {
+            if (!category || !subCategoryMap[category]) {
+                return '<option value="">- اختر فئة أولاً -</option>';
+            }
+            let options = '<option value="">اختر تصنيف فرعي...</option>';
+            const groupedOptions = subCategoryMap[category].reduce((acc, option) => {
+                acc[option.group] = acc[option.group] || [];
+                acc[option.group].push(option);
+                return acc;
+            }, {});
+
+            for (const groupName in groupedOptions) {
+                options += `<optgroup label="${groupName}">`;
+                groupedOptions[groupName].forEach(sub => {
+                    options += `<option value="${sub.value}" ${selectedSubCategory === sub.value ? 'selected' : ''}>${sub.label}</option>`;
+                });
+                options += `</optgroup>`;
+            }
+            return options;
+        }
+
+        function confirmCategory(event, accountId) {
+            event.stopPropagation();
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (account) {
+                account.is_confirmed = true;
+                addAuditLogEntry(`تم تأكيد التصنيف للحساب ${accountId}.`);
+                saveAuditFile();
+                processAndRender();
+            }
+        }
+
+        // ================================================================
+// المهمة الأولى: إصلاح دالة تحديث الفئة الرئيسية
+// ================================================================
+
+function updateCategory(selectElement, accountId) {
+    const account = auditFile.trialBalance.find(acc => String(acc.account_id) === String(accountId));
+    if (account) {
+        // تحديث الفئة الرئيسية
+        account.category = selectElement.value || null;
+        
+        // **الإصلاح المطلوب: إفراغ التصنيف الفرعي عند تغيير الرئيسي**
+        account.sub_category = null; 
+        
+        // تأكيد التغيير تلقائيًا
+        account.is_confirmed = true; 
+        
+        addAuditLogEntry(`تم تحديث الفئة الرئيسية للحساب ${accountId} إلى ${selectElement.options[selectElement.selectedIndex].text}`);
+        
+        // **الحفظ الفوري وإعادة الرسم هما مفتاح الحل**
+        saveAuditFile();
+        processAndRender();
+    }
+}
+
+        function updateSubCategory(selectElement, accountId) {
+    const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+    if (account) {
+        account.sub_category = selectElement.value || null;
+        addAuditLogEntry(`تم تحديث التصنيف الفرعي للحساب ${accountId} إلى ${selectElement.options[selectElement.selectedIndex].text}`);
+        
+        // حفظ التغيير وإعادة رسم الواحة لضمان التناسق
+        saveAuditFile();
+        processAndRender();
+
+        // تحديث لوحة المفتش إذا كان هذا هو الحساب النشط
+        const activeRow = document.querySelector('#trialBalanceTable tr.table-active');
+        if (activeRow && activeRow.dataset.accountId === accountId) {
+            updateInspectorPane(accountId);
+        }
+    }
+}
+
+
+      // ضع هذا الجزء الجديد والمحسّن مكانه
+
+
+        // --- STATUS BAR & KPI CALCULATIONS ---
+        function updateStatusBar() {
+            const matDisplay = document.getElementById('materialityDisplay');
+            if (auditFile.settings && auditFile.settings.materiality) {
+                matDisplay.innerHTML = `${formatCurrency(auditFile.settings.materiality)} <small class="d-block text-muted">(${auditFile.settings.materiality_basis || ''})</small>`;
+            } else {
+                matDisplay.textContent = 'لم تحدد';
+            }
+
+            const { profitBefore, adjustmentsEffect } = calculateNetProfit();
+            const profitAfter = profitBefore + adjustmentsEffect;
+            document.getElementById('netProfitDisplay').innerHTML = `${formatCurrency(profitAfter)} <small class="d-block text-muted">(قبل: ${formatCurrency(profitBefore)})</small>`;
+            document.getElementById('adjustmentsEffectDisplay').textContent = formatCurrency(adjustmentsEffect);
+
+            const totalAccounts = auditFile.trialBalance.length;
+            const reviewedAccounts = auditFile.trialBalance.filter(acc => acc.review_status === 'reviewed').length;
+            const completion = totalAccounts > 0 ? (reviewedAccounts / totalAccounts * 100) : 0;
+            document.getElementById('completionDisplay').textContent = `${completion.toFixed(1)}%`;
+        }
+                   function updateKpiPane() {
+            const accounts = auditFile.trialBalance;
+            const getFinalBalance = (acc) => (acc.book_balance || 0) + calculateAdjustments(acc.account_id);
+            
+            const getSumBySubCategory = (subCategory) => accounts
+                .filter(acc => acc.sub_category === subCategory)
+                .reduce((sum, acc) => sum + getFinalBalance(acc), 0);
+
+            // --- 1. استخراج الأرقام الأساسية ---
+            const mainRevenue = Math.abs(getSumBySubCategory('main_revenue'));
+            const otherRevenue = Math.abs(getSumBySubCategory('other_revenue'));
+            const salesReturns = Math.abs(getSumBySubCategory('sales_returns'));
+            const salesDiscount = Math.abs(getSumBySubCategory('sales_discount'));
+            const netRevenue = (mainRevenue + otherRevenue) - (salesReturns + salesDiscount);
+            const cogs = Math.abs(getSumBySubCategory('cogs'));
+            const grossProfit = netRevenue - cogs;
+            const operatingExpensesList = ['salaries', 'rent', 'utilities', 'maintenance', 'fuel_transport', 'general_admin', 'gov_fees', 'professional_fees', 'selling_marketing', 'commission_expense', 'depreciation', 'amortization'];
+            const operatingExpenses = operatingExpensesList.reduce((sum, sc) => sum + Math.abs(getSumBySubCategory(sc)), 0);
+            const operatingProfit = grossProfit - operatingExpenses;
+            
+            // **استخدام القيم الصحيحة من الدالة الجديدة**
+            const { profitAfter, profitForEquity } = calculateNetProfit(true); // profitAfter للعرض, profitForEquity للحسابات
+            
+            const totalAssets = accounts.filter(a => a.category === 'assets').reduce((s, a) => s + getFinalBalance(a), 0);
+            const totalLiabilities = Math.abs(accounts.filter(a => a.category === 'liabilities').reduce((s, a) => s + getFinalBalance(a), 0));
+            
+            // **المعادلة المحاسبية الصحيحة لحقوق الملكية**
+            // حقوق الملكية = (رأس المال + أرباح مبقاة) + ربح الفترة (بإشارته السالبة)
+            const capitalAndRetained = getSumBySubCategory('capital') + getSumBySubCategory('retained_earnings');
+            const totalEquity = Math.abs(capitalAndRetained + profitForEquity); // نجمع الربح بإشارته السالبة ثم نأخذ القيمة المطلقة للعرض
+
+            const currentAssetsList = ['cash_on_hand', 'cash_at_banks', 'trade_receivables', 'inventory', 'prepaid_expenses', 'accrued_revenue'];
+            const currentAssets = currentAssetsList.reduce((sum, sc) => sum + getSumBySubCategory(sc), 0);
+            const currentLiabilitiesList = ['trade_payables', 'accrued_expenses', 'short_term_loans', 'vat_payable', 'unearned_revenue'];
+            const currentLiabilities = Math.abs(currentLiabilitiesList.reduce((sum, sc) => sum + getSumBySubCategory(sc), 0));
+            const inventory = getSumBySubCategory('inventory');
+            const tradeReceivables = getSumBySubCategory('trade_receivables');
+
+            // --- 2. حساب النسب المالية (تستخدم profitAfter للعرض) ---
+            const ratios = [
+                { id: 'grossMargin', label: 'هامش الربح الإجمالي', value: netRevenue > 0 ? (grossProfit / netRevenue * 100) : 0, format: 'percent', icon: 'fa-percent' },
+                { id: 'operatingMargin', label: 'هامش الربح التشغيلي', value: netRevenue > 0 ? (operatingProfit / netRevenue * 100) : 0, format: 'percent', icon: 'fa-cash-register' },
+                { id: 'netMargin', label: 'هامش صافي الربح', value: netRevenue > 0 ? (profitAfter / netRevenue * 100) : 0, format: 'percent', icon: 'fa-wallet' },
+                { id: 'roe', label: 'العائد على حقوق الملكية', value: totalEquity !== 0 ? (profitAfter / totalEquity * 100) : 0, format: 'percent', icon: 'fa-users-cog' },
+                { id: 'currentRatio', label: 'نسبة التداول', value: currentLiabilities > 0 ? (currentAssets / currentLiabilities) : 0, format: 'decimal', icon: 'fa-hand-holding-usd' },
+                { id: 'quickRatio', label: 'النسبة السريعة', value: currentLiabilities > 0 ? ((currentAssets - inventory) / currentLiabilities) : 0, format: 'decimal', icon: 'fa-shipping-fast' },
+                { id: 'debtRatio', label: 'نسبة المديونية', value: totalAssets > 0 ? (totalLiabilities / totalAssets * 100) : 0, format: 'percent', icon: 'fa-university' },
+                { id: 'debtToEquity', label: 'الديون إلى حقوق الملكية', value: totalEquity !== 0 ? (totalLiabilities / totalEquity) : 0, format: 'decimal', icon: 'fa-balance-scale-left' },
+                { id: 'assetTurnover', label: 'معدل دوران الأصول', value: totalAssets > 0 ? (netRevenue / totalAssets) : 0, format: 'decimal', icon: 'fa-sync-alt' },
+                { id: 'inventoryTurnover', label: 'دوران المخزون (مرة)', value: inventory > 0 ? (cogs / inventory) : 0, format: 'decimal', icon: 'fa-boxes' },
+                { id: 'collectionPeriod', label: 'فترة التحصيل (يوم)', value: netRevenue > 0 ? (tradeReceivables / (netRevenue / 365)) : 0, format: 'days', icon: 'fa-calendar-check' },
+                { id: 'roa', label: 'العائد على الأصول (ROA)', value: totalAssets > 0 ? (profitAfter / totalAssets * 100) : 0, format: 'percent', icon: 'fa-chart-line' }
+            ];
+
+            // --- 3. تحديث الواجهة (DOM) ---
+            ratios.forEach(ratio => {
+                const card = document.getElementById(ratio.id)?.closest('.ratio-card');
+                if (!card) return;
+                let displayValue;
+                switch (ratio.format) {
+                    case 'percent': displayValue = `${ratio.value.toFixed(1)}%`; break;
+                    case 'decimal': displayValue = ratio.value.toFixed(2); break;
+                    case 'days': displayValue = isFinite(ratio.value) ? ratio.value.toFixed(0) : '∞'; break;
+                    default: displayValue = ratio.value;
+                }
+                card.innerHTML = `<i class="fas ${ratio.icon} icon-placeholder"></i><span class="label-placeholder">${ratio.label}</span><span class="value-placeholder">${displayValue}</span>`;
+                if (ratio.value < 0) { card.classList.add('negative'); } else { card.classList.remove('negative'); }
+            });
+        }
+
+
+
+
+                  function calculateNetProfit(final = false) {
+            let netIncome_account_balance = 0; // سيحتفظ بالإشارة المحاسبية (سالب للربح)
+
+            auditFile.trialBalance.forEach(acc => {
+                const balance = final 
+                    ? (acc.book_balance || 0) + calculateAdjustments(acc.account_id) 
+                    : (acc.book_balance || 0);
+
+                if (acc.category === 'revenue' || acc.category === 'expenses') {
+                    netIncome_account_balance += balance;
+                }
+            });
+
+            // **التصحيح الجوهري:**
+            // profitForEquity: هذا هو الرقم الذي سيُستخدم في معادلة الميزانية.
+            // يحتفظ بإشارته المحاسبية الصحيحة (سالب في حالة الربح).
+            const profitForEquity = netIncome_account_balance;
+
+            // profitForDisplay: هذا الرقم للعرض فقط في التقارير والنسب.
+            // يكون دائمًا موجبًا في حالة الربح.
+            const profitForDisplay = -netIncome_account_balance;
+
+            // حساب أثر التسويات (للعرض فقط)
+            let adjustmentsEffect = 0;
+            if (!final) {
+                auditFile.adjustments.forEach(adj => {
+                    if (adj.type === 'AJE') {
+                        const debitAcc = auditFile.trialBalance.find(a => String(a.account_id) === String(adj.debit_account));
+                        const creditAcc = auditFile.trialBalance.find(a => String(a.account_id) === String(adj.credit_account));
+                        const amount = Number(adj.amount) || 0;
+                        if (debitAcc && debitAcc.category === 'expenses') adjustmentsEffect -= amount;
+                        if (debitAcc && debitAcc.category === 'revenue') adjustmentsEffect += amount;
+                        if (creditAcc && creditAcc.category === 'revenue') adjustmentsEffect += amount;
+                        if (creditAcc && creditAcc.category === 'expenses') adjustmentsEffect -= amount;
+                    }
+                });
+            }
+            
+            const profitBefore = profitForDisplay - adjustmentsEffect;
+
+            // إرجاع كلا القيمتين لاستخدامهما في السياق الصحيح
+            return { profitBefore, adjustmentsEffect, profitAfter: profitForDisplay, profitForEquity };
+        }
+
+        function calculateAdjustments(accountId) {
+            return auditFile.adjustments
+                .filter(adj => adj.debit_account === accountId || adj.credit_account === accountId)
+                .reduce((sum, adj) => sum + (adj.debit_account === accountId ? adj.amount : -adj.amount), 0);
+        }
+
+        // --- USER ACTIONS & MODALS ---
+        function saveMateriality() {
+            const basis = document.getElementById('materialityBasis').value;
+            const basisText = document.getElementById('materialityBasis').options[document.getElementById('materialityBasis').selectedIndex].text;
+            let materiality = 0;
+
+            const totalAssets = auditFile.trialBalance.filter(acc => acc.category === 'assets').reduce((sum, acc) => sum + acc.book_balance, 0);
+            const totalRevenue = Math.abs(auditFile.trialBalance.filter(acc => acc.category === 'revenue').reduce((sum, acc) => sum + acc.book_balance, 0));
+            const { profitBefore } = calculateNetProfit();
+
+            switch (basis) {
+                case 'profit': materiality = Math.abs(profitBefore * 0.05); break;
+                case 'revenue': materiality = Math.abs(totalRevenue * 0.01); break;
+                case 'assets': materiality = Math.abs(totalAssets * 0.005); break;
+                case 'fixed': materiality = parseFloat(document.getElementById('materialityAmount').value) || 0; break;
+            }
+
+            if (materiality <= 0) {
+                alert("قيمة الأهمية النسبية المحسوبة أو المدخلة غير صالحة.");
+                return;
+            }
+
+            auditFile.settings.materiality = materiality;
+            auditFile.settings.materiality_basis = basisText;
+            addAuditLogEntry(`تم تحديد الأهمية النسبية: ${formatCurrency(materiality)}`);
+            saveAuditFile();
+            materialityModal.hide();
+            processAndRender();
+        }
+
+        function openAjeModal(accountId) {
+            document.getElementById('ajeModalLabel').textContent = `إضافة قيد للحساب: ${accountId}`;
+            document.getElementById('ajeDescription').value = '';
+            document.getElementById('ajeAmount').value = '';
+            document.getElementById('isRceSwitch').checked = false;
+            document.getElementById('ajeDebitAccount').value = accountId;
+            document.getElementById('ajeCreditAccount').value = '';
+            ajeModal.show();
+        }
+
+        function setupAjeModal() {
+            const debitSelect = document.getElementById('ajeDebitAccount');
+            const creditSelect = document.getElementById('ajeCreditAccount');
+            debitSelect.innerHTML = '<option value="">اختر الحساب المدين</option>';
+            creditSelect.innerHTML = '<option value="">اختر الحساب الدائن</option>';
+            auditFile.trialBalance.forEach(account => {
+                const option = `<option value="${account.account_id}">${account.account_id} - ${account.name || 'غير مسمى'}</option>`;
+                debitSelect.innerHTML += option;
+                creditSelect.innerHTML += option;
+            });
+        }
+function saveChanges() {
+    try {
+        // تخزين auditFile في LocalStorage (حل مؤقت إذا لم يكن هناك خادم)
+        localStorage.setItem('auditFile', JSON.stringify(auditFile));
+        alert('تم الحفظ بنجاح!');
+        
+        // إذا كنت تستخدم خادمًا، أرسل البيانات عبر API
+        fetch('/api/save-audit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(auditFile),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم الحفظ على الخادم بنجاح!');
+            } else {
+                throw new Error('فشل الحفظ على الخادم');
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في الحفظ:', error);
+            alert('حدث خطأ أثناء الحفظ. تحقق من وحدة التحكم.');
+        });
+    } catch (error) {
+        console.error('خطأ في الحفظ:', error);
+        alert('حدث خطأ أثناء الحفظ.');
+    }
+}
+
+// ربط زر الحفظ بالدالة
+document.querySelector('.btn-primary').addEventListener('click', saveChanges);
+        function saveAdjustment() {
+            const description = document.getElementById('ajeDescription').value;
+            const debitAccount = document.getElementById('ajeDebitAccount').value;
+            const creditAccount = document.getElementById('ajeCreditAccount').value;
+            const amount = parseFloat(document.getElementById('ajeAmount').value);
+            const isRCE = document.getElementById('isRceSwitch').checked;
+
+            if (!description || !debitAccount || !creditAccount || isNaN(amount) || amount <= 0) {
+                alert("الرجاء ملء جميع الحقول بشكل صحيح.");
+                return;
+            }
+            if (debitAccount === creditAccount) {
+                alert("لا يمكن أن يكون الحساب المدين هو نفسه الحساب الدائن.");
+                return;
+            }
+
+            const adjustment = {
+                id: `ADJ-${Date.now()}`,
+                type: isRCE ? 'RCE' : 'AJE',
+                description,
+                debit_account: debitAccount,
+                credit_account: creditAccount,
+                amount,
+                timestamp: new Date().toISOString()
+            };
+
+            auditFile.adjustments.push(adjustment);
+            addAuditLogEntry(`إضافة قيد ${adjustment.type}: ${description}`);
+            saveAuditFile();
+            ajeModal.hide();
+            processAndRender();
+            updateInspectorPane(debitAccount);
+        }
+
+        // FIXED: This now saves the file immediately, fixing the refresh issue.
+        function updateReviewStatus(selectElement, accountId) {
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (account) {
+                account.review_status = selectElement.value;
+                addAuditLogEntry(`تم تحديث حالة المراجعة للحساب ${accountId} إلى ${selectElement.options[selectElement.selectedIndex].text}`);
+                saveAuditFile();
+                updateStatusBar();
+            }
+        }
+window.onload = function() {
+    const savedData = localStorage.getItem('auditFile');
+    if (savedData) {
+        auditFile = JSON.parse(savedData);
+        // إعادة تحميل جدول البيانات
+        updateTrialBalanceTable();
+        // تحديث لوحة المفتش إذا كان هناك حساب محدد
+        const selectedAccount = document.querySelector('#trialBalanceTable tr.table-active');
+        if (selectedAccount) {
+            updateInspectorPane(selectedAccount.dataset.accountId);
+        }
+    }
+};
+        // --- VAI ASSISTANT LOGIC ---
+       function openVAIModal(accountId) {
+    const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+    if (!account) {
+        alert('خطأ: لم يتم العثور على الحساب.');
+        return;
+    }
+
+    currentVAIContext = {
+        name: account.name,
+        id: account.account_id,
+        category: getCategoryLabel(account.category),
+        sub_category: account.sub_category,
+        balance: account.book_balance + calculateAdjustments(account.account_id),
+        py_balance: account.pyb
+    };
+
+    document.getElementById('vAIAccountName').textContent = `${account.name || 'غير مسمى'} (${account.account_id})`;
+    document.getElementById('vAIQuestion').value = `ما هي رؤية المجلس حول المخاطر وإجراءات المراجعة المقترحة لهذا الحساب؟`;
+    document.getElementById('vAIAssistantResponse').style.display = 'none';
+    document.getElementById('vAIAssistantResponse').innerHTML = ''; // إعادة تعيين
+    document.getElementById('vAIBtnText').style.display = 'inline-block';
+    document.getElementById('vAISpinner').style.display = 'none';
+    
+    vAIAssistantModal.show();
+}
+
+        
+
+        // --- WORKPAPERS LOGIC ---
+        function openWorkpapersModal(event, accountId) {
+            event.stopPropagation();
+            currentWorkpaperAccountId = accountId;
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (!account) return;
+
+            document.getElementById('workpapersModalTitle').textContent = `أوراق عمل: ${account.name || account.id}`;
+            document.getElementById('workpapersAccountName').textContent = `${account.name || 'غير مسمى'} (${account.account_id})`;
+            renderWorkpapersList(account.workpapers);
+            workpapersModal.show();
+        }
+
+       
+
+      // ==================================================================
+// ==================================================================
+// --- START: FINAL & CLEAN FUNCTIONALITY FIXES ---
+// ==================================================================
+
+// ================================================================
+// المهمة الاستراتيجية الأولى: ترقية استجابة مجلس الحكمة
+// ================================================================
+
+function getVAIResponse() {
+    const question = document.getElementById('vAIQuestion').value.trim();
+    if (!question) {
+        alert("الرجاء كتابة سؤالك للمجلس.");
+        return;
+    }
+
+    const btnText = document.getElementById('vAIBtnText');
+    const spinner = document.getElementById('vAISpinner');
+    const responseDiv = document.getElementById('vAIAssistantResponse');
+    
+    // إعادة تعيين العرض
+    responseDiv.style.display = 'none';
+    responseDiv.innerHTML = '';
+    btnText.style.display = 'none';
+    spinner.style.display = 'inline-block';
+
+    // استخراج معلومات الحساب من السياق الحالي
+    const { name, category, sub_category, balance, py_balance } = currentVAIContext;
+    const variance = (py_balance !== undefined && py_balance !== null && py_balance !== 0) 
+        ? ((balance - py_balance) / Math.abs(py_balance) * 100) 
+        : null;
+    
+    // بناء التحليل
+    let analysis = `<div style="font-family: var(--font-family-main); line-height: 1.6;">`;
+    analysis += `<h5 style="color: var(--color-primary);">ملخص استشارة مجلس الحكماء</h5>`;
+    analysis += `<p><strong>الحساب:</strong> ${name || 'غير مسمى'} (${currentVAIContext.id})</p>`;
+    analysis += `<h6>1. نظرة عامة وتحليل مقارن:</h6>`;
+    analysis += `<ul>`;
+    analysis += `<li><strong>الرصيد النهائي:</strong> ${formatCurrency(balance)}</li>`;
+    analysis += variance !== null 
+        ? `<li><strong>التغير مقارنة بالعام السابق:</strong> ${variance.toFixed(1)}%</li>`
+        : `<li><strong>التغير مقارنة بالعام السابق:</strong> لا توجد بيانات للمقارنة</li>`;
+    analysis += `</ul>`;
+
+    // استخراج المخاطر
+    let relevantRisks = [...councilKnowledgeBase.generalRisks];
+    if (sub_category && councilKnowledgeBase.specificRisks[sub_category]) {
+        relevantRisks.push(...councilKnowledgeBase.specificRisks[sub_category]);
+    }
+
+    analysis += `<h6>2. أبرز المخاطر المحتملة والإجراءات المقترحة:</h6>`;
+    analysis += `<ul>`;
+    if (variance !== null && Math.abs(variance) > VARIANCE_THRESHOLD) {
+        analysis += `<li><strong>خطر التقلب العالي:</strong> التغير الكبير (${variance.toFixed(1)}%) يستدعي التحقق من المعاملات الكبيرة خلال العام والاستفسار من الإدارة.</li>`;
+    }
+    relevantRisks.forEach(risk => {
+        analysis += `<li><strong>${risk.split(':')[0]}:</strong> ${risk.split(':')[1]}</li>`;
+    });
+    analysis += `</ul>`;
+
+    analysis += `<h6>3. خلاصة رأي المجلس:</h6>`;
+    analysis += `<p>"نوصي بالتركيز على الإجراءات المذكورة أعلاه. يجب أن تكون المستندات الثبوتية أساس عملك، وأن يكون الاستفسار من الإدارة أداتك لتأكيد فهمك للمعاملات."</p>`;
+    analysis += `</div>`;
+
+    // محاكاة استجابة الشبكة
+    setTimeout(() => {
+        responseDiv.innerHTML = analysis;
+        responseDiv.style.display = 'block';
+        btnText.style.display = 'inline-block';
+        spinner.style.display = 'none';
+    }, 1000); // تقليل التأخير لتحسين تجربة المستخدم
+}
+function performComparativeAnalysis() {
+    // إعادة عرض الجدول مع تطبيق التظليل
+    processAndRender();
+    addAuditLogEntry("تم إجراء تحليل مقارن للحسابات.");
+    saveAuditFile();
+}
+function saveChangesManually() {
+    try {
+        saveAuditFile();
+        addAuditLogEntry("تم حفظ التغييرات يدويًا بواسطة المستخدم.");
+        alert("تم حفظ التغييرات بنجاح!");
+    } catch (e) {
+        console.error("خطأ أثناء الحفظ اليدوي:", e);
+        alert("حدث خطأ أثناء حفظ التغييرات. الرجاء المحاولة مرة أخرى.");
+    }
+}
+function renderWorkpapersList(workpapers) {
+    const list = document.getElementById('workpapersList');
+    list.innerHTML = '';
+    if (!workpapers || workpapers.length === 0) {
+        list.innerHTML = '<li class="list-group-item text-muted">لا توجد مستندات مرفقة حالياً.</li>';
+        return;
+    }
+    workpapers.forEach((wp, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+            <span><i class="fas fa-file me-2"></i>${wp.name}</span>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary btn-sm" onclick="downloadWorkpaper(event, ${index})"><i class="fas fa-download"></i></button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteWorkpaper(event, ${index})"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function uploadWorkpaper() {
+    const fileInput = document.getElementById('fileUpload');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert('الرجاء اختيار ملف أولاً.');
+        return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const fileData = {
+            name: file.name,
+            type: file.type,
+            content: e.target.result,
+            uploadedAt: new Date().toISOString() // إضافة طابع زمني
+        };
+
+        const account = auditFile.trialBalance.find(acc => acc.account_id === currentWorkpaperAccountId);
+        if (account) {
+            if (!account.workpapers) account.workpapers = [];
+            account.workpapers.push(fileData);
+            addAuditLogEntry(`تم إرفاق مستند '${file.name}' للحساب ${currentWorkpaperAccountId}.`);
+            saveAuditFile();
+            renderWorkpapersList(account.workpapers);
+            processAndRender();
+            fileInput.value = ''; // إعادة تعيين حقل الإدخال
+            alert('تم رفع المستند بنجاح!'); // رسالة تأكيد
+        } else {
+            alert('خطأ: لم يتم العثور على الحساب.');
+        }
+    };
+    reader.onerror = function() {
+        alert('حدث خطأ أثناء قراءة الملف.');
+    };
+    reader.readAsDataURL(file);
+}
+function downloadWorkpaper(event, index) {
+    event.stopPropagation();
+    const account = auditFile.trialBalance.find(acc => acc.account_id === currentWorkpaperAccountId);
+    if (account && account.workpapers && account.workpapers[index]) {
+        const wp = account.workpapers[index];
+        const link = document.createElement('a');
+        link.href = wp.content;
+        link.download = wp.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// ==================================================================
+// --- END: FINAL & CLEAN FUNCTIONALITY FIXES ---
+// ==================================================================
+
+
+        function deleteWorkpaper(event, index) {
+            event.stopPropagation();
+            if (!confirm('هل أنت متأكد من حذف ورقة العمل هذه؟')) return;
+            const account = auditFile.trialBalance.find(acc => acc.account_id === currentWorkpaperAccountId);
+            if (account) {
+                const deletedWp = account.workpapers.splice(index, 1);
+                addAuditLogEntry(`تم حذف مستند '${deletedWp[0].name}' من الحساب ${currentWorkpaperAccountId}.`);
+                saveAuditFile();
+                renderWorkpapersList(account.workpapers);
+                processAndRender();
+            }
+        }
+
+        // --- HELPERS & UTILITIES ---
+        function handleFatalError(message) {
+            const container = document.querySelector('.container-fluid') || document.body;
+            container.innerHTML = `<div class="alert alert-danger m-5">${message}</div>`;
+        }
+
+        function addAuditLogEntry(action) {
+            if (!auditFile.auditLog) auditFile.auditLog = [];
+            auditFile.auditLog.push({ timestamp: new Date().toISOString(), action });
+        }
+
+        function saveUserPrefs() {
+            try {
+                localStorage.setItem(`polarisUserPrefs_${auditFile.clientInfo.id}`, JSON.stringify(userPrefs));
+            } catch (e) { console.warn("Could not save user preferences."); }
+        }
+
+        function formatCurrency(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            return new Intl.NumberFormat('ar-SA', { 
+                style: 'currency', 
+                currency: CURRENCY,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        function getCategoryLabel(categoryKey) {
+            return getCategoryLabel.labels[categoryKey] || 'غير مصنف';
+        }
+        getCategoryLabel.labels = {
+            'assets': 'أصول', 'liabilities': 'التزامات', 'equity': 'حقوق الملكية',
+            'revenue': 'إيرادات', 'expenses': 'مصروفات'
+        };
+
+       // ==================================================================
+// --- دالة التصدير المحسنة مع معالجة الأخطاء ---
+// ==================================================================
+
+function exportToExcel() {
+    try {
+        // التحقق من وجود مكتبة XLSX
+        if (typeof XLSX === 'undefined') {
+            alert('خطأ: مكتبة XLSX غير محملة. يرجى إضافة المكتبة أولاً.');
+            console.error('XLSX library is not loaded');
+            return;
+        }
+
+        // التحقق من وجود البيانات
+        if (!auditFile || !auditFile.trialBalance || auditFile.trialBalance.length === 0) {
+            alert('خطأ: لا توجد بيانات للتصدير');
+            console.error('No data available for export');
+            return;
+        }
+
+        console.log('بدء عملية التصدير...');
+        
+        // إعداد البيانات للتصدير
+        const exportData = [];
+        
+        // إضافة رأس الجدول
+        exportData.push([
+            'كود الحساب',
+            'اسم الحساب',
+            'الفئة الرئيسية',
+            'التصنيف الفرعي',
+            'رصيد أول المدة (مدين)',
+            'رصيد أول المدة (دائن)',
+            'إجمالي الحركة (مدين)',
+            'إجمالي الحركة (دائن)',
+            'الرصيد الدفتري (مدين)',
+            'الرصيد الدفتري (دائن)',
+            'قيود التسوية (مدين)',
+            'قيود التسوية (دائن)',
+            'الرصيد النهائي (مدين)',
+            'الرصيد النهائي (دائن)',
+            'حالة المراجعة'
+        ]);
+
+        // معالجة كل حساب
+        auditFile.trialBalance.forEach((account, index) => {
+            try {
+                // حساب التسويات للحساب
+                let adjustmentDebit = 0;
+                let adjustmentCredit = 0;
+                
+                if (auditFile.adjustments && Array.isArray(auditFile.adjustments)) {
+                    const accountAdjustments = auditFile.adjustments.filter(adj => 
+                        String(adj.debit_account) === String(account.account_id) || 
+                        String(adj.credit_account) === String(account.account_id)
+                    );
+                    
+                    adjustmentDebit = accountAdjustments
+                        .filter(adj => String(adj.debit_account) === String(account.account_id))
+                        .reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0);
+                    
+                    adjustmentCredit = accountAdjustments
+                        .filter(adj => String(adj.credit_account) === String(account.account_id))
+                        .reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0);
+                }
+
+                // استخراج البيانات الأساسية مع قيم افتراضية آمنة
+                const obDebit = Number(account.ob_debit) || 0;
+                const obCredit = Number(account.ob_credit) || 0;
+                const moveDebit = Number(account.move_debit) || 0;
+                const moveCredit = Number(account.move_credit) || 0;
+                const bookBalanceDebit = Number(account.book_balance_debit) || 0;
+                const bookBalanceCredit = Number(account.book_balance_credit) || 0;
+
+                // حساب الرصيد النهائي
+                const finalBalance = (bookBalanceDebit - bookBalanceCredit) + (adjustmentDebit - adjustmentCredit);
+                const finalBalanceDebit = finalBalance >= 0 ? finalBalance : 0;
+                const finalBalanceCredit = finalBalance < 0 ? Math.abs(finalBalance) : 0;
+
+                // الحصول على تسميات الفئات بطريقة آمنة
+                const categoryLabel = getCategoryLabelSafe(account.category);
+                const subCategoryLabel = getSubCategoryLabelSafe(account.category, account.sub_category);
+                const reviewStatusLabel = getReviewStatusLabelSafe(account.review_status);
+
+                // إضافة صف البيانات
+                exportData.push([
+                    account.account_id || '',
+                    account.name || '',
+                    categoryLabel,
+                    subCategoryLabel,
+                    obDebit,
+                    obCredit,
+                    moveDebit,
+                    moveCredit,
+                    bookBalanceDebit,
+                    bookBalanceCredit,
+                    adjustmentDebit,
+                    adjustmentCredit,
+                    finalBalanceDebit,
+                    finalBalanceCredit,
+                    reviewStatusLabel
+                ]);
+                
+            } catch (accountError) {
+                console.error(`خطأ في معالجة الحساب ${account.account_id}:`, accountError);
+                // إضافة صف فارغ في حالة الخطأ
+                exportData.push([
+                    account.account_id || '',
+                    account.name || '',
+                    'خطأ في البيانات',
+                    '',
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    'خطأ'
+                ]);
+            }
+        });
+
+        console.log(`تم معالجة ${exportData.length - 1} حساب`);
+
+        // إنشاء ملف الإكسل
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+        
+        // تنسيق العرض للأعمدة
+        const colWidths = [
+            { wch: 15 }, { wch: 40 }, { wch: 20 }, { wch: 25 },
+            { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 },
+            { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 },
+            { wch: 18 }, { wch: 18 }, { wch: 15 }
+        ];
+        ws['!cols'] = colWidths;
+
+        // إنشاء المصنف
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "ميزان المراجعة");
+
+        // تحديد اسم الملف
+        const clientName = (auditFile.clientInfo && auditFile.clientInfo.name) ? auditFile.clientInfo.name : 'عميل';
+        const currentDate = new Date().toLocaleDateString('ar-EG').replace(/\//g, '-');
+        const fileName = `ميزان_المراجعة_${clientName}_${currentDate}.xlsx`;
+
+        // تحميل الملف
+        XLSX.writeFile(wb, fileName);
+        
+        console.log(`✅ تم تصدير ميزان المراجعة بنجاح: ${fileName}`);
+        alert(`تم تصدير ميزان المراجعة بنجاح!\nاسم الملف: ${fileName}`);
+        
+    } catch (error) {
+        console.error('خطأ تفصيلي في تصدير ميزان المراجعة:', error);
+        console.error('Stack trace:', error.stack);
+        alert(`حدث خطأ أثناء تصدير ميزان المراجعة:\n${error.message}\n\nيرجى فتح Developer Tools (F12) لمزيد من التفاصيل.`);
+    }
+}
+
+// ==================================================================
+// --- دوال مساعدة آمنة للتصدير ---
+// ==================================================================
+
+function getCategoryLabelSafe(category) {
+    try {
+        const categories = {
+            'assets': 'أصول',
+            'liabilities': 'التزامات',
+            'equity': 'حقوق الملكية',
+            'revenue': 'إيرادات',
+            'expenses': 'مصروفات'
+        };
+        return categories[category] || '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function getSubCategoryLabelSafe(category, subCategory) {
+    try {
+        if (!category || !subCategory) return '';
+        if (typeof subCategoryMap === 'undefined' || !subCategoryMap[category]) return '';
+        const subCat = subCategoryMap[category].find(sc => sc.value === subCategory);
+        return subCat ? subCat.label : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function getReviewStatusLabelSafe(status) {
+    try {
+        const statuses = {
+            'pending': 'قيد المراجعة',
+            'reviewed': 'تمت المراجعة',
+            'flagged': 'تحتاج تدقيق'
+        };
+        return statuses[status] || 'قيد المراجعة';
+    } catch (e) {
+        return 'قيد المراجعة';
+    }
+}
+
+// ==================================================================
+// --- دالة تشخيص المشاكل ---
+// ==================================================================
+
+function diagnoseExportIssues() {
+    console.log('=== تشخيص مشاكل التصدير ===');
+    
+    // فحص مكتبة XLSX
+    console.log('1. مكتبة XLSX:', typeof XLSX !== 'undefined' ? '✅ محملة' : '❌ غير محملة');
+    
+    // فحص البيانات
+    console.log('2. متغير auditFile:', typeof auditFile !== 'undefined' ? '✅ موجود' : '❌ غير موجود');
+    
+    if (typeof auditFile !== 'undefined') {
+        console.log('3. auditFile.trialBalance:', auditFile.trialBalance ? `✅ موجود (${auditFile.trialBalance.length} حساب)` : '❌ غير موجود');
+        console.log('4. auditFile.adjustments:', auditFile.adjustments ? `✅ موجود (${auditFile.adjustments.length} تسوية)` : '❌ غير موجود');
+        console.log('5. auditFile.clientInfo:', auditFile.clientInfo ? '✅ موجود' : '❌ غير موجود');
+    }
+    
+    // فحص متغير subCategoryMap
+    console.log('6. متغير subCategoryMap:', typeof subCategoryMap !== 'undefined' ? '✅ موجود' : '❌ غير موجود');
+    
+    console.log('=== انتهاء التشخيص ===');
+}
+
+// لتشغيل التشخيص، استخدم: diagnoseExportIssues()
+
+
+
+        // --- CONSOLIDATION LOGIC ---
+        function navigateToConsolidation() {
+            const unreviewedCount = auditFile.trialBalance.filter(acc => acc.review_status !== 'reviewed').length;
+            if (unreviewedCount > 0) {
+                if (!confirm(`يوجد ${unreviewedCount} حساب لم تتم مراجعته. هل أنت متأكد من رغبتك في المتابعة؟`)) {
+                    return;
+                }
+            }
+            
+            // Save the final state of the audit file one last time
+            addAuditLogEntry("تم اعتماد ميزان المراجعة والانتقال لمرحلة القوائم المالية.");
+            saveAuditFile();
+            
+            // Redirect to your dedicated consolidation page
+            window.location.href = 'consolidation-cockpit.html';
+        }
+
+function updateProgressBars() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 100);
+    });
+}
+
+
+        // --- DEMO DATA ---
+        function createDummyAuditFile(clientId) {
+            console.warn("Creating dummy audit file for demonstration.");
+            const dummyFile = {
+                clientInfo: { id: clientId, name: "شركة العميل التجريبية" },
+                settings: {},
+                adjustments: [],
+                auditLog: [],
+                trialBalance: [
+                    { account_id: '1101', name: 'صندوق الشركة الرئيسي', book_balance: 15000, pyb: 12000, workpapers: [] },
+                    { account_id: '1102', name: 'بنك الراجحي', book_balance: 250000, pyb: 200000, workpapers: [] },
+                    { account_id: '1201', name: 'عملاء - تجاريون', book_balance: 85000, pyb: 95000, workpapers: [] },
+                    { account_id: '1401', name: 'مخزون بضاعة جاهزة', book_balance: 120000, pyb: 110000, workpapers: [] },
+                    { account_id: '1501', name: 'سيارات الشركة', book_balance: 300000, pyb: 250000, category: null, sub_category: null, is_confirmed: false, workpapers: [] }, // Unclassified example
+                    { account_id: '2101', name: 'موردون محليون', book_balance: -65000, pyb: -70000, workpapers: [] },
+                    { account_id: '2201', name: 'قروض قصيرة الأجل', book_balance: -100000, pyb: 0, workpapers: [] },
+                    { account_id: '3101', name: 'رأس المال', book_balance: -200000, pyb: -200000, workpapers: [] },
+                    { account_id: '4101', name: 'إيرادات مبيعات', book_balance: -800000, pyb: -750000, workpapers: [] },
+                    { account_id: '4102', name: 'خصم مسموح به على المبيعات', book_balance: 15000, pyb: 12000, workpapers: [] }, // Contra-revenue
+                    { account_id: '5101', name: 'تكلفة البضاعة المباعة', book_balance: 450000, pyb: 420000, workpapers: [] },
+                    { account_id: '5201', name: 'مصروف رواتب وأجور', book_balance: 180000, pyb: 160000, workpapers: [] },
+                    { account_id: '5205', name: 'مصروف إيجار المكتب', book_balance: -1000, pyb: 60000, workpapers: [] }, // Abnormal balance example
+                    { account_id: '5301', name: 'مصروف عمولة بيع', book_balance: 25000, pyb: 20000, workpapers: [] },
+                    { account_id: '9999', name: null, book_balance: 0, pyb: 0, workpapers: [] } // Account with no name to test robustness
+                ]
+            };
+            localStorage.setItem(`polarisAuditFile_v6_${clientId}`, JSON.stringify(dummyFile));
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محطة عمل المراجعة - إصدار المجلس v6.2 (متصل)</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #0d1117;
+            --color-surface: #161b22;
+            --color-primary: #00aaff;
+            --color-primary-glow: rgba(0, 170, 255, 0.5  );
+            --color-text-primary: #c9d1d9;
+            --color-text-secondary: #8b949e;
+            --color-border: #30363d;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
+            --border-radius-lg: 12px;
+            --border-radius-md: 8px;
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Cairo', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+        }
+
+        .container-fluid { padding: 2rem; }
+
+        .page-header h1 {
+            font-family: var(--font-family-display);
+            font-weight: 900;
+            color: var(--color-text-primary);
+            text-shadow: 0 0 10px var(--color-primary-glow);
+        }
+        .page-header h4 { color: var(--color-text-secondary); font-weight: 500; }
+
+        .control-pane, .inspector-pane, .status-bar, .modal-content, .kpi-pane {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-lg);
+        }
+
+        .control-pane { padding: 1rem; }
+
+        .btn {
+            font-weight: 700;
+            border-radius: var(--border-radius-md);
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem; /* Unified padding */
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 15px var(--color-primary-glow);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background-color: var(--color-success);
+            border-color: var(--color-success);
+        }
+        .btn-success:hover {
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .form-select, .form-control, .form-control[type="search"] {
+            background-color: var(--color-bg);
+            border-color: var(--color-border);
+            color: var(--color-text-primary);
+        }
+        .form-select:focus, .form-control:focus, .form-control[type="search"]:focus {
+            box-shadow: 0 0 0 0.25rem var(--color-primary-glow);
+            border-color: var(--color-primary);
+        }
+
+        .table-responsive {
+            max-height: 65vh;
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 5px;
+        }
+        .table th, .table td {
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+            vertical-align: middle;
+            padding: 0.8rem;
+        }
+        .table thead th {
+            position: sticky; top: 0;
+            background-color: #1c222b; z-index: 10;
+        }
+        .table-hover tbody tr:hover { background-color: rgba(0, 170, 255, 0.08); }
+        .table-hover tbody tr.table-active { background-color: rgba(0, 170, 255, 0.15); }
+        .negative-balance { color: var(--color-danger) !important; }
+        
+        .account-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #e6edf3 !important; 
+        }
+
+        .inspector-pane { padding: 1.5rem; height: 100%; }
+        .inspector-pane h5 { font-family: var(--font-family-display); }
+        .inspector-pane .table td { padding: 0.5rem; }
+
+        .status-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-item i {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+        }
+        .status-item span {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+        .status-item strong {
+            font-size: 1.1rem;
+            color: var(--color-text-primary);
+            font-weight: 700;
+        }
+
+        .modal-header, .modal-footer { border-color: var(--color-border); }
+        
+        #vAIAssistantResponse {
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-md);
+            padding: 15px; margin-top: 15px;
+            white-space: pre-wrap; font-size: 0.9rem;
+            max-height: 300px; overflow-y: auto;
+        }
+
+        .unclassified-cell { display: flex; align-items: center; gap: 5px; }
+        .confirm-btn {
+            background: none; border: none; color: var(--color-success);
+            cursor: pointer; padding: 2px 5px; transition: all 0.2s ease;
+        }
+        .confirm-btn:hover {
+            color: white; background-color: var(--color-success);
+            border-radius: 4px; transform: scale(1.1);
+        }
+
+        .kpi-pane {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .kpi-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        .kpi-item .kpi-icon {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        .kpi-item .kpi-value {
+            font-family: var(--font-family-display);
+            font-size: 1.75rem; font-weight: 700;
+            color: var(--color-text-primary); line-height: 1.2;
+        }
+        .kpi-item .kpi-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+        .logical-warning-icon {
+            color: var(--color-warning); margin-right: 8px;
+            cursor: help; animation: blink-warning 2s infinite;
+        }
+        @keyframes blink-warning { 50% { opacity: 0.5; } }
+        
+        .action-icon {
+            color: var(--color-text-secondary); margin-left: 8px;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .action-icon:hover { color: var(--color-primary); transform: scale(1.2); }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div id="loader" class="text-center my-5">
+            <h3 style="color: var(--color-text-secondary); font-family: var(--font-family-main);">جاري تهيئة محطة عمل المراجعة...</h3>
+        </div>
+
+        <div id="appContainer" style="display: none;">
+            <header class="page-header mb-4">
+                <h1><i class="fas fa-rocket text-primary me-3"></i>محطة عمل المراجعة - إصدار المجلس v6.2</h1>
+                <h4 id="clientNameSubtitle"></h4>
+            </header>
+            
+            <div class="kpi-pane mb-3">
+                <div class="kpi-item">
+                    <i class="fas fa-percent kpi-icon"></i>
+                    <div id="grossProfitMargin" class="kpi-value">--%</div>
+                    <div class="kpi-label">هامش الربح الإجمالي</div>
+                </div>
+                <div class="kpi-item">
+                    <i class="fas fa-piggy-bank kpi-icon"></i>
+                    <div id="netProfitMargin" class="kpi-value">--%</div>
+                    <div class="kpi-label">هامش صافي الربح</div>
+                </div>
+                <div class="kpi-item">
+                    <i class="fas fa-cash-register kpi-icon"></i>
+                    <div id="operatingMargin" class="kpi-value">--%</div>
+                    <div class="kpi-label">هامش الربح التشغيلي</div>
+                </div>
+                <div class="kpi-item">
+                    <i class="fas fa-exchange-alt kpi-icon"></i>
+                    <div id="currentRatio" class="kpi-value">--</div>
+                    <div class="kpi-label">نسبة التداول</div>
+                </div>
+                <div class="kpi-item">
+                    <i class="fas fa-balance-scale-left kpi-icon"></i>
+                    <div id="debtToEquity" class="kpi-value">--</div>
+                    <div class="kpi-label">الديون إلى حقوق الملكية</div>
+                </div>
+                <div class="kpi-item">
+                    <i class="fas fa-sync-alt kpi-icon"></i>
+                    <div id="assetTurnover" class="kpi-value">--</div>
+                    <div class="kpi-label">معدل دوران الأصول</div>
+                </div>
+            </div>
+
+            <div class="control-pane mb-3">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#materialityModal"><i class="fas fa-bullseye me-2"></i>الأهمية النسبية</button>
+                    <select class="form-select w-auto" id="filterCategory">
+                        <option value="all">جميع الفئات</option>
+                        <option value="assets">الأصول</option>
+                        <option value="liabilities">الالتزامات</option>
+                        <option value="equity">حقوق الملكية</option>
+                        <option value="revenue">الإيرادات</option>
+                        <option value="expenses">المصروفات</option>
+                        <option value="unclassified">غير مصنف</option>
+                    </select>
+                    <select class="form-select w-auto" id="filterStatus">
+                        <option value="all">جميع الحالات</option>
+                        <option value="pending">قيد المراجعة</option>
+                        <option value="reviewed">تمت المراجعة</option>
+                        <option value="flagged">تحتاج تدقيق</option>
+                    </select>
+                    <input type="search" class="form-control w-auto flex-grow-1" id="searchInput" placeholder="ابحث بالاسم أو الرقم...">
+                    <button class="btn btn-outline-secondary" id="exportButton"><i class="fas fa-file-excel me-2"></i>تصدير</button>
+                    <button class="btn btn-success ms-auto" id="consolidationButton" onclick="navigateToConsolidation()">
+                        <i class="fas fa-layer-group me-2"></i>الاعتماد والانتقال للقوائم
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="trialBalanceTable">
+                            <thead>
+                                <tr>
+                                    <th>الحساب</th>
+                                    <th>الفئة</th>
+                                    <th>التصنيف الفرعي</th>
+                                    <th>الرصيد الدفتري</th>
+                                    <th>التسويات</th>
+                                    <th>الرصيد النهائي</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="inspector-pane">
+                        <h5><i class="fas fa-search-location text-primary me-2"></i>لوحة المفتش الذكي</h5>
+                        <hr class="my-3" style="border-color: var(--color-border);">
+                        <div id="inspectorContent">
+                            <p class="text-center mt-5 text-muted">الرجاء تحديد حساب من الجدول لعرض تفاصيله وإجراءات المراجعة المقترحة.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-bar mt-3">
+                <div class="status-item">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>الأهمية النسبية</span>
+                    <strong id="materialityDisplay">لم تحدد</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>صافي الربح المعدل</span>
+                    <strong id="netProfitDisplay">لم يحسب</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-pen"></i>
+                    <span>أثر التسويات</span>
+                    <strong id="adjustmentsEffectDisplay">0</strong>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>نسبة الإنجاز</span>
+                    <strong id="completionDisplay">0%</strong>
+                </div>
+            </div>
+        </div>
+        <!-- All Modals -->
+        <!-- Materiality Modal -->
+        <div class="modal fade" id="materialityModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">تحديد الأهمية النسبية</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">سيتم استخدام هذا الرقم لتحديد الحسابات الهامة وتوجيه إجراءات المراجعة.</p>
+                        <div class="mb-3">
+                            <label class="form-label">أساس الحساب</label>
+                            <select class="form-select" id="materialityBasis">
+                                <option value="profit">5% من صافي الربح قبل الزكاة</option>
+                                <option value="revenue">1% من إجمالي الإيرادات</option>
+                                <option value="assets">0.5% من إجمالي الأصول</option>
+                                <option value="fixed">مبلغ مقطوع</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="fixedAmountInput" style="display: none;">
+                            <label class="form-label">المبلغ النهائي</label>
+                            <input type="number" class="form-control" id="materialityAmount" placeholder="أدخل المبلغ">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="saveMateriality()">حفظ واعتماد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AJE Modal -->
+        <div class="modal fade" id="ajeModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ajeModalLabel">إدخال قيد تسوية / إعادة تصنيف</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="isRceSwitch">
+                            <label class="form-check-label" for="isRceSwitch">هذا القيد هو **إعادة تصنيف (RCE)** ولا يؤثر على صافي الربح.</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <input type="text" class="form-control" id="ajeDescription">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الحساب المدين</label>
+                                <select class="form-select" id="ajeDebitAccount"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الحساب الدائن</label>
+                                <select class="form-select" id="ajeCreditAccount"></select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" id="ajeAmount">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="saveAdjustment()">حفظ القيد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Council of Elders Modal -->
+        <div class="modal fade" id="vAIAssistantModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-users text-primary me-2"></i>استشارة مجلس الحكماء</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>الحساب قيد التحليل:</strong> <span id="vAIAccountName" class="fw-bold"></span></p>
+                        <div class="mb-3">
+                            <label for="vAIQuestion" class="form-label">سؤالك للمجلس:</label>
+                            <textarea class="form-control" id="vAIQuestion" rows="3"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="getVAIResponse()">
+                            <span id="vAIBtnText">احصل على استشارة</span>
+                            <div id="vAISpinner" class="spinner-border spinner-border-sm" role="status" style="display: none;"></div>
+                        </button>
+                        <div id="vAIAssistantResponse" class="mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workpapers Modal -->
+        <div class="modal fade" id="workpapersModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="workpapersModalTitle">أوراق العمل</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>الحساب:</strong> <span id="workpapersAccountName" class="fw-bold"></span></p>
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">إرفاق مستند جديد (محاكاة)</label>
+                            <input class="form-control" type="file" id="fileUpload">
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="uploadWorkpaper()">رفع وحفظ</button>
+                        <hr>
+                        <h6>المستندات المرفقة:</h6>
+                        <ul class="list-group" id="workpapersList">
+                            <li class="list-group-item">لا توجد مستندات مرفقة حالياً.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- GLOBAL VARIABLES & MAPS ---
+        let auditFile = {};
+        let userPrefs = {};
+        let ajeModal, materialityModal, vAIAssistantModal, workpapersModal;
+        let currentVAIContext = {};
+        let currentWorkpaperAccountId = null;
+        const CURRENCY = 'SAR';
+        const VARIANCE_THRESHOLD = 25;
+
+        const subCategoryMap = {
+            'assets': [
+                { group: 'الأصول المتداولة', value: 'cash_on_hand', label: 'النقدية بالصندوق' },
+                { group: 'الأصول المتداولة', value: 'cash_at_banks', label: 'النقدية لدى البنوك' },
+                { group: 'الأصول المتداولة', value: 'trade_receivables', label: 'العملاء (الذمم المدينة )' },
+                { group: 'الأصول المتداولة', value: 'employee_advances', label: 'سلف الموظفين' },
+                { group: 'الأصول المتداولة', value: 'custody_accounts', label: 'حسابات العهد' },
+                { group: 'الأصول المتداولة', value: 'prepaid_expenses', label: 'مصروفات مقدمة' },
+                { group: 'الأصول المتداولة', value: 'inventory', label: 'المخزون' },
+                { group: 'الأصول غير المتداولة', value: 'fixed_assets', label: 'الأصول الثابتة (صافي)' },
+                { group: 'الأصول غير المتداولة', value: 'wip_projects', label: 'مشاريع تحت التنفيذ' },
+                { group: 'الأصول غير المتداولة', value: 'intangible_assets', label: 'أصول غير ملموسة' },
+                { group: 'الأصول غير المتداولة', value: 'long_term_investments', label: 'استثمارات طويلة الأجل' }
+            ],
+            'liabilities': [
+                { group: 'الالتزامات المتداولة', value: 'trade_payables', label: 'الموردون (الذمم الدائنة)' },
+                { group: 'الالتزامات المتداولة', value: 'accrued_expenses', label: 'مصروفات مستحقة' },
+                { group: 'الالتزامات المتداولة', value: 'unearned_revenue', label: 'إيرادات غير مكتسبة' },
+                { group: 'الالتزامات المتداولة', value: 'short_term_loans', label: 'قروض قصيرة الأجل' },
+                { group: 'الالتزامات غير المتداولة', value: 'long_term_loans', label: 'قروض طويلة الأجل' },
+                { group: 'الالتزامات غير المتداولة', value: 'provisions', label: 'مخصصات' }
+            ],
+            'equity': [
+                { group: 'حقوق الملكية', value: 'capital', label: 'رأس المال' },
+                { group: 'حقوق الملكية', value: 'retained_earnings', label: 'أرباح مبقاة' },
+                { group: 'حقوق الملكية', value: 'reserves', label: 'احتياطيات' }
+            ],
+            'revenue': [
+                { group: 'الإيرادات', value: 'main_revenue', label: 'إيرادات النشاط الرئيسي' },
+                { group: 'الإيرادات', value: 'other_revenue', label: 'إيرادات أخرى' },
+                { group: 'الإيرادات', value: 'sales_discount', label: 'خصم على المبيعات (مقابل)' }
+            ],
+            'expenses': [
+                { group: 'تكلفة الإيرادات', value: 'cogs', label: 'تكلفة البضاعة/الخدمات' },
+                { group: 'مصاريف التشغيل', value: 'salaries', label: 'رواتب وأجور' },
+                { group: 'مصاريف التشغيل', value: 'rent', label: 'مصروف إيجار' },
+                { group: 'مصاريف التشغيل', value: 'utilities', label: 'مصروف كهرباء ومياه' },
+                { group: 'مصاريف التشغيل', value: 'maintenance', label: 'مصروف صيانة' },
+                { group: 'مصاريف عمومية وإدارية', value: 'general_admin', label: 'مصاريف عمومية وإدارية' },
+                { group: 'مصاريف البيع والتسويق', value: 'selling_marketing', label: 'مصاريف بيع وتسويق' },
+                { group: 'مصاريف البيع والتسويق', value: 'commission_expense', label: 'مصروف عمولة' },
+                { group: 'مصاريف أخرى', value: 'depreciation', label: 'مصروف إهلاك' },
+                { group: 'مصاريف أخرى', value: 'financing_costs', label: 'تكاليف تمويل' }
+            ]
+        };
+
+        const keywordMapping = [
+            { keyword: 'تكلفة', category: 'expenses', sub_category: 'cogs' },
+            { keyword: 'مصروف', category: 'expenses', sub_category: 'general_admin' },
+            { keyword: 'مصاريف', category: 'expenses', sub_category: 'general_admin' },
+            { keyword: 'اهلاك', category: 'expenses', sub_category: 'depreciation' },
+            { keyword: 'إهلاك', category: 'expenses', sub_category: 'depreciation' },
+            { keyword: 'رواتب', category: 'expenses', sub_category: 'salaries' },
+            { keyword: 'ايجار', category: 'expenses', sub_category: 'rent' },
+            { keyword: 'إيجار', category: 'expenses', sub_category: 'rent' },
+            { keyword: 'عمولة', category: 'expenses', sub_category: 'commission_expense' },
+            { keyword: 'خصم مكتسب', category: 'revenue', sub_category: 'other_revenue' },
+            { keyword: 'خصم مسموح به', category: 'revenue', sub_category: 'sales_discount' },
+            { keyword: 'صندوق', category: 'assets', sub_category: 'cash_on_hand' },
+            { keyword: 'بنك', category: 'assets', sub_category: 'cash_at_banks' },
+            { keyword: 'بنوك', category: 'assets', sub_category: 'cash_at_banks' },
+            { keyword: 'عملاء', category: 'assets', sub_category: 'trade_receivables' },
+            { keyword: 'مدينون', category: 'assets', sub_category: 'trade_receivables' },
+            { keyword: 'سلف', category: 'assets', sub_category: 'employee_advances' },
+            { keyword: 'عهدة', category: 'assets', sub_category: 'custody_accounts' },
+            { keyword: 'عهد', category: 'assets', sub_category: 'custody_accounts' },
+            { keyword: 'مقدم', category: 'assets', sub_category: 'prepaid_expenses' },
+            { keyword: 'مخزون', category: 'assets', sub_category: 'inventory' },
+            { keyword: 'موردون', category: 'liabilities', sub_category: 'trade_payables' },
+            { keyword: 'دائنون', category: 'liabilities', sub_category: 'trade_payables' },
+            { keyword: 'مستحق', category: 'liabilities', sub_category: 'accrued_expenses' },
+            { keyword: 'قرض', category: 'liabilities', sub_category: 'short_term_loans' },
+            { keyword: 'قروض', category: 'liabilities', sub_category: 'short_term_loans' },
+            { keyword: 'مخصص', category: 'liabilities', sub_category: 'provisions' },
+            { keyword: 'رأس المال', category: 'equity', sub_category: 'capital' },
+            { keyword: 'ارباح', category: 'equity', sub_category: 'retained_earnings' },
+            { keyword: 'أرباح', category: 'equity', sub_category: 'retained_earnings' },
+            { keyword: 'ايراد', category: 'revenue', sub_category: 'main_revenue' },
+            { keyword: 'إيراد', category: 'revenue', sub_category: 'main_revenue' },
+            { keyword: 'مبيعات', category: 'revenue', sub_category: 'main_revenue' }
+        ];
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', initializeApplication);
+
+        function initializeApplication() {
+            ajeModal = new bootstrap.Modal(document.getElementById('ajeModal'));
+            materialityModal = new bootstrap.Modal(document.getElementById('materialityModal'));
+            vAIAssistantModal = new bootstrap.Modal(document.getElementById('vAIAssistantModal'));
+            workpapersModal = new bootstrap.Modal(document.getElementById('workpapersModal'));
+
+            // *** THE CORE FIX IS HERE ***
+            // This key should be the SAME key used by the PREVIOUS page to save the data.
+            const realDataKey = `importedTrialBalance`; 
+            const savedAuditFile = localStorage.getItem(realDataKey);
+
+            if (savedAuditFile) {
+                console.log("Real data found. Loading from previous stage.");
+                auditFile = JSON.parse(savedAuditFile);
+                // Ensure the structure is correct for this page
+                auditFile.settings = auditFile.settings || {};
+                auditFile.adjustments = auditFile.adjustments || [];
+                auditFile.auditLog = auditFile.auditLog || [];
+                auditFile.trialBalance.forEach(acc => {
+                    acc.review_status = 'pending';
+                    acc.category = null;
+                    acc.sub_category = null;
+                    acc.is_confirmed = false;
+                    acc.workpapers = [];
+                });
+            } else {
+                console.warn("No real data found. Creating dummy data for demonstration.");
+                // Fallback to dummy data only if no real data exists
+                const dummyClientId = 'client_12345';
+                createDummyAuditFile(dummyClientId);
+                const dummyData = localStorage.getItem(`polarisAuditFile_v6_${dummyClientId}`);
+                auditFile = JSON.parse(dummyData);
+            }
+            
+            autoCategorizeAccounts();
+            userPrefs = loadUserPrefs(auditFile.clientInfo.id);
+            setupEventListeners();
+            processAndRender();
+            
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+        }
+
+        function loadUserPrefs(clientId) {
+            const prefsKey = `polarisUserPrefs_${clientId}`;
+            const savedPrefs = localStorage.getItem(prefsKey);
+            try {
+                return savedPrefs ? JSON.parse(savedPrefs) : { filterCategory: 'all', filterStatus: 'all', searchTerm: '' };
+            } catch (e) {
+                return { filterCategory: 'all', filterStatus: 'all', searchTerm: '' };
+            }
+        }
+        
+        function saveAuditFile() {
+            try {
+                // This key is used for saving the state of THIS page.
+                const auditFileKey = `auditWorkstationFile_${auditFile.clientInfo.id}`;
+                localStorage.setItem(auditFileKey, JSON.stringify(auditFile));
+            } catch (e) {
+                console.error("CRITICAL: Failed to save audit file!", e);
+                alert("خطأ حرج في حفظ ملف المراجعة. قد يكون حد التخزين ممتلئ.");
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('clientNameSubtitle').textContent = auditFile.clientInfo.name || 'عميل غير محدد';
+            document.getElementById('filterCategory').value = userPrefs.filterCategory;
+            document.getElementById('filterStatus').value = userPrefs.filterStatus;
+            document.getElementById('searchInput').value = userPrefs.searchTerm;
+
+            document.getElementById('filterCategory').addEventListener('change', (e) => { userPrefs.filterCategory = e.target.value; saveUserPrefs(); processAndRender(); });
+            document.getElementById('filterStatus').addEventListener('change', (e) => { userPrefs.filterStatus = e.target.value; saveUserPrefs(); processAndRender(); });
+            document.getElementById('searchInput').addEventListener('input', (e) => { userPrefs.searchTerm = e.target.value; saveUserPrefs(); processAndRender(); });
+            
+            document.getElementById('materialityBasis').addEventListener('change', (e) => {
+                document.getElementById('fixedAmountInput').style.display = e.target.value === 'fixed' ? 'block' : 'none';
+            });
+            setupAjeModal();
+            document.getElementById('exportButton').addEventListener('click', exportToExcel);
+        }
+
+        function autoCategorizeAccounts() {
+            let hasChanges = false;
+            auditFile.trialBalance.forEach(account => {
+                if (account.category) return;
+                const accountName = account.name ? account.name.toLowerCase() : '';
+                for (const mapping of keywordMapping) {
+                    if (accountName.includes(mapping.keyword)) {
+                        account.category = mapping.category;
+                        account.sub_category = mapping.sub_category;
+                        account.is_confirmed = false;
+                        hasChanges = true;
+                        break;
+                    }
+                }
+            });
+            if (hasChanges) {
+                addAuditLogEntry("تم إجراء تصنيف تلقائي للحسابات بالخوارزمية المحسنة.");
+                saveAuditFile();
+            }
+        }
+
+        // --- CORE LOGIC & RENDERING ---
+        function processAndRender() {
+            const tbody = document.querySelector('#trialBalanceTable tbody');
+            tbody.innerHTML = '';
+            const filteredAccounts = filterAccounts();
+            filteredAccounts.forEach(account => {
+                const row = createAccountRow(account);
+                tbody.appendChild(row);
+            });
+            updateStatusBar();
+            updateKpiPane();
+        }
+
+        function filterAccounts() {
+            const searchTerm = userPrefs.searchTerm.toLowerCase().trim();
+            return auditFile.trialBalance.filter(account => {
+                if (!account || !account.account_id) return false;
+
+                const categoryMatch = userPrefs.filterCategory === 'all' || 
+                    (userPrefs.filterCategory === 'unclassified' ? !account.category : account.category === userPrefs.filterCategory);
+
+                const statusMatch = userPrefs.filterStatus === 'all' || account.review_status === userPrefs.filterStatus;
+
+                const searchMatch = searchTerm === '' || 
+                    (account.name && account.name.toLowerCase().includes(searchTerm)) || 
+                    account.account_id.toLowerCase().includes(searchTerm);
+
+                return categoryMatch && statusMatch && searchMatch;
+            });
+        }
+
+        function createAccountRow(account) {
+            const adjustments = calculateAdjustments(account.account_id);
+            const finalBalance = account.book_balance + adjustments;
+            
+            const row = document.createElement('tr');
+            row.dataset.accountId = account.account_id;
+            row.addEventListener('click', (e) => {
+                if (!e.target.closest('select, button, .action-icon, .confirm-btn')) {
+                    updateInspectorPane(account.account_id);
+                }
+            });
+
+            const allCategories = [
+                { value: 'assets', label: 'أصول' },
+                { value: 'liabilities', label: 'التزامات' },
+                { value: 'equity', label: 'حقوق الملكية' },
+                { value: 'revenue', label: 'إيرادات' },
+                { value: 'expenses', label: 'مصروفات' }
+            ];
+
+            let categoryCellContent;
+            if (!account.category) {
+                categoryCellContent = `<select class="form-select form-select-sm" onchange="updateCategory(this, '${account.account_id}')">
+                       <option value="">اختر فئة...</option>
+                       ${allCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+                   </select>`;
+            } else if (!account.is_confirmed) {
+                categoryCellContent = `<div class="unclassified-cell">
+                    <select class="form-select form-select-sm" onchange="updateCategory(this, '${account.account_id}')">
+                       ${allCategories.map(c => `<option value="${c.value}" ${account.category === c.value ? 'selected' : ''}>${c.label}</option>`).join('')}
+                    </select>
+                    <button class="confirm-btn" title="تأكيد التصنيف" onclick="confirmCategory(event, '${account.account_id}')"><i class="fas fa-check-circle"></i></button>
+                </div>`;
+            } else {
+                categoryCellContent = getCategoryLabel(account.category);
+            }
+
+            let warningIcon = '';
+            const isAsset = account.category === 'assets';
+            const isLiabilityOrEquity = account.category === 'liabilities' || account.category === 'equity';
+            const isRevenue = account.category === 'revenue' && account.sub_category !== 'sales_discount';
+            const isContraRevenue = account.sub_category === 'sales_discount';
+            const isExpense = account.category === 'expenses';
+
+            if ((isAsset && finalBalance < 0) || (isLiabilityOrEquity && finalBalance > 0) || (isRevenue && finalBalance > 0) || (isContraRevenue && finalBalance < 0) || (isExpense && finalBalance < 0)) {
+                warningIcon = `<i class="fas fa-exclamation-triangle logical-warning-icon" title="رصيد الحساب غير منطقي لطبيعته"></i>`;
+            }
+
+            const subCategoryDropdown = `
+                <select class="form-select form-select-sm" onchange="updateSubCategory(this, '${account.account_id}')" ${!account.category ? 'disabled' : ''}>
+                    ${generateSubCategoryOptions(account.category, account.sub_category)}
+                </select>`;
+
+            row.innerHTML = `
+                <td>
+                    ${warningIcon}
+                    <i class="fas fa-paperclip action-icon" title="إدارة أوراق العمل (${account.workpapers.length})" onclick="openWorkpapersModal(event, '${account.account_id}')"></i>
+                    <span class="account-name">${account.name || 'غير مسمى'}</span>
+                    <div class="text-muted small" style="margin-right: 22px;">${account.account_id}</div>
+                </td>
+                <td>${categoryCellContent}</td>
+                <td>${subCategoryDropdown}</td>
+                <td class="${account.book_balance < 0 ? 'negative-balance' : ''}">${formatCurrency(account.book_balance)}</td>
+                <td class="${adjustments !== 0 && adjustments < 0 ? 'negative-balance' : ''}">${formatCurrency(adjustments)}</td>
+                <td class="fw-bold ${finalBalance < 0 ? 'negative-balance' : ''}">${formatCurrency(finalBalance)}</td>
+                <td>
+                    <select class="form-select form-select-sm" onchange="updateReviewStatus(this, '${account.account_id}')">
+                        <option value="pending" ${account.review_status === 'pending' ? 'selected' : ''}>قيد المراجعة</option>
+                        <option value="reviewed" ${account.review_status === 'reviewed' ? 'selected' : ''}>تمت المراجعة</option>
+                        <option value="flagged" ${account.review_status === 'flagged' ? 'selected' : ''}>تحتاج تدقيق</option>
+                    </select>
+                </td>
+            `;
+            return row;
+        }
+
+        function generateSubCategoryOptions(category, selectedSubCategory) {
+            if (!category || !subCategoryMap[category]) {
+                return '<option value="">- اختر فئة أولاً -</option>';
+            }
+            let options = '<option value="">اختر تصنيف فرعي...</option>';
+            const groupedOptions = subCategoryMap[category].reduce((acc, option) => {
+                acc[option.group] = acc[option.group] || [];
+                acc[option.group].push(option);
+                return acc;
+            }, {});
+
+            for (const groupName in groupedOptions) {
+                options += `<optgroup label="${groupName}">`;
+                groupedOptions[groupName].forEach(sub => {
+                    options += `<option value="${sub.value}" ${selectedSubCategory === sub.value ? 'selected' : ''}>${sub.label}</option>`;
+                });
+                options += `</optgroup>`;
+            }
+            return options;
+        }
+
+        function confirmCategory(event, accountId) {
+            event.stopPropagation();
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (account) {
+                account.is_confirmed = true;
+                addAuditLogEntry(`تم تأكيد التصنيف للحساب ${accountId}.`);
+                saveAuditFile();
+                processAndRender();
+            }
+        }
+
+        function updateCategory(selectElement, accountId) {
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (account) {
+                account.category = selectElement.value || null;
+                account.sub_category = null; 
+                account.is_confirmed = true; 
+                addAuditLogEntry(`تم تحديث الفئة الرئيسية للحساب ${accountId} إلى ${selectElement.options[selectElement.selectedIndex].text}`);
+                saveAuditFile();
+                processAndRender();
+            }
+        }
+
+        function updateSubCategory(selectElement, accountId) {
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (account) {
+                account.sub_category = selectElement.value || null;
+                addAuditLogEntry(`تم تحديث التصنيف الفرعي للحساب ${accountId} إلى ${selectElement.options[selectElement.selectedIndex].text}`);
+                saveAuditFile();
+                processAndRender();
+            }
+        }
+
+        function updateInspectorPane(accountId) {
+            const account = auditFile.trialBalance.find(acc => acc.account_id === accountId);
+            if (!account) return;
+
+            document.querySelectorAll('#trialBalanceTable tbody tr').forEach(r => r.classList.remove('table-active'));
+            const activeRow = document.querySelector(`tr[data-account-id="${accountId}"]`);
+            if (activeRow) activeRow.classList.add('table-active');
+
+            const bookBalance = account.book_balance;
+            const adjustments = calculateAdjustments(account.account_id);
+            const finalBalance = bookBalance + adjustments;
+            const accountAdjustments = auditFile.adjustments.filter(adj => adj.debit_account === accountId || adj.credit_account === accountId);
+            
+            const content = document.getElementById('inspectorContent');
+            content.innerHTML = `
+                <div class="mb-3 p-2" style="background-color: var(--color-bg); border-radius: var(--border-radius-md);">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">رقم الحساب</span>
+                        <span class="fw-bold">${account.account_id}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">اسم الحساب</span>
+                        <span class="fw-bold">${account.name || 'غير مسمى'}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">الرصيد الدفتري</span>
+                        <span class="fw-bold">${formatCurrency(account.book_balance)}</span>
+                    </div>
+                </div>
+                
+                <h6 class="mt-4">ملخص حركة الحساب</h6>
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                        <tr>
+                            <td>رصيد دفتري</td>
+                            <td class="text-end ${bookBalance < 0 ? 'negative-balance' : ''}">${formatCurrency(bookBalance)}</td>
+                        </tr>
+                         <tr>
+                            <td>(+/-) قيود التسوية</td>
+                            <td class="text-end ${adjustments < 0 ? 'negative-balance' : ''}">${formatCurrency(adjustments)}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>= الرصيد النهائي</strong></td>
+                            <td class="text-end fw-bold ${finalBalance < 0 ? 'negative-balance' : ''}">${formatCurrency(finalBalance)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-primary" onclick="openAjeModal('${accountId}')"><i class="fas fa-plus me-2"></i>إضافة قيد تسوية</button>
+                    <button class="btn btn-outline-primary" onclick="openVAIModal('${accountId}')"><i class="fas fa-users me-2"></i>استشارة المجلس</button>
+                </div>
+                
+                <hr class="my-3">
+                <h6>سجل قيود التسوية</h6>
+                ${accountAdjustments.length > 0 ? 
+                    accountAdjustments.map(adj => `
+                        <div class="small p-2 mb-1" style="background-color: var(--color-bg); border-radius: 5px;">
+                            <strong>${adj.type === 'RCE' ? 'تصنيف' : 'تسوية'}:</strong> ${adj.description}
+                            <span class="float-start ${adj.debit_account === accountId ? '' : 'negative-balance'}">${formatCurrency(adj.debit_account === accountId ? adj.amount : -adj.amount)}</span>
+                        </div>
+                    `).join('') 
+                    : '<p class="text-muted small text-center mt-3">لا توجد قيود تسوية لهذا الحساب.</p>'
+                }
+            `;
+        }
+
+        // --- STATUS BAR & KPI CALCULATIONS ---
+        function updateStatusBar() {
+            const matDisplay = document.getElementById('materialityDisplay');
+            if (auditFile.settings && auditFile.settings.materiality) {
+                matDisplay.innerHTML = `${formatCurrency(auditFile.settings.materiality)} <small class="d-block text-muted">(${auditFile.settings.materiality_basis || ''})</small>`;
+            } else {
+                matDisplay.textContent = 'لم تحدد';
+            }
+
+            const { profitBefore, adjustmentsEffect } = calculateNetProfit();
+            const profitAfter = profitBefore + adjustmentsEffect;
+            document.getElementById('netProfitDisplay').innerHTML = `${formatCurrency(profitAfter)} <small class="d-block text-muted">(قبل: ${formatCurrency(profitBefore)})</small>`;
+            document.getElementById('adjustmentsEffectDisplay').textContent = formatCurrency(adjustmentsEffect);
+
+            const total

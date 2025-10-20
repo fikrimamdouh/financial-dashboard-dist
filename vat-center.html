@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز تسوية ق.م. | Polaris</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap'   );
+        :root {
+            --font-family-main: 'Tajawal', sans-serif; --font-family-display: 'Orbitron', sans-serif;
+            --color-primary-glow: #00BFFF; --color-bg: #010409; --color-surface: rgba(13, 17, 23, 0.85);
+            --color-border: rgba(56, 139, 253, 0.3); --color-text-primary: #E6EDF3; --color-text-secondary: #7D8590;
+            --color-success-glow: rgba(46, 160, 67, 0.4); --color-danger-glow: rgba(248, 81, 73, 0.4);
+        }
+        body { font-family: var(--font-family-main); direction: rtl; background-color: var(--color-bg); color: var(--color-text-primary); }
+        .main-content { flex-grow: 1; padding: 2rem; margin-right: 60px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .page-title { font-family: var(--font-family-display); font-size: 2rem; }
+        .control-bar { display: flex; justify-content: space-between; align-items: center; background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem 1.5rem; margin-bottom: 1rem; }
+        .pane-title { font-family: var(--font-family-display); font-size: 1.2rem; color: var(--color-primary-glow); }
+        .content-pane { background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .table thead th { color: var(--color-text-secondary); border-bottom: 2px solid var(--color-border); text-align: center; vertical-align: middle; }
+        .table tbody td { border-color: var(--color-border); vertical-align: middle; text-align: center; }
+        .table input { background-color: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text-primary); text-align: center; border-radius: 4px; padding: 0.5rem; width: 100%; }
+        .table input:disabled { background-color: rgba(13, 17, 23, 0.5); cursor: not-allowed; }
+        .table .entity-row { background-color: rgba(56, 139, 253, 0.1); font-weight: bold; }
+        .table .sub-item-row td:first-child { padding-right: 2rem !important; text-align: right; }
+        .official-return-table td:first-child { text-align: right; }
+        .official-return-table .fw-bold { color: var(--color-primary-glow); }
+        .btn-primary-glow { background-color: var(--color-primary-glow); border-color: var(--color-primary-glow); color: var(--color-bg); }
+        .btn-outline-secondary { color: var(--color-text-secondary); border-color: var(--color-border); }
+        .modal-content { background-color: var(--color-bg); border: 1px solid var(--color-border); }
+        .modal-header, .modal-footer { border-bottom-color: var(--color-border); border-top-color: var(--color-border); }
+        .form-label { color: var(--color-text-secondary); }
+        .form-control { background-color: #010409; border-color: var(--color-border); color: var(--color-text-primary); }
+        .form-control:focus { background-color: #010409; border-color: var(--color-primary-glow); color: var(--color-text-primary); box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.25); }
+        .net-vat-positive { background-color: var(--color-danger-glow) !important; }
+        .net-vat-negative { background-color: var(--color-success-glow) !important; }
+
+        @media print {
+            body { background-color: #fff !important; color: #000 !important; }
+            .no-print { display: none !important; }
+            .print-area { display: block !important; }
+            .print-header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #333; padding-bottom: 1rem; }
+            .print-header h2 { font-family: 'Tajawal', sans-serif; color: #007bff; }
+            .print-header p { font-size: 1rem; color: #555; }
+            .print-area .table { color: #000 !important; }
+            .print-area .table thead th { background-color: #f2f2f2 !important; color: #333 !important; }
+            .print-area .table, .print-area .table th, .print-area .table td { border: 1px solid #dee2e6 !important; }
+            .print-area .table input { border: none !important; background: transparent !important; color: #000 !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container no-print">
+    <nav class="sidebar"><a href="#" class="app-logo" title="Polaris"><i class="fas fa-atom"></i></a></nav>
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">مركز تسوية القيمة المضافة</h1>
+            <div class="d-flex gap-2">
+                 <button class="btn btn-outline-secondary" id="add-entity-btn" data-bs-toggle="modal" data-bs-target="#addEntityModal"><i class="fas fa-plus-circle me-2"></i>إضافة كيان مستقل</button>
+                 <button class="btn btn-outline-secondary" id="import-btn"><i class="fas fa-upload me-2"></i>استيراد البيانات</button>
+                 <button class="btn btn-outline-secondary" id="export-btn"><i class="fas fa-download me-2"></i>تصدير البيانات</button>
+            </div>
+        </div>
+        
+        <div id="entities-container">
+            <div class="content-pane entity-card" id="bin-hamed-card">
+                <div class="control-bar">
+                    <div class="pane-title">مجموعة بن حامد</div>
+                    <div>الرقم الضريبي: <span class="fw-bold">302255129500003</span></div>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="year-select"></select>
+                        <select class="form-select form-select-sm" id="quarter-select">
+                            <option value="Q1">الربع الأول</option>
+                            <option value="Q2">الربع الثاني</option>
+                            <option value="Q3">الربع الثالث</option>
+                            <option value="Q4">الربع الرابع</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive" data-print-section="input_table_main">
+                    <table class="table table-bordered vat-input-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 25%;">البند</th>
+                                <th colspan="3">المبيعات</th><th colspan="3">المشتريات</th>
+                                <th rowspan="2">صافي الضريبة</th>
+                                <th rowspan="2" style="width: 5%;"><i class="fas fa-paperclip"></i></th>
+                            </tr>
+                            <tr>
+                                <th>المبلغ قبل الضريبة</th><th>الضريبة</th><th>الإجمالي الشامل</th>
+                                <th>المبلغ قبل الضريبة</th><th>الضريبة</th><th>الإجمالي الشامل</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entities-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="summary-container">
+            <div class="content-pane" data-print-section="official_return">
+                <div class="pane-title mb-3">ملخص الإقرار الضريبي المجمع</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered official-return-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">البيان</th>
+                                <th>المبلغ (ريال)</th>
+                                <th>مبلغ التعديل (ريال)</th>
+                                <th>مبلغ ضريبة القيمة المضافة (ريال)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="official-return-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-pane" data-print-section="settlement_journal">
+                <div class="pane-title mb-3">قيود التسوية المقترحة</div>
+                
+                <div class="mb-4">
+                    <h6 class="text-white-50">1. قيد تسوية (المصنع والحديد)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead><tr><th>من حساب (المدين)</th><th>إلى حساب (الدائن)</th><th>المبلغ (ريال)</th><th>البيان</th></tr></thead>
+                            <tbody id="settlement-body-factory"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h6 class="text-white-50">2. قيد تسوية (الفنادق)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead><tr><th>من حساب (المدين)</th><th>إلى حساب (الدائن)</th><th>المبلغ (ريال)</th><th>البيان</th></tr></thead>
+                            <tbody id="settlement-body-hotels"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-bar">
+                <button class="btn btn-primary-glow" onclick="alert('تمت أرشفة الإقرار بنجاح!')"><i class="fas fa-archive me-2"></i>أرشفة الإقرار الحالي</button>
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" onclick="printContent('input_table_main')">طباعة جدول الإدخال</button>
+                    <button class="btn btn-outline-secondary" onclick="printContent('official_return')">طباعة الإقرار الرسمي</button>
+                    <button class="btn btn-outline-secondary" onclick="printContent('settlement_journal')">طباعة قيد التسوية</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Add Entity Modal -->
+<div class="modal fade" id="addEntityModal" tabindex="-1" aria-labelledby="addEntityModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addEntityModalLabel">إضافة كيان مستقل جديد</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addEntityForm">
+          <div class="mb-3">
+            <label for="entityNameInput" class="form-label">اسم الكيان</label>
+            <input type="text" class="form-control" id="entityNameInput" required>
+          </div>
+          <div class="mb-3">
+            <label for="entityVatInput" class="form-label">الرقم الضريبي</label>
+            <input type="text" class="form-control" id="entityVatInput" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-primary-glow" id="saveEntityBtn">حفظ وإضافة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="print-container" class="print-area" style="display: none;"></div>
+<input type="file" id="file-input" style="display: none;" accept=".json">
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const VAT_RATE = 0.15;
+    let newEntityCounter = 0;
+
+    const initialEntities = [
+        { type: 'group', id: 'factory', name: 'مصنع بن حامد للبلوك والخرسانة', logic: 'flexible', subItems: [{ id: 'blocks', name: 'قسم البلوك' }, { id: 'concrete', name: 'قسم الخرسانة' }] },
+        { type: 'group', id: 'lambert', name: 'فنادق لامبرت', logic: 'strict', subItems: [{ id: 'riyadh_hotel', name: 'فندق لامبرت الرياض' }, { id: 'riyadh_cafe', name: 'مقهى لامبرت الرياض' }, { id: 'jeddah_hotel', name: 'فندق لامبرت جدة' }, { id: 'jeddah_cafe', name: 'مقهى لامبرت جدة' }] }, // CORRECTED
+        { type: 'single', id: 'trading', name: 'مؤسسة بن حامد التجارية (الحديد )', logic: 'strict' },
+        { type: 'single', id: 'laundry', name: 'مغسلة القمة لغسيل الملابس', logic: 'strict' },
+        { type: 'single', id: 'engineering', name: 'مكتب ركن الخبرة للاستشارات الهندسية', logic: 'strict' },
+        { type: 'single', id: 'supermarket', name: 'مؤسسة محمد مهدي (سوبر ماركت)', logic: 'strict' },
+        { type: 'single', id: 'livestock', name: 'مؤسسة محمد مهدي (للمواشي)', logic: 'strict' },
+    ];
+
+    function formatCurrency(num) {
+        if (isNaN(num) || num === null) return '0.00';
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    }
+    
+    function parseFloatOrZero(value) {
+        if (typeof value !== 'string' || value.trim() === '') return 0;
+        return parseFloat(value.replace(/,/g, '')) || 0;
+    }
+
+    function populateYears() {
+        const yearSelect = document.getElementById('year-select');
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear; i <= 2030; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+    }
+
+    function buildInputTable() {
+        const tbody = document.getElementById('entities-tbody');
+        tbody.innerHTML = '';
+        initialEntities.forEach(item => {
+            const isFlexible = item.logic === 'flexible';
+            if (item.type === 'group') {
+                tbody.innerHTML += `<tr class="entity-row" data-item-id="${item.id}" data-logic="${item.logic}" data-item-name="${item.name}"><td>${item.name}</td>${generateInputCells(item.id, 'sales', !isFlexible)}${generateInputCells(item.id, 'purchases', !isFlexible)}<td><input type="text" class="form-control net-vat-cell" disabled></td><td></td></tr>`;
+                item.subItems.forEach(sub => {
+                    tbody.innerHTML += `<tr class="sub-item-row" data-parent-id="${item.id}" data-item-id="${sub.id}" data-item-name="${sub.name}"><td>${sub.name}</td>${generateInputCells(sub.id, 'sales')}${generateInputCells(sub.id, 'purchases')}<td><input type="text" class="form-control net-vat-cell" disabled></td><td><button class="btn btn-sm btn-outline-secondary" onclick="alert('جاهز لرفع ملفات ${sub.name}')"><i class="fas fa-paperclip"></i></button></td></tr>`;
+                });
+            } else { // Single entity
+                tbody.innerHTML += `<tr class="single-entity-row" data-item-id="${item.id}" data-logic="${item.logic}" data-item-name="${item.name}"><td>${item.name}</td>${generateInputCells(item.id, 'sales')}${generateInputCells(item.id, 'purchases')}<td><input type="text" class="form-control net-vat-cell" disabled></td><td><button class="btn btn-sm btn-outline-secondary" onclick="alert('جاهز لرفع ملفات ${item.name}')"><i class="fas fa-paperclip"></i></button></td></tr>`;
+            }
+        });
+    }
+
+    function generateInputCells(id, type, isDisabled = false) {
+        const disabled = isDisabled ? 'disabled' : '';
+        return `
+            <td><input type="text" id="input_${id}_${type}_base" class="form-control data-input" data-type="${type}" data-field="base" ${disabled}></td>
+            <td><input type="text" id="input_${id}_${type}_vat" class="form-control data-input" data-type="${type}" data-field="vat" ${disabled}></td>
+            <td><input type="text" id="input_${id}_${type}_total" class="form-control data-input" data-type="${type}" data-field="total" ${disabled}></td>
+        `;
+    }
+    
+    function buildOfficialReturnTable() {
+        const tbody = document.getElementById('official-return-body');
+        tbody.innerHTML = '';
+        const rows = [
+            { label: 'ضريبة القيمة المضافة على المبيعات:', type: 'header' },
+            { id: 'sales_standard', label: '1. المبيعات الخاضعة للنسبة الأساسية', auto: true },
+            { id: 'sales_citizen', label: '2. المبيعات للمواطنين (صحة/تعليم خاص)', auto: false },
+            { id: 'sales_zero', label: '3. المبيعات المحلية الخاضعة للنسبة الصفرية', auto: false },
+            { id: 'sales_exports', label: '4. الصادرات', auto: false },
+            { id: 'sales_exempt', label: '5. المبيعات المعفاة', auto: false },
+            { id: 'sales_total', label: '6. إجمالي المبيعات', auto: true, bold: true },
+            { label: 'ضريبة القيمة المضافة على المشتريات:', type: 'header' },
+            { id: 'purchases_standard', label: '7. المشتريات الخاضعة للنسبة الأساسية', auto: true },
+            { id: 'purchases_imports_customs', label: '8. الاستيرادات الخاضعة للضريبة (تدفع للجمارك)', auto: false },
+            { id: 'purchases_imports_reverse', label: '9. الاستيرادات الخاضعة للضريبة (احتساب عكسي)', auto: false },
+            { id: 'purchases_zero', label: '10. المشتريات الخاضعة للنسبة الصفرية', auto: false },
+            { id: 'purchases_exempt', label: '11. المشتريات المعفاة', auto: false },
+            { id: 'purchases_total', label: '12. إجمالي المشتريات', auto: true, bold: true },
+            { label: 'صافي الضريبة:', type: 'header' },
+            { id: 'net_vat_due', label: '13. إجمالي ضريبة القيمة المضافة المستحقة', auto: true, bold: true },
+            { id: 'corrections', label: '14. تصحيحات من الفترات السابقة', auto: false },
+            { id: 'vat_carried_forward', label: '15. ضريبة القيمة المضافة المرحلة من فترات سابقة', auto: false },
+            { id: 'final_net_vat', label: '16. صافي الضريبة المستحقة أو المستردة', auto: true, bold: true },
+        ];
+
+        rows.forEach(row => {
+            if (row.type === 'header') {
+                tbody.innerHTML += `<tr><td colspan="4" class="fw-bold p-2 bg-dark text-white">${row.label}</td></tr>`;
+            } else {
+                const disabledBase = row.auto ? 'disabled' : '';
+                const disabledVat = 'disabled';
+                const boldClass = row.bold ? 'fw-bold' : '';
+                tbody.innerHTML += `
+                    <tr class="${boldClass}">
+                        <td>${row.label}</td>
+                        <td><input type="text" id="${row.id}_base" class="form-control return-input" ${disabledBase}></td>
+                        <td><input type="text" id="${row.id}_adj" class="form-control return-input"></td>
+                        <td><input type="text" id="${row.id}_vat" class="form-control return-input" ${disabledVat}></td>
+                    </tr>
+                `;
+            }
+        });
+    }
+
+    function calculateAll() {
+        // --- Step 1: Update individual row calculations (sub-items and single entities) ---
+        document.querySelectorAll('.sub-item-row, .single-entity-row, .new-entity-card tr[data-item-id]').forEach(row => {
+            const sales_vat = parseFloatOrZero(row.querySelector('[data-type="sales"][data-field="vat"]')?.value);
+            const purchases_vat = parseFloatOrZero(row.querySelector('[data-type="purchases"][data-field="vat"]')?.value);
+            const netVat = sales_vat - purchases_vat;
+            const netVatCell = row.querySelector('.net-vat-cell');
+            if (netVatCell) {
+                netVatCell.value = formatCurrency(netVat);
+                netVatCell.classList.remove('net-vat-positive', 'net-vat-negative');
+                if (netVat > 0) netVatCell.classList.add('net-vat-positive');
+                if (netVat < 0) netVatCell.classList.add('net-vat-negative');
+            }
+        });
+
+        // --- Step 2: Aggregate group totals based on their logic ---
+        document.querySelectorAll('.entity-row').forEach(groupRow => {
+            const parentId = groupRow.dataset.itemId;
+            const logic = groupRow.dataset.logic;
+            
+            const mainSales = parseFloatOrZero(groupRow.querySelector('[data-type="sales"][data-field="base"]').value);
+            const mainPurchases = parseFloatOrZero(groupRow.querySelector('[data-type="purchases"][data-field="base"]').value);
+
+            if (logic === 'flexible' && (mainSales > 0 || mainPurchases > 0)) {
+                // User entered data in the main row, it's the source of truth.
+            } else {
+                // Sum up sub-items for strict groups OR for flexible groups that are empty.
+                let totals = { sales_base: 0, sales_vat: 0, sales_total: 0, purchases_base: 0, purchases_vat: 0, purchases_total: 0 };
+                document.querySelectorAll(`.sub-item-row[data-parent-id="${parentId}"]`).forEach(subRow => {
+                    for (const key in totals) {
+                        const [type, field] = key.split('_');
+                        totals[key] += parseFloatOrZero(subRow.querySelector(`[data-type="${type}"][data-field="${field}"]`).value);
+                    }
+                });
+                for (const key in totals) {
+                    const [type, field] = key.split('_');
+                    groupRow.querySelector(`[data-type="${type}"][data-field="${field}"]`).value = formatCurrency(totals[key]);
+                }
+            }
+             // Always update the net vat display for the group row
+            const groupSalesVat = parseFloatOrZero(groupRow.querySelector('[data-type="sales"][data-field="vat"]').value);
+            const groupPurchasesVat = parseFloatOrZero(groupRow.querySelector('[data-type="purchases"][data-field="vat"]').value);
+            const groupNetVat = groupSalesVat - groupPurchasesVat;
+            const groupNetVatCell = groupRow.querySelector('.net-vat-cell');
+            groupNetVatCell.value = formatCurrency(groupNetVat);
+            groupNetVatCell.classList.remove('net-vat-positive', 'net-vat-negative');
+            if (groupNetVat > 0) groupNetVatCell.classList.add('net-vat-positive');
+            if (groupNetVat < 0) groupNetVatCell.classList.add('net-vat-negative');
+        });
+
+        // --- Step 3: Calculate grand totals for the official return ---
+        let grandTotals = { sales_base: 0, purchases_base: 0 };
+        let itemNetVat = {}; // For settlement journal
+
+        document.querySelectorAll('.entity-row, .single-entity-row, .new-entity-card tr[data-item-id], .sub-item-row').forEach(row => {
+            // Only add main groups and single entities to the grand total to avoid double counting
+            if (row.classList.contains('entity-row') || row.classList.contains('single-entity-row') || row.classList.contains('new-entity-card')) {
+                 grandTotals.sales_base += parseFloatOrZero(row.querySelector('[data-type="sales"][data-field="base"]').value);
+                 grandTotals.purchases_base += parseFloatOrZero(row.querySelector('[data-type="purchases"][data-field="base"]').value);
+            }
+            
+            const sales_vat = parseFloatOrZero(row.querySelector('[data-type="sales"][data-field="vat"]').value);
+            const purchases_vat = parseFloatOrZero(row.querySelector('[data-type="purchases"][data-field="vat"]').value);
+            itemNetVat[row.dataset.itemId] = {
+                name: row.dataset.itemName,
+                balance: sales_vat - purchases_vat
+            };
+        });
+
+        // --- Step 4: Update the official return table's main lines ---
+        document.getElementById('sales_standard_base').value = formatCurrency(grandTotals.sales_base);
+        document.getElementById('purchases_standard_base').value = formatCurrency(grandTotals.purchases_base);
+        
+        // --- Step 5: Recalculate all values within the official return table ---
+        let totalSalesBase = 0, totalSalesVat = 0;
+        ['sales_standard', 'sales_citizen', 'sales_zero', 'sales_exports', 'sales_exempt'].forEach(id => {
+            const base = parseFloatOrZero(document.getElementById(`${id}_base`).value);
+            const adj = parseFloatOrZero(document.getElementById(`${id}_adj`).value);
+            const vat = (id === 'sales_standard' || id === 'sales_citizen') ? (base - adj) * VAT_RATE : 0;
+            document.getElementById(`${id}_vat`).value = formatCurrency(vat);
+            totalSalesBase += base;
+            totalSalesVat += vat;
+        });
+        document.getElementById('sales_total_base').value = formatCurrency(totalSalesBase);
+        document.getElementById('sales_total_vat').value = formatCurrency(totalSalesVat);
+
+        let totalPurchasesBase = 0, totalPurchasesVat = 0;
+        ['purchases_standard', 'purchases_imports_customs', 'purchases_imports_reverse', 'purchases_zero', 'purchases_exempt'].forEach(id => {
+            const base = parseFloatOrZero(document.getElementById(`${id}_base`).value);
+            const adj = parseFloatOrZero(document.getElementById(`${id}_adj`).value);
+            const vat = (id === 'purchases_standard' || id === 'purchases_imports_customs' || id === 'purchases_imports_reverse') ? (base - adj) * VAT_RATE : 0;
+            document.getElementById(`${id}_vat`).value = formatCurrency(vat);
+            totalPurchasesBase += base;
+            totalPurchasesVat += vat;
+        });
+        document.getElementById('purchases_total_base').value = formatCurrency(totalPurchasesBase);
+        document.getElementById('purchases_total_vat').value = formatCurrency(totalPurchasesVat);
+        
+        const netVat = totalSalesVat - totalPurchasesVat;
+        document.getElementById('net_vat_due_vat').value = formatCurrency(netVat);
+        
+        const corrections = parseFloatOrZero(document.getElementById('corrections_vat')?.value);
+        const carried = parseFloatOrZero(document.getElementById('vat_carried_forward_vat')?.value);
+        const finalNet = netVat + corrections - carried;
+        document.getElementById('final_net_vat_vat').value = formatCurrency(finalNet);
+        
+        // --- Step 6: Update Settlement Journal ---
+        updateSettlementJournal(itemNetVat);
+    }
+    
+    function updateSettlementJournal(itemNetVat) {
+        // Group 1: Factory and Trading
+        const factoryGroupIds = ['factory', 'trading'];
+        const factoryGroupVat = {};
+        factoryGroupIds.forEach(id => {
+            if(itemNetVat[id]) factoryGroupVat[id] = itemNetVat[id];
+        });
+        generateSingleJournal(factoryGroupVat, 'settlement-body-factory');
+
+        // Group 2: Hotels (Sub-items only)
+        const hotelsGroupIds = ['riyadh_hotel', 'riyadh_cafe', 'jeddah_hotel', 'jeddah_cafe'];
+        const hotelsGroupVat
+ = {};
+        hotelsGroupIds.forEach(id => {
+            if(itemNetVat[id]) hotelsGroupVat[id] = itemNetVat[id];
+        });
+        generateSingleJournal(hotelsGroupVat, 'settlement-body-hotels');
+    }
+
+    function generateSingleJournal(groupVat, tbodyId) {
+        const settlementBody = document.getElementById(tbodyId);
+        settlementBody.innerHTML = '';
+
+        const creditors = Object.values(groupVat).filter(item => item.balance < 0).map(item => ({ ...item, balance: Math.abs(item.balance) }));
+        const debtors = Object.values(groupVat).filter(item => item.balance > 0);
+        const netGroupDue = debtors.reduce((sum, d) => sum + d.balance, 0) - creditors.reduce((sum, c) => sum + c.balance, 0);
+
+        if (Object.keys(groupVat).length === 0 || (creditors.length === 0 && debtors.length === 0)) {
+            settlementBody.innerHTML = `<tr><td colspan="4" class="text-center">لا توجد بيانات لهذه المجموعة.</td></tr>`;
+            return;
+        }
+
+        // --- Internal Settlement Logic ---
+        creditors.forEach(creditor => {
+            let remainingCredit = creditor.balance;
+            debtors.forEach(debtor => {
+                if (remainingCredit > 0 && debtor.balance > 0) {
+                    const settlementAmount = Math.min(remainingCredit, debtor.balance);
+                    
+                    let row = settlementBody.insertRow();
+                    row.innerHTML = `
+                        <td>من حـ/ جاري مدين (${debtor.name})</td>
+                        <td>إلى حـ/ جاري دائن (${creditor.name})</td>
+                        <td>${formatCurrency(settlementAmount)}</td>
+                        <td>تسوية رصيد ${creditor.name} الدائن</td>
+                    `;
+                    
+                    remainingCredit -= settlementAmount;
+                    debtor.balance -= settlementAmount;
+                }
+            });
+        });
+
+        // --- Final Payment to Tax Authority for the group ---
+        if (netGroupDue > 0.005) { // Use a small threshold to handle floating point inaccuracies
+            debtors.sort((a, b) => b.balance - a.balance);
+            const mainPayer = debtors.length > 0 && debtors[0].balance > 0 ? debtors[0] : { name: 'الكيان الرئيسي للمجموعة' };
+
+            let finalRow = settlementBody.insertRow();
+            finalRow.innerHTML = `
+                <td class="fw-bold">من حـ/ هيئة الزكاة والضريبة والجمارك</td>
+                <td class="fw-bold">إلى حـ/ البنك أو الصندوق (${mainPayer.name})</td>
+                <td class="fw-bold">${formatCurrency(netGroupDue)}</td>
+                <td class="fw-bold">سداد صافي الضريبة المستحقة للمجموعة</td>
+            `;
+        } else if (netGroupDue < -0.005) {
+             settlementBody.innerHTML += `<tr><td colspan="4" class="text-center text-success">يوجد رصيد دائن للمجموعة بقيمة: ${formatCurrency(Math.abs(netGroupDue))}</td></tr>`;
+        } else {
+             settlementBody.innerHTML += `<tr><td colspan="4" class="text-center">تمت تسوية المجموعة بالكامل.</td></tr>`;
+        }
+    }
+
+    function handleInputChange(e) {
+        if (e.target.classList.contains('data-input')) {
+            const input = e.target;
+            const row = input.closest('tr');
+            
+            if (row.dataset.logic === 'flexible') {
+                const parentId = row.dataset.itemId;
+                document.querySelectorAll(`.sub-item-row[data-parent-id="${parentId}"] input`).forEach(subInput => {
+                    subInput.value = '';
+                });
+            }
+
+            const val = parseFloatOrZero(input.value);
+            const type = input.dataset.type;
+            const field = input.dataset.field;
+            let base = 0, vat = 0, total = 0;
+
+            if (field === 'total') { total = val; base = total / (1 + VAT_RATE); vat = total - base; } 
+            else if (field === 'vat') { vat = val; base = vat / VAT_RATE; total = base + vat; } 
+            else { base = val; vat = base * VAT_RATE; total = base + vat; }
+
+            row.querySelector(`[data-type="${type}"][data-field="base"]`).value = formatCurrency(base);
+            row.querySelector(`[data-type="${type}"][data-field="vat"]`).value = formatCurrency(vat);
+            row.querySelector(`[data-type="${type}"][data-field="total"]`).value = formatCurrency(total);
+            
+            const originalInput = row.querySelector(`[data-type="${type}"][data-field="${field}"]`);
+            if (document.activeElement !== originalInput) {
+                originalInput.value = formatCurrency(val);
+            }
+
+            calculateAll();
+        }
+        if (e.target.classList.contains('return-input')) {
+            e.target.value = formatCurrency(parseFloatOrZero(e.target.value));
+            calculateAll();
+        }
+    }
+
+    function printContent(sectionKey) {
+        const printContainer = document.getElementById('print-container');
+        const header = `<div class="print-header"><h2>مجموعة بن حامد</h2><p>الرقم الضريبي: 302255129500003</p></div>`;
+        const contentToPrint = document.querySelector(`[data-print-section="${sectionKey}"]`).cloneNode(true);
+        contentToPrint.querySelectorAll('input').forEach(input => {
+            const value = input.value || '0.00';
+            const cell = input.parentElement;
+            cell.textContent = value;
+        });
+        printContainer.innerHTML = header + contentToPrint.innerHTML;
+        setTimeout(() => window.print(), 200);
+    }
+
+    function exportData() {
+        const data = {
+            inputs: {},
+            newEntities: []
+        };
+        document.querySelectorAll('input.data-input, input.return-input').forEach(input => {
+            if (input.value && input.id) {
+                data.inputs[input.id] = input.value;
+            }
+        });
+        
+        document.querySelectorAll('.new-entity-card').forEach(card => {
+            const entityData = {
+                name: card.querySelector('.pane-title').textContent,
+                vat: card.querySelector('.fw-bold').textContent,
+                id: card.dataset.entityId
+            };
+            data.newEntities.push(entityData);
+        });
+        
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        const date = new Date().toISOString().slice(0, 10);
+        link.download = `vat_backup_${date}.json`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        alert('تم تصدير البيانات بنجاح!');
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                document.querySelectorAll('.new-entity-card').forEach(card => card.remove());
+
+                if (data.newEntities) {
+                    data.newEntities.forEach(entityData => {
+                        addNewEntity(entityData.name, entityData.vat, entityData.id);
+                    });
+                }
+
+                const inputsToRestore = data.inputs || data.mainInputs;
+
+                if (inputsToRestore) {
+                    for (const id in inputsToRestore) {
+                        const input = document.getElementById(id);
+                        if (input) {
+                            input.value = inputsToRestore[id];
+                        }
+                    }
+                }
+
+                calculateAll();
+                alert('تم استيراد البيانات بنجاح!');
+            } catch (error) {
+                alert('خطأ في قراءة الملف. الرجاء التأكد من أنه ملف نسخة احتياطية صحيح.');
+                console.error("Import error:", error);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = null;
+    }
+
+    function addNewEntity(name, vat, existingId = null) {
+        const entityId = existingId || `new_${++newEntityCounter}`;
+        const newCard = document.createElement('div');
+        newCard.className = 'content-pane new-entity-card';
+        newCard.id = `card_${entityId}`;
+        newCard.dataset.entityId = entityId;
+        newCard.dataset.itemId = entityId;
+        newCard.dataset.itemName = name; 
+
+        newCard.innerHTML = `
+            <div class="control-bar">
+                <div class="pane-title">${name}</div>
+                <div>الرقم الضريبي: <span class="fw-bold">${vat}</span></div>
+                <button class="btn btn-sm btn-outline-danger" onclick="document.getElementById('${newCard.id}').remove(); calculateAll();"><i class="fas fa-trash-alt"></i></button>
+            </div>
+            <div class="table-responsive" data-print-section="input_table_${entityId}">
+                <table class="table table-bordered vat-input-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 25%;">البند</th>
+                            <th colspan="3">المبيعات</th><th colspan="3">المشتريات</th>
+                            <th rowspan="2">صافي الضريبة</th>
+                        </tr>
+                        <tr>
+                            <th>المبلغ قبل الضريبة</th><th>الضريبة</th><th>الإجمالي الشامل</th>
+                            <th>المبلغ قبل الضريبة</th><th>الضريبة</th><th>الإجمالي الشامل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-item-name="${name}" data-item-id="${entityId}">
+                            <td>${name}</td>
+                            ${generateInputCells(entityId, 'sales')}
+                            ${generateInputCells(entityId, 'purchases')}
+                            <td><input type="text" class="form-control net-vat-cell" disabled></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+        document.getElementById('entities-container').appendChild(newCard);
+    }
+
+    // --- EVENT LISTENERS ---
+    document.body.addEventListener('change', handleInputChange);
+    document.getElementById('export-btn').addEventListener('click', exportData);
+    document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
+    document.getElementById('file-input').addEventListener('change', importData);
+
+    document.getElementById('saveEntityBtn').addEventListener('click', () => {
+        const form = document.getElementById('addEntityForm');
+        if (form.checkValidity()) {
+            const entityName = document.getElementById('entityNameInput').value;
+            const entityVat = document.getElementById('entityVatInput').value;
+            addNewEntity(entityName, entityVat);
+            
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addEntityModal'));
+            modalInstance.hide();
+            form.reset();
+        } else {
+            form.reportValidity();
+        }
+    });
+
+
+    // --- INITIALIZATION ---
+    populateYears();
+    buildInputTable();
+    buildOfficialReturnTable();
+    calculateAll();
+</script>
+</body>
+</html>
