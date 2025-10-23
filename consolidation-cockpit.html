@@ -739,7 +739,6 @@
             `;
         }
 
-
         function renderNote(noteId, sheetName, title, icon) {
             const data = excelData[sheetName] || [];
             if (data.length === 0) {
@@ -747,8 +746,7 @@
                     <div class="tab-pane fade" id="${noteId}">
                         <div class="report-section">
                             <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                لا توجد بيانات متاحة لهذا الإيضاح. يرجى التأكد من وجود ورقة Excel باسم "${sheetName}"
+                                لا توجد بيانات متاحة لهذا الإيضاح
                             </div>
                         </div>
                     </div>
@@ -757,74 +755,38 @@
             
             let tableRows = '';
             let headers = [];
-            let headerRowIndex = -1;
-            let totalAmount = 0;
-            let hasTotal = false;
             
-            // استخراج العناوين بذكاء
-            for (let i = 0; i < Math.min(data.length, 10); i++) {
+            // استخراج العناوين
+            for (let i = 0; i < data.length; i++) {
                 const row = data[i];
                 if (row && row.some(cell => cell && cell.toString().trim())) {
-                    const rowText = row.join('').toLowerCase();
-                    if (rowText.includes('البيان') || rowText.includes('الحساب') || 
-                        rowText.includes('الوصف') || rowText.includes('المبلغ')) {
+                    // البحث عن صف العناوين
+                    if (row.some(cell => cell && (cell.toString().includes('البيان') || cell.toString().includes('الحساب')))) {
                         headers = row.filter(cell => cell && cell.toString().trim());
-                        headerRowIndex = i;
                         break;
                     }
                 }
             }
             
+            // إذا لم نجد عناوين، استخدم عناوين افتراضية
             if (headers.length === 0) {
                 headers = ['البيان', 'المبلغ'];
-                headerRowIndex = 0;
             }
             
             // استخراج البيانات
-            let startDataRow = headerRowIndex + 1;
+            let startDataRow = headers.length > 0 ? 5 : 3;
             for (let i = startDataRow; i < data.length; i++) {
                 const row = data[i];
                 if (!row || !row.some(cell => cell && cell.toString().trim())) continue;
                 
-                const firstCell = (row[0] || '').toString().toLowerCase();
-                const isTotal = firstCell.includes('المجموع') || firstCell.includes('إجمالي') || 
-                               firstCell.includes('total') || firstCell.includes('الإجمالي');
-                
-                let rowHtml = `<tr class="${isTotal ? 'fs-total-row' : 'fs-item-row'}">`;
-                
+                let rowHtml = '<tr class="fs-item-row">';
                 for (let j = 0; j < Math.min(row.length, headers.length); j++) {
                     const cell = row[j] || '';
-                    const cellStr = cell.toString().trim();
-                    const isNumber = !isNaN(parseFloat(cellStr)) && isFinite(cellStr) && cellStr !== '';
-                    
-                    if (isNumber) {
-                        const numValue = parseFloat(cellStr);
-                        if (j === row.length - 1 || j === headers.length - 1) {
-                            if (!isTotal) totalAmount += numValue;
-                            hasTotal = true;
-                        }
-                        rowHtml += `<td class="amount">${formatNumber(numValue)}</td>`;
-                    } else {
-                        rowHtml += `<td>${cellStr}</td>`;
-                    }
+                    const isNumber = !isNaN(parseFloat(cell)) && isFinite(cell);
+                    rowHtml += `<td class="${isNumber ? 'amount' : ''}">${isNumber ? formatNumber(cell) : cell}</td>`;
                 }
                 rowHtml += '</tr>';
                 tableRows += rowHtml;
-            }
-            
-            if (hasTotal && totalAmount > 0 && !tableRows.includes('fs-total-row')) {
-                let totalRow = '<tr class="fs-total-row">';
-                for (let j = 0; j < headers.length; j++) {
-                    if (j === 0) {
-                        totalRow += '<td><strong>الإجمالي</strong></td>';
-                    } else if (j === headers.length - 1) {
-                        totalRow += `<td class="amount"><strong>${formatNumber(totalAmount)}</strong></td>`;
-                    } else {
-                        totalRow += '<td></td>';
-                    }
-                }
-                totalRow += '</tr>';
-                tableRows += totalRow;
             }
             
             return `
@@ -832,7 +794,7 @@
                     <div class="report-section">
                         <div class="company-header">
                             <div class="company-name">مصنع بن حامد للمنتجات الأسمنتية</div>
-                            <div class="report-period">${title} - للسنة المنتهية في 2024/12/31م</div>
+                            <div class="report-period">${title}</div>
                         </div>
                         
                         <div class="report-header no-print">
@@ -843,7 +805,7 @@
                                 <button class="btn-action" onclick="printReport('${noteId}')">
                                     <i class="fas fa-print me-2"></i>طباعة
                                 </button>
-                                <button class="btn-action" onclick="exportToExcel('${noteId}', '${title.replace(/\\s/g, '_')}')">
+                                <button class="btn-action" onclick="exportToExcel('${noteId}', '${title.replace(/\s/g, '_')}')">
                                     <i class="fas fa-file-excel me-2"></i>تصدير Excel
                                 </button>
                             </div>
@@ -857,14 +819,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${tableRows || '<tr><td colspan="' + headers.length + '" class="text-center">لا توجد بيانات</td></tr>'}
+                                    ${tableRows}
                                 </tbody>
                             </table>
-                        </div>
-                        
-                        <div class="alert alert-info mt-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>ملاحظة:</strong> البيانات مستخرجة مباشرة من ملف Excel المرفوع (ورقة: ${sheetName})
                         </div>
                     </div>
                 </div>
@@ -1006,8 +963,7 @@
                             };
                         };
                     </script>
-                    <script src="cashflow-engine.js"></script>
-</body>
+                </body>
                 </html>
             `);
             
