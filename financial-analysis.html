@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحليل المالي المتقدم | Polaris</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
+        
+        :root { 
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Orbitron', sans-serif; 
+            --color-primary-glow: #00BFFF;
+            --color-bg: #010409;
+            --color-surface: rgba(13, 17, 23, 0.8); 
+            --color-border: rgba(56, 139, 253, 0.3);
+            --color-text-primary: #E6EDF3;
+            --color-text-secondary: #7D8590;
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+        }
+        
+        body { 
+            font-family: var(--font-family-main);
+            direction: rtl;
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+        }
+        
+        .grid-background { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+        }
+        
+        .glow-background { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%);
+            transform: translate(-50%, -50%);
+            animation: pulse 10s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } 
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--color-border);
+        }
+        
+        .page-title {
+            font-family: var(--font-family-display);
+            font-size: 3rem;
+            margin: 0 0 1rem 0;
+            color: var(--color-primary-glow);
+            text-shadow: 0 0 20px var(--color-primary-glow);
+        }
+        
+        .page-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-primary-glow);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .back-button:hover {
+            background-color: rgba(0, 191, 255, 0.1);
+            border-color: var(--color-primary-glow);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+            color: var(--color-primary-glow);
+        }
+        
+        .report-section {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .section-title {
+            font-family: var(--font-family-display);
+            font-size: 1.8rem;
+            color: var(--color-primary-glow);
+            margin: 0;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-action {
+            background-color: rgba(0, 191, 255, 0.1);
+            border: 1px solid var(--color-primary-glow);
+            color: var(--color-primary-glow);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-action:hover {
+            background-color: rgba(0, 191, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+        }
+        
+        .report-table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+        }
+        
+        .report-table th,
+        .report-table td {
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+        }
+        
+        .report-table thead {
+            background-color: rgba(0, 191, 255, 0.1);
+        }
+        
+        .report-table th {
+            font-weight: 600;
+            color: var(--color-primary-glow);
+        }
+        
+        .company-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .company-header h3 {
+            color: var(--color-primary-glow);
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .alert-info {
+            background-color: rgba(0, 191, 255, 0.1);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: var(--color-text-primary);
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: var(--color-text-primary);
+        }
+        
+        @media print {
+            .back-button,
+            .section-actions {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .report-section {
+                border: 1px solid #000;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-background"></div>
+    <div class="glow-background"></div>
+    
+    <a href="reporting-pantheon.html" class="back-button">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للتقارير
+    </a>
+    
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">التحليل المالي المتقدم</h1>
+            <p class="page-subtitle">تحليل شامل للأداء المالي والنسب والمؤشرات</p>
+        </div>
+        
+        <!-- تحليل الاتجاهات -->
+        <div class="report-section" id="trend-analysis">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    تحليل الاتجاهات المالية
+                </h2>
+                <div class="section-actions">
+                    <button class="btn-action" onclick="printSection('trend-analysis')">
+                        <i class="fas fa-print me-1"></i> طباعة
+                    </button>
+                    <button class="btn-action" onclick="exportPDF('trend-analysis', 'تحليل_الاتجاهات')">
+                        <i class="fas fa-file-pdf me-1"></i> حفظ PDF
+                    </button>
+                </div>
+            </div>
+            <div id="trend-content"></div>
+        </div>
+        
+        <!-- التحليل الرأسي -->
+        <div class="report-section" id="vertical-analysis">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    التحليل الرأسي
+                </h2>
+                <div class="section-actions">
+                    <button class="btn-action" onclick="printSection('vertical-analysis')">
+                        <i class="fas fa-print me-1"></i> طباعة
+                    </button>
+                    <button class="btn-action" onclick="exportPDF('vertical-analysis', 'التحليل_الرأسي')">
+                        <i class="fas fa-file-pdf me-1"></i> حفظ PDF
+                    </button>
+                </div>
+            </div>
+            <div id="vertical-content"></div>
+        </div>
+        
+        <!-- دورة التحويل النقدي -->
+        <div class="report-section" id="cash-cycle">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    دورة التحويل النقدي
+                </h2>
+                <div class="section-actions">
+                    <button class="btn-action" onclick="printSection('cash-cycle')">
+                        <i class="fas fa-print me-1"></i> طباعة
+                    </button>
+                    <button class="btn-action" onclick="exportPDF('cash-cycle', 'دورة_التحويل_النقدي')">
+                        <i class="fas fa-file-pdf me-1"></i> حفظ PDF
+                    </button>
+                </div>
+            </div>
+            <div id="cash-cycle-content"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let auditFile = null;
+        let activeClientId = null;
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            generateAllReports();
+        });
+        
+        // Load data from localStorage
+        function loadData() {
+            activeClientId = localStorage.getItem('activeClientId');
+            if (!activeClientId) {
+                alert('لم يتم العثور على بيانات. يرجى العودة إلى صفحة المحطة المركزية.');
+                window.location.href = 'account-mapping.html';
+                return;
+            }
+            
+            const dataKey = `polarisAuditFile_${activeClientId}`;
+            const savedData = localStorage.getItem(dataKey);
+            
+            if (savedData) {
+                auditFile = JSON.parse(savedData);
+            } else {
+                alert('لم يتم العثور على بيانات. يرجى العودة إلى صفحة المحطة المركزية.');
+                window.location.href = 'account-mapping.html';
+            }
+        }
+        
+        // Calculate totals from trial balance
+        function calculateTotals(data) {
+            const totals = {
+                assets: 0,
+                currentAssets: 0,
+                fixedAssets: 0,
+                liabilities: 0,
+                currentLiabilities: 0,
+                longTermLiabilities: 0,
+                equity: 0,
+                revenue: 0,
+                cogs: 0,
+                operatingExpenses: 0,
+                grossProfit: 0,
+                netIncome: 0,
+                expenses: 0
+            };
+            
+            data.forEach(item => {
+                const debit = parseFloat(item.debit) || 0;
+                const credit = parseFloat(item.credit) || 0;
+                const balance = debit - credit;
+                
+                switch(item.category) {
+                    case 'أصول متداولة':
+                        totals.currentAssets += Math.abs(balance);
+                        break;
+                    case 'أصول ثابتة':
+                        totals.fixedAssets += Math.abs(balance);
+                        break;
+                    case 'التزامات متداولة':
+                        totals.currentLiabilities += Math.abs(balance);
+                        break;
+                    case 'التزامات طويلة الأجل':
+                        totals.longTermLiabilities += Math.abs(balance);
+                        break;
+                    case 'حقوق الملكية':
+                        totals.equity += Math.abs(balance);
+                        break;
+                    case 'إيرادات':
+                        totals.revenue += Math.abs(balance);
+                        break;
+                    case 'تكلفة البضاعة المباعة':
+                        totals.cogs += Math.abs(balance);
+                        break;
+                    case 'مصروفات تشغيلية':
+                        totals.operatingExpenses += Math.abs(balance);
+                        break;
+                }
+            });
+            
+            totals.assets = totals.currentAssets + totals.fixedAssets;
+            totals.liabilities = totals.currentLiabilities + totals.longTermLiabilities;
+            totals.grossProfit = totals.revenue - totals.cogs;
+            totals.netIncome = totals.grossProfit - totals.operatingExpenses;
+            totals.expenses = totals.cogs + totals.operatingExpenses;
+            
+            return totals;
+        }
+        
+        // Format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('ar-SA', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+        
+        // Generate all reports
+        function generateAllReports() {
+            const tbData = auditFile.trialBalance || [];
+            
+            document.getElementById('trend-content').innerHTML = generateTrendAnalysis(tbData);
+            document.getElementById('vertical-content').innerHTML = generateVerticalAnalysis(tbData);
+            document.getElementById('cash-cycle-content').innerHTML = generateCashCycle(tbData);
+        }
+        
+        // Generate Trend Analysis
+        function generateTrendAnalysis(data) {
+            const totals = calculateTotals(data);
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            const currentYear = new Date().getFullYear();
+            
+            const trends = [
+                { year: currentYear - 2, revenue: totals.revenue * 0.7, expenses: totals.expenses * 0.75, netIncome: totals.netIncome * 0.6 },
+                { year: currentYear - 1, revenue: totals.revenue * 0.85, expenses: totals.expenses * 0.88, netIncome: totals.netIncome * 0.8 },
+                { year: currentYear, revenue: totals.revenue, expenses: totals.expenses, netIncome: totals.netIncome }
+            ];
+            
+            const revenueGrowth = ((trends[2].revenue - trends[1].revenue) / trends[1].revenue * 100).toFixed(2);
+            const expenseGrowth = ((trends[2].expenses - trends[1].expenses) / trends[1].expenses * 100).toFixed(2);
+            const incomeGrowth = ((trends[2].netIncome - trends[1].netIncome) / trends[1].netIncome * 100).toFixed(2);
+            
+            return `
+                <div class="company-header">
+                    <h3>${companyName}</h3>
+                    <p class="text-secondary">تحليل الاتجاهات المالية</p>
+                    <p class="text-secondary">للسنوات ${currentYear - 2} - ${currentYear}</p>
+                </div>
+
+                <h5 class="mb-3">تحليل اتجاهات الإيرادات والمصروفات</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>السنة</th>
+                            <th class="text-end">الإيرادات</th>
+                            <th class="text-end">المصروفات</th>
+                            <th class="text-end">صافي الربح</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${trends.map(t => `
+                            <tr>
+                                <td>${t.year}</td>
+                                <td class="text-end">${formatCurrency(t.revenue)}</td>
+                                <td class="text-end">${formatCurrency(t.expenses)}</td>
+                                <td class="text-end">${formatCurrency(t.netIncome)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <h5 class="mb-3 mt-4">معدلات النمو السنوية</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">معدل النمو (%)</th>
+                            <th>التقييم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>نمو الإيرادات</td>
+                            <td class="text-end">${revenueGrowth}%</td>
+                            <td><span class="badge ${revenueGrowth > 0 ? 'bg-success' : 'bg-danger'}">${revenueGrowth > 0 ? 'إيجابي' : 'سلبي'}</span></td>
+                        </tr>
+                        <tr>
+                            <td>نمو المصروفات</td>
+                            <td class="text-end">${expenseGrowth}%</td>
+                            <td><span class="badge ${expenseGrowth < revenueGrowth ? 'bg-success' : 'bg-warning'}">${expenseGrowth < revenueGrowth ? 'تحت السيطرة' : 'يحتاج مراجعة'}</span></td>
+                        </tr>
+                        <tr>
+                            <td>نمو صافي الربح</td>
+                            <td class="text-end">${incomeGrowth}%</td>
+                            <td><span class="badge ${incomeGrowth > 0 ? 'bg-success' : 'bg-danger'}">${incomeGrowth > 0 ? 'إيجابي' : 'سلبي'}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-chart-line me-2"></i>
+                    <strong>ملاحظة:</strong> البيانات التاريخية محاكاة للأغراض التوضيحية. في التطبيق الفعلي، يجب إدخال بيانات السنوات السابقة الفعلية.
+                </div>
+            `;
+        }
+        
+        // Generate Vertical Analysis
+        function generateVerticalAnalysis(data) {
+            const totals = calculateTotals(data);
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            
+            return `
+                <div class="company-header">
+                    <h3>${companyName}</h3>
+                    <p class="text-secondary">التحليل الرأسي للقوائم المالية</p>
+                </div>
+
+                <h5 class="mb-3">قائمة الدخل - التحليل الرأسي</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">المبلغ</th>
+                            <th class="text-end">النسبة من الإيرادات (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>الإيرادات</td>
+                            <td class="text-end">${formatCurrency(totals.revenue)}</td>
+                            <td class="text-end">100.00%</td>
+                        </tr>
+                        <tr>
+                            <td>تكلفة البضاعة المباعة</td>
+                            <td class="text-end">${formatCurrency(totals.cogs)}</td>
+                            <td class="text-end">${(totals.cogs / totals.revenue * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>إجمالي الربح</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.grossProfit)}</strong></td>
+                            <td class="text-end"><strong>${(totals.grossProfit / totals.revenue * 100).toFixed(2)}%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>المصروفات التشغيلية</td>
+                            <td class="text-end">${formatCurrency(totals.operatingExpenses)}</td>
+                            <td class="text-end">${(totals.operatingExpenses / totals.revenue * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>صافي الربح</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.netIncome)}</strong></td>
+                            <td class="text-end"><strong>${(totals.netIncome / totals.revenue * 100).toFixed(2)}%</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="mb-3 mt-4">قائمة المركز المالي - التحليل الرأسي</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">المبلغ</th>
+                            <th class="text-end">النسبة من إجمالي الأصول (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>الأصول المتداولة</td>
+                            <td class="text-end">${formatCurrency(totals.currentAssets)}</td>
+                            <td class="text-end">${(totals.currentAssets / totals.assets * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr>
+                            <td>الأصول الثابتة</td>
+                            <td class="text-end">${formatCurrency(totals.fixedAssets)}</td>
+                            <td class="text-end">${(totals.fixedAssets / totals.assets * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>إجمالي الأصول</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.assets)}</strong></td>
+                            <td class="text-end"><strong>100.00%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>الالتزامات المتداولة</td>
+                            <td class="text-end">${formatCurrency(totals.currentLiabilities)}</td>
+                            <td class="text-end">${(totals.currentLiabilities / totals.assets * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr>
+                            <td>الالتزامات طويلة الأجل</td>
+                            <td class="text-end">${formatCurrency(totals.longTermLiabilities)}</td>
+                            <td class="text-end">${(totals.longTermLiabilities / totals.assets * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr>
+                            <td>حقوق الملكية</td>
+                            <td class="text-end">${formatCurrency(totals.equity + totals.netIncome)}</td>
+                            <td class="text-end">${((totals.equity + totals.netIncome) / totals.assets * 100).toFixed(2)}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Generate Cash Conversion Cycle
+        function generateCashCycle(data) {
+            const totals = calculateTotals(data);
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            
+            // حساب متوسط فترات التحويل (تقديرية)
+            const daysInventory = (totals.currentAssets * 0.3 / totals.cogs) * 365;
+            const daysReceivables = (totals.currentAssets * 0.4 / totals.revenue) * 365;
+            const daysPayables = (totals.currentLiabilities / totals.cogs) * 365;
+            const cashCycle = daysInventory + daysReceivables - daysPayables;
+            
+            return `
+                <div class="company-header">
+                    <h3>${companyName}</h3>
+                    <p class="text-secondary">دورة التحويل النقدي</p>
+                </div>
+
+                <h5 class="mb-3">مكونات دورة التحويل النقدي</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">عدد الأيام</th>
+                            <th>التقييم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>فترة تحويل المخزون (DIO)</td>
+                            <td class="text-end">${daysInventory.toFixed(0)} يوم</td>
+                            <td><span class="badge ${daysInventory < 60 ? 'bg-success' : daysInventory < 90 ? 'bg-warning' : 'bg-danger'}">${daysInventory < 60 ? 'ممتاز' : daysInventory < 90 ? 'جيد' : 'يحتاج تحسين'}</span></td>
+                        </tr>
+                        <tr>
+                            <td>فترة تحصيل الذمم (DSO)</td>
+                            <td class="text-end">${daysReceivables.toFixed(0)} يوم</td>
+                            <td><span class="badge ${daysReceivables < 45 ? 'bg-success' : daysReceivables < 60 ? 'bg-warning' : 'bg-danger'}">${daysReceivables < 45 ? 'ممتاز' : daysReceivables < 60 ? 'جيد' : 'يحتاج تحسين'}</span></td>
+                        </tr>
+                        <tr>
+                            <td>فترة سداد الموردين (DPO)</td>
+                            <td class="text-end">${daysPayables.toFixed(0)} يوم</td>
+                            <td><span class="badge ${daysPayables > 45 ? 'bg-success' : daysPayables > 30 ? 'bg-warning' : 'bg-danger'}">${daysPayables > 45 ? 'ممتاز' : daysPayables > 30 ? 'جيد' : 'يحتاج تحسين'}</span></td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>دورة التحويل النقدي (CCC)</strong></td>
+                            <td class="text-end"><strong>${cashCycle.toFixed(0)} يوم</strong></td>
+                            <td><span class="badge ${cashCycle < 60 ? 'bg-success' : cashCycle < 90 ? 'bg-warning' : 'bg-danger'}">${cashCycle < 60 ? 'ممتاز' : cashCycle < 90 ? 'جيد' : 'يحتاج تحسين'}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>ملاحظة:</strong> دورة التحويل النقدي تقيس عدد الأيام بين دفع النقد للموردين واستلام النقد من العملاء. كلما كانت الدورة أقصر، كان ذلك أفضل للسيولة.
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>تنبيه:</strong> الحسابات أعلاه تقديرية بناءً على البيانات المتوفرة. للحصول على نتائج دقيقة، يجب استخدام البيانات الفعلية لكل بند.
+                </div>
+            `;
+        }
+        
+        // Print section
+        function printSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>طباعة</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: Arial, sans-serif; direction: rtl; }');
+            printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 1rem 0; }');
+            printWindow.document.write('th, td { border: 1px solid #000; padding: 0.5rem; text-align: right; }');
+            printWindow.document.write('th { background-color: #f0f0f0; font-weight: bold; }');
+            printWindow.document.write('.company-header { text-align: center; margin-bottom: 2rem; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(section.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Export to PDF
+        function exportPDF(sectionId, filename) {
+            const element = document.getElementById(sectionId);
+            const opt = {
+                margin: 1,
+                filename: filename + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
+
