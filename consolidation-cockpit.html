@@ -439,9 +439,39 @@
         });
 
         async function loadExcelFile() {
-            const response = await fetch('financial-data.json');
-            excelData = await response.json();
-            console.log("✅ تم تحميل البيانات المالية بنجاح", Object.keys(excelData));
+            // قراءة البيانات من localStorage (نفس البيانات المرفوعة في reporting-pantheon)
+            const activeClientId = localStorage.getItem('activeClientId') || 'default';
+            const savedAuditFile = localStorage.getItem(`polarisAuditFile_${activeClientId}`);
+            
+            if (savedAuditFile) {
+                const auditFile = JSON.parse(savedAuditFile);
+                
+                // تحويل بيانات auditFile إلى excelData
+                if (auditFile.trialBalance) {
+                    excelData['ميزان المراجعة 2024'] = auditFile.trialBalance;
+                }
+                
+                // إضافة بيانات الشركة
+                if (auditFile.clientInfo) {
+                    companyInfo = auditFile.clientInfo;
+                }
+                
+                console.log("✅ تم تحميل البيانات من localStorage", {
+                    clientId: activeClientId,
+                    company: companyInfo.name || 'غير محدد',
+                    trialBalanceRows: auditFile.trialBalance?.length || 0
+                });
+            } else {
+                // إذا لم توجد بيانات في localStorage، حاول تحميل من financial-data.json
+                try {
+                    const response = await fetch('financial-data.json');
+                    excelData = await response.json();
+                    console.log("⚠️ تم تحميل البيانات من ملف احتياطي", Object.keys(excelData));
+                } catch (error) {
+                    console.error("❌ فشل تحميل البيانات:", error);
+                    throw new Error('لا توجد بيانات متاحة. يرجى رفع ملف Excel في reporting-pantheon.html أولاً.');
+                }
+            }
         }
 
         function renderAllReports() {
