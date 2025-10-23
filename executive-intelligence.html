@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الذكاء التنفيذي - Polaris</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .header-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .module-header {
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .kpi-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .strategy-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        .strategy-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .risk-low { background: #d4edda; color: #155724; }
+        .risk-medium { background: #fff3cd; color: #856404; }
+        .risk-high { background: #f8d7da; color: #721c24; }
+        .action-plan-item {
+            background: #f8f9fa;
+            border-right: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+        }
+        .credit-limit-table {
+            font-size: 0.9rem;
+        }
+        .export-pack-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- العنوان الرئيسي -->
+        <div class="header-section text-center">
+            <h1><i class="fas fa-crown text-warning"></i> الذكاء التنفيذي</h1>
+            <p class="lead">منصة القرارات الاستراتيجية والتنفيذية المتقدمة</p>
+            <p id="companyInfo" class="text-muted"></p>
+        </div>
+
+        <!-- الوحدة 1: إدارة الأداء (Performance Management) -->
+        <div class="module-card" id="performanceManagement">
+            <div class="module-header">
+                <h3><i class="fas fa-chart-line text-primary"></i> 1. إدارة الأداء (Performance Management)</h3>
+                <p class="text-muted">ربط نتائج التحليل بأهداف KPIs ومتابعة الانحرافات</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="kpi-box">
+                        <h5>هامش الربح الفعلي</h5>
+                        <h2 id="actualProfitMargin">0%</h2>
+                        <small>الهدف: 15%</small>
+                        <div class="progress mt-2" style="height: 10px;">
+                            <div class="progress-bar bg-success" id="profitMarginProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="kpi-box">
+                        <h5>نسبة السيولة الفعلية</h5>
+                        <h2 id="actualCurrentRatio">0</h2>
+                        <small>الهدف: 2.0</small>
+                        <div class="progress mt-2" style="height: 10px;">
+                            <div class="progress-bar bg-info" id="currentRatioProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="kpi-box">
+                        <h5>العائد على حقوق الملكية</h5>
+                        <h2 id="actualROE">0%</h2>
+                        <small>الهدف: 20%</small>
+                        <div class="progress mt-2" style="height: 10px;">
+                            <div class="progress-bar bg-warning" id="roeProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="mt-4">تحليل الانحرافات</h5>
+            <div id="varianceAnalysis"></div>
+        </div>
+
+        <!-- الوحدة 2: محاكاة استراتيجية (Strategy Simulation) -->
+        <div class="module-card" id="strategySimulation">
+            <div class="module-header">
+                <h3><i class="fas fa-chess text-success"></i> 2. محاكاة استراتيجية (Strategy Simulation)</h3>
+                <p class="text-muted">محاكاة الخطط البديلة وحساب الأثر المالي والمخاطر</p>
+            </div>
+
+            <div id="strategyScenarios"></div>
+        </div>
+
+        <!-- الوحدة 3: تقييم المنشأة (Valuation & Investor Package) -->
+        <div class="module-card" id="valuation">
+            <div class="module-header">
+                <h3><i class="fas fa-gem text-warning"></i> 3. تقييم المنشأة (Valuation)</h3>
+                <p class="text-muted">DCF - Multiples - Net Asset Value + تقرير جاهز للمستثمر/البنك</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6>طريقة DCF</h6>
+                            <h3 class="text-primary" id="dcfValuation">0</h3>
+                            <small class="text-muted">التدفقات النقدية المخصومة</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6>طريقة المضاعفات</h6>
+                            <h3 class="text-success" id="multiplesValuation">0</h3>
+                            <small class="text-muted">EBITDA × معامل الصناعة</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6>صافي قيمة الأصول</h6>
+                            <h3 class="text-info" id="navValuation">0</h3>
+                            <small class="text-muted">الأصول - الالتزامات</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>التقييم الموصى به</h5>
+                <div class="alert alert-info" id="recommendedValuation"></div>
+            </div>
+        </div>
+
+        <!-- الوحدة 4: الامتثال والمخاطر (Compliance & Risk) -->
+        <div class="module-card" id="complianceRisk">
+            <div class="module-header">
+                <h3><i class="fas fa-shield-alt text-danger"></i> 4. الامتثال والمخاطر (Compliance & Risk)</h3>
+                <p class="text-muted">مراجعة سياسات - اختبار ضوابط - تصنيف مخاطر</p>
+            </div>
+
+            <div id="riskAssessment"></div>
+        </div>
+
+        <!-- الوحدة 5: ذكاء تنفيذي (Prescriptive Actions) -->
+        <div class="module-card" id="prescriptiveActions">
+            <div class="module-header">
+                <h3><i class="fas fa-tasks text-info"></i> 5. ذكاء تنفيذي (Prescriptive Actions)</h3>
+                <p class="text-muted">خطة تنفيذ قابلة للطباعة مع جدول زمني أسبوعي</p>
+            </div>
+
+            <div id="actionPlan"></div>
+        </div>
+
+        <!-- الوحدة 6: القرارات التشغيلية (Operational Decisions) -->
+        <div class="module-card" id="operationalDecisions">
+            <div class="module-header">
+                <h3><i class="fas fa-cogs text-secondary"></i> 6. القرارات التشغيلية</h3>
+                <p class="text-muted">حدود ائتمانية - سياسات تسعير - أولوية السداد</p>
+            </div>
+
+            <h5>محرك الحدود الائتمانية</h5>
+            <div id="creditLimits"></div>
+
+            <h5 class="mt-4">سياسات التسعير المقترحة</h5>
+            <div id="pricingPolicies"></div>
+
+            <h5 class="mt-4">أولوية السداد/الصرف</h5>
+            <div id="paymentPriority"></div>
+        </div>
+
+        <!-- الوحدة 7: حزم التقارير الخارجية (External Packs) -->
+        <div class="module-card" id="externalPacks">
+            <div class="module-header">
+                <h3><i class="fas fa-file-export text-primary"></i> 7. حزم التقارير الخارجية</h3>
+                <p class="text-muted">Bank Submission Pack - Investor Deck - Tax Defence File</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-university fa-3x text-primary mb-3"></i>
+                            <h5>حزمة البنك</h5>
+                            <p class="text-muted">تقرير شامل للتقديم للبنوك للحصول على تمويل</p>
+                            <button class="btn btn-primary" onclick="generateBankPack()">
+                                <i class="fas fa-download"></i> تحميل PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-chart-pie fa-3x text-success mb-3"></i>
+                            <h5>حزمة المستثمر</h5>
+                            <p class="text-muted">عرض تقديمي احترافي للمستثمرين المحتملين</p>
+                            <button class="btn btn-success" onclick="generateInvestorDeck()">
+                                <i class="fas fa-download"></i> تحميل PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-file-invoice fa-3x text-warning mb-3"></i>
+                            <h5>ملف الدفاع الضريبي</h5>
+                            <p class="text-muted">مستندات داعمة للإقرارات الضريبية</p>
+                            <button class="btn btn-warning" onclick="generateTaxDefence()">
+                                <i class="fas fa-download"></i> تحميل PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- زر التصدير الشامل -->
+        <div class="text-center my-5">
+            <button class="export-pack-btn" onclick="exportExecutivePack()">
+                <i class="fas fa-file-pdf"></i> تصدير حزمة الذكاء التنفيذي الكاملة (PDF)
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common-navigation.js"></script>
+    <script src="executive-intelligence.js"></script>
+</body>
+</html>
+

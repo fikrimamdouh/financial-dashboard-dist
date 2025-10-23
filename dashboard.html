@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Polaris</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-container {
+            padding: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .alert-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .alert-critical { background: #fee; border-right: 4px solid #dc3545; }
+        .alert-warning { background: #fff3cd; border-right: 4px solid #ffc107; }
+        .alert-success { background: #d4edda; border-right: 4px solid #28a745; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="text-center text-white mb-4">
+            <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم الرئيسية</h1>
+            <p id="companyName" class="lead"></p>
+        </div>
+
+        <!-- المؤشرات الرئيسية -->
+        <div class="row" id="kpiCards">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-primary"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-value" id="totalRevenue">0</div>
+                    <div class="stat-label">إجمالي الإيرادات</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-success"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-value" id="netProfit">0</div>
+                    <div class="stat-label">صافي الربح</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-info"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-value" id="totalAssets">0</div>
+                    <div class="stat-label">إجمالي الأصول</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-warning"><i class="fas fa-percentage"></i></div>
+                    <div class="stat-value" id="profitMargin">0%</div>
+                    <div class="stat-label">هامش الربح</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- التنبيهات -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="chart-card">
+                    <h4><i class="fas fa-bell"></i> التنبيهات الهامة</h4>
+                    <div id="alertsContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5>الإيرادات والمصروفات</h5>
+                    <canvas id="revenueExpenseChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5>توزيع الأصول</h5>
+                    <canvas id="assetsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5>النسب المالية الرئيسية</h5>
+                    <canvas id="ratiosChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5>هيكل رأس المال</h5>
+                    <canvas id="capitalStructureChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- روابط سريعة -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="chart-card">
+                    <h4><i class="fas fa-link"></i> روابط سريعة</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="consolidation-cockpit.html" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-file-alt"></i> القوائم المالية
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="reporting-pantheon.html" class="btn btn-info w-100 mb-2">
+                                <i class="fas fa-chart-bar"></i> التقارير التحليلية
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="decision-intelligence.html" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-brain"></i> ذكاء القرارات
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="executive-intelligence.html" class="btn btn-warning w-100 mb-2">
+                                <i class="fas fa-crown"></i> الذكاء التنفيذي
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common-navigation.js"></script>
+    <script>
+        // تحميل البيانات
+        function loadDashboardData() {
+            const activeClientId = localStorage.getItem('activeClientId');
+            if (!activeClientId) {
+                alert('لم يتم العثور على بيانات. يرجى رفع ميزان المراجعة أولاً.');
+                window.location.href = 'data-ingestion.html';
+                return;
+            }
+
+            const auditFileKey = `polarisAuditFile_${activeClientId}`;
+            const storedData = localStorage.getItem(auditFileKey);
+            
+            if (!storedData) {
+                alert('لم يتم العثور على بيانات. يرجى رفع ميزان المراجعة أولاً.');
+                window.location.href = 'data-ingestion.html';
+                return;
+            }
+
+            try {
+                const auditFile = JSON.parse(storedData);
+                displayDashboard(auditFile);
+            } catch (e) {
+                console.error('خطأ في قراءة البيانات:', e);
+                alert('حدث خطأ في قراءة البيانات');
+            }
+        }
+
+        function displayDashboard(auditFile) {
+            // عرض اسم الشركة
+            document.getElementById('companyName').textContent = auditFile.companyName || 'شركة';
+
+            // حساب المجاميع
+            const tbData = auditFile.trialBalance || [];
+            const totals = calculateTotals(tbData);
+
+            // عرض المؤشرات
+            document.getElementById('totalRevenue').textContent = formatCurrency(totals.revenue);
+            document.getElementById('netProfit').textContent = formatCurrency(totals.netProfit);
+            document.getElementById('totalAssets').textContent = formatCurrency(totals.assets);
+            
+            const profitMargin = totals.revenue > 0 ? (totals.netProfit / totals.revenue * 100).toFixed(1) : 0;
+            document.getElementById('profitMargin').textContent = profitMargin + '%';
+
+            // عرض التنبيهات
+            displayAlerts(totals);
+
+            // رسم الرسوم البيانية
+            drawCharts(totals);
+        }
+
+        function calculateTotals(tbData) {
+            let assets = 0, liabilities = 0, equity = 0;
+            let revenue = 0, cogs = 0, expenses = 0;
+            let currentAssets = 0, fixedAssets = 0;
+            let currentLiabilities = 0, longTermLiabilities = 0;
+
+            tbData.forEach(row => {
+                const balance = parseFloat(row.Balance) || 0;
+                const category = row.Category || '';
+
+                if (category.includes('أصول متداولة') || category.includes('Current Assets')) {
+                    currentAssets += Math.abs(balance);
+                    assets += Math.abs(balance);
+                } else if (category.includes('أصول ثابتة') || category.includes('Fixed Assets')) {
+                    fixedAssets += Math.abs(balance);
+                    assets += Math.abs(balance);
+                } else if (category.includes('التزامات متداولة') || category.includes('Current Liabilities')) {
+                    currentLiabilities += Math.abs(balance);
+                    liabilities += Math.abs(balance);
+                } else if (category.includes('التزامات طويلة') || category.includes('Long-term Liabilities')) {
+                    longTermLiabilities += Math.abs(balance);
+                    liabilities += Math.abs(balance);
+                } else if (category.includes('حقوق الملكية') || category.includes('Equity')) {
+                    equity += Math.abs(balance);
+                } else if (category.includes('إيرادات') || category.includes('Revenue')) {
+                    revenue += Math.abs(balance);
+                } else if (category.includes('تكلفة') || category.includes('COGS')) {
+                    cogs += Math.abs(balance);
+                } else if (category.includes('مصروفات') || category.includes('Expenses')) {
+                    expenses += Math.abs(balance);
+                }
+            });
+
+            const netProfit = revenue - cogs - expenses;
+
+            return {
+                assets, liabilities, equity,
+                revenue, cogs, expenses, netProfit,
+                currentAssets, fixedAssets,
+                currentLiabilities, longTermLiabilities
+            };
+        }
+
+        function displayAlerts(totals) {
+            const alertsContainer = document.getElementById('alertsContainer');
+            const alerts = [];
+
+            // تحليل السيولة
+            const currentRatio = totals.currentLiabilities > 0 ? 
+                (totals.currentAssets / totals.currentLiabilities) : 0;
+            
+            if (currentRatio < 1) {
+                alerts.push({
+                    type: 'critical',
+                    icon: 'fa-exclamation-triangle',
+                    title: 'تحذير: أزمة سيولة',
+                    message: `نسبة السيولة ${currentRatio.toFixed(2)} أقل من 1. الأصول المتداولة لا تغطي الالتزامات المتداولة.`
+                });
+            }
+
+            // تحليل الربحية
+            const profitMargin = totals.revenue > 0 ? (totals.netProfit / totals.revenue * 100) : 0;
+            if (profitMargin < 5) {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'fa-chart-line',
+                    title: 'تنبيه: هامش ربح منخفض',
+                    message: `هامش الربح ${profitMargin.toFixed(1)}% أقل من 5%. يُنصح بمراجعة استراتيجية التسعير والتكاليف.`
+                });
+            } else if (profitMargin >= 10) {
+                alerts.push({
+                    type: 'success',
+                    icon: 'fa-check-circle',
+                    title: 'ممتاز: ربحية جيدة',
+                    message: `هامش الربح ${profitMargin.toFixed(1)}% يعتبر جيداً. استمر في الأداء الحالي.`
+                });
+            }
+
+            // تحليل المديونية
+            const debtRatio = totals.assets > 0 ? (totals.liabilities / totals.assets * 100) : 0;
+            if (debtRatio > 70) {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'fa-balance-scale',
+                    title: 'تنبيه: مديونية مرتفعة',
+                    message: `نسبة المديونية ${debtRatio.toFixed(1)}% مرتفعة. يُنصح بخطة لتخفيض الديون.`
+                });
+            }
+
+            // عرض التنبيهات
+            if (alerts.length === 0) {
+                alertsContainer.innerHTML = '<p class="text-muted">لا توجد تنبيهات حالياً. الوضع المالي مستقر.</p>';
+            } else {
+                alertsContainer.innerHTML = alerts.map(alert => `
+                    <div class="alert-item alert-${alert.type}">
+                        <i class="fas ${alert.icon} me-2"></i>
+                        <strong>${alert.title}:</strong> ${alert.message}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function drawCharts(totals) {
+            // رسم الإيرادات والمصروفات
+            const revenueExpenseCtx = document.getElementById('revenueExpenseChart').getContext('2d');
+            new Chart(revenueExpenseCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['الإيرادات', 'تكلفة البضاعة', 'المصروفات', 'صافي الربح'],
+                    datasets: [{
+                        label: 'المبلغ (ريال)',
+                        data: [totals.revenue, totals.cogs, totals.expenses, totals.netProfit],
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#007bff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // رسم توزيع الأصول
+            const assetsCtx = document.getElementById('assetsChart').getContext('2d');
+            new Chart(assetsCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['أصول متداولة', 'أصول ثابتة'],
+                    datasets: [{
+                        data: [totals.currentAssets, totals.fixedAssets],
+                        backgroundColor: ['#36a2eb', '#ff6384']
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // رسم النسب المالية
+            const currentRatio = totals.currentLiabilities > 0 ? 
+                (totals.currentAssets / totals.currentLiabilities) : 0;
+            const debtRatio = totals.assets > 0 ? (totals.liabilities / totals.assets * 100) : 0;
+            const roe = totals.equity > 0 ? (totals.netProfit / totals.equity * 100) : 0;
+
+            const ratiosCtx = document.getElementById('ratiosChart').getContext('2d');
+            new Chart(ratiosCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['نسبة السيولة', 'نسبة المديونية', 'العائد على حقوق الملكية'],
+                    datasets: [{
+                        label: 'النسب المالية',
+                        data: [currentRatio, debtRatio, roe],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)'
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // رسم هيكل رأس المال
+            const capitalCtx = document.getElementById('capitalStructureChart').getContext('2d');
+            new Chart(capitalCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['الالتزامات', 'حقوق الملكية'],
+                    datasets: [{
+                        data: [totals.liabilities, totals.equity],
+                        backgroundColor: ['#ff6384', '#36a2eb']
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('ar-SA', {
+                style: 'currency',
+                currency: 'SAR',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
+</body>
+</html>
+
