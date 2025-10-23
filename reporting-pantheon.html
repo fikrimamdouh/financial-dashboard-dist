@@ -1044,6 +1044,18 @@
         }
 
         function generateZakatReport(data) {
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            const year = new Date().getFullYear();
+            
+            // استخدام محرك حساب الزكاة الصحيح
+            const zakatData = calculateZakatCorrectly(data);
+            
+            // استخدام دالة التقرير المفصل من محرك الزكاة
+            return generateDetailedZakatReport(zakatData, companyName, year);
+        }
+
+        // دالة احتياطية للتوافق مع الكود القديم (لن تُستخدم)
+        function generateZakatReport_OLD(data) {
             const totals = calculateTotals(data);
             const companyName = auditFile.clientInfo?.name || 'الشركة';
             const year = new Date().getFullYear();
@@ -1827,6 +1839,7 @@
             html2pdf().set(opt).from(element).save();
         }
     </script>
+    <script src="zakat-calculator.js"></script>
     <script src="reports-library.js"></script>
 </body>
 </html>
