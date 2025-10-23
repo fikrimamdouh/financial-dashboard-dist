@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الحكمة المالية - التقارير الشاملة | Polaris</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
+        
+        :root { 
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Orbitron', sans-serif; 
+            --color-primary-glow: #00BFFF;
+            --color-bg: #010409;
+            --color-surface: rgba(13, 17, 23, 0.8); 
+            --color-border: rgba(56, 139, 253, 0.3);
+            --color-text-primary: #E6EDF3;
+            --color-text-secondary: #7D8590;
+            --color-warning: #ffc107;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+        }
+        
+        body { 
+            font-family: var(--font-family-main);
+            direction: rtl;
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+        }
+        
+        .grid-background { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+        }
+        
+        .glow-background { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%);
+            transform: translate(-50%, -50%);
+            animation: pulse 10s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } 
+        }
+        
+        .main-content { padding: 2rem; }
+        
+        .page-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1rem;
+        }
+        
+        .page-title { 
+            font-family: var(--font-family-display);
+            font-size: 2.5rem;
+            color: var(--color-primary-glow);
+            text-shadow: 0 0 15px var(--color-primary-glow);
+            margin: 0;
+        }
+        
+        .sidebar-nav {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-pills .nav-link {
+            color: var(--color-text-primary);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--color-primary-glow);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--color-primary-glow);
+            color: var(--color-bg);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+        
+        .report-section {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-primary-glow);
+        }
+        
+        .report-title {
+            font-family: var(--font-family-display);
+            font-size: 1.8rem;
+            color: var(--color-primary-glow);
+            margin: 0;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-action {
+            background-color: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-action:hover {
+            background-color: var(--color-primary-glow);
+            border-color: var(--color-primary-glow);
+            color: var(--color-bg);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .fs-table {
+            width: 100%;
+            color: var(--color-text-primary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .fs-table th,
+        .fs-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+        
+        .fs-table thead th {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--color-primary-glow);
+            font-weight: 700;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .fs-table tbody tr:hover {
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        .fs-group-header {
+            font-family: var(--font-family-display);
+            font-size: 1.1rem;
+            color: var(--color-primary-glow);
+            font-weight: 700;
+            padding-top: 1.5rem !important;
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        .fs-subgroup-header {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            background-color: rgba(255, 255, 255, 0.02);
+            padding-right: 2rem !important;
+        }
+        
+        .fs-item-row td:first-child {
+            padding-right: 3rem;
+        }
+        
+        .fs-total-row {
+            font-weight: 700;
+            border-top: 2px solid var(--color-primary-glow);
+            background-color: rgba(0, 191, 255, 0.1);
+        }
+        
+        .amount {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            text-align: left;
+            direction: ltr;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            background-color: transparent;
+            color: var(--color-text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background-color: var(--color-primary-glow);
+            border-color: var(--color-primary-glow);
+            color: var(--color-bg);
+        }
+        
+        .toggle-btn:hover {
+            border-color: var(--color-primary-glow);
+            color: var(--color-primary-glow);
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .report-section {
+                page-break-inside: avoid;
+                border: none;
+                box-shadow: none;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .fs-table th,
+            .fs-table td {
+                color: black;
+            }
+        }
+        
+        .company-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+        
+        .company-name {
+            font-family: var(--font-family-display);
+            font-size: 1.5rem;
+            color: var(--color-primary-glow);
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-period {
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-background"></div>
+    <div class="glow-background"></div>
+
+    <main class="main-content">
+        <div class="page-header no-print">
+            <div>
+                <h1 class="page-title">منصة الحكمة المالية</h1>
+                <p class="text-secondary mb-0" id="clientNameSubtitle">التقارير المالية الشاملة</p>
+            </div>
+            <div>
+                <button class="btn btn-action" onclick="window.location.href='account-mapping.html'">
+                    <i class="fas fa-arrow-right me-2"></i>العودة للمراجعة
+                </button>
+            </div>
+        </div>
+
+        <div id="loader" class="text-center mt-5">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-2">جاري تحميل البيانات المالية...</p>
+        </div>
+
+        <div id="appContainer" style="display: none;">
+            <div class="row">
+                <div class="col-md-3 no-print">
+                    <div class="sidebar-nav">
+                        <h5 class="mb-3" style="color: var(--color-primary-glow);">
+                            <i class="fas fa-list me-2"></i>القوائم والتقارير
+                        </h5>
+                        <ul class="nav nav-pills flex-column" id="reportsNav">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#trial-balance" data-bs-toggle="pill">
+                                    <i class="fas fa-balance-scale me-2"></i>ميزان المراجعة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#balance-sheet" data-bs-toggle="pill">
+                                    <i class="fas fa-file-invoice me-2"></i>قائمة المركز المالي
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#income-statement" data-bs-toggle="pill">
+                                    <i class="fas fa-chart-line me-2"></i>قائمة الدخل الشامل
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#cash-flow" data-bs-toggle="pill">
+                                    <i class="fas fa-money-bill-wave me-2"></i>قائمة التدفقات النقدية
+                                </a>
+                            </li>
+                            <li class="nav-item mt-3">
+                                <h6 style="color: var(--color-text-secondary); padding: 0.5rem;">الإيضاحات المتممة</h6>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-cash" data-bs-toggle="pill">
+                                    <i class="fas fa-coins me-2"></i>النقدية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-receivables" data-bs-toggle="pill">
+                                    <i class="fas fa-users me-2"></i>الذمم المدينة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-inventory" data-bs-toggle="pill">
+                                    <i class="fas fa-boxes me-2"></i>المخزون
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-fixed-assets" data-bs-toggle="pill">
+                                    <i class="fas fa-building me-2"></i>الأصول الثابتة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-payables" data-bs-toggle="pill">
+                                    <i class="fas fa-file-invoice-dollar me-2"></i>الموردين
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-creditors" data-bs-toggle="pill">
+                                    <i class="fas fa-hand-holding-usd me-2"></i>الدائنون
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-equity" data-bs-toggle="pill">
+                                    <i class="fas fa-landmark me-2"></i>حقوق الملكية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-revenue" data-bs-toggle="pill">
+                                    <i class="fas fa-dollar-sign me-2"></i>الإيرادات
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-expenses" data-bs-toggle="pill">
+                                    <i class="fas fa-receipt me-2"></i>المصاريف
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-other-revenue" data-bs-toggle="pill">
+                                    <i class="fas fa-plus-circle me-2"></i>إيرادات أخرى
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-other-payables" data-bs-toggle="pill">
+                                    <i class="fas fa-clipboard-list me-2"></i>أرصدة دائنة أخرى
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="tab-content" id="reportsContent">
+                        <!-- المحتوى سيتم إنشاؤه ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let excelData = {};
+        let companyInfo = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log("🚀 تحميل منصة الحكمة المالية...");
+            
+            try {
+                await loadExcelFile();
+                renderAllReports();
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+            } catch (error) {
+                console.error("خطأ في تحميل البيانات:", error);
+                document.getElementById('loader').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>خطأ في تحميل البيانات</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        async function loadExcelFile() {
+            const response = await fetch('financial-data.json');
+            excelData = await response.json();
+            console.log("✅ تم تحميل البيانات المالية بنجاح", Object.keys(excelData));
+        }
+
+        function renderAllReports() {
+            const container = document.getElementById('reportsContent');
+            
+            container.innerHTML = `
+                ${renderTrialBalance()}
+                ${renderBalanceSheet()}
+                ${renderIncomeStatement()}
+                ${renderCashFlow()}
+                ${renderNoteCash()}
+                ${renderNoteReceivables()}
+                ${renderNoteInventory()}
+                ${renderNoteFixedAssets()}
+                ${renderNotePayables()}
+                ${renderNoteCreditors()}
+                ${renderNoteEquity()}
+                ${renderNoteRevenue()}
+                ${renderNoteExpenses()}
+                ${renderNoteOtherRevenue()}
+                ${renderNoteOtherPayables()}
+            `;
+        }
+
+        function renderTrialBalance() {
+            const data = excelData['ميزان المراجعة 2024'] || [];
+            if (data.length === 0) return '';
+            
+            // استخراج معلومات الشركة من الصفوف الأولى
+            const companyName = "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            let startRow = 3; // البداية من الصف الرابع (بعد العناوين)
+            
+            for (let i = startRow; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const accountName = row[12] || '';
+                const accountCode = row[13] || '';
+                const openingDebit = formatNumber(row[11]);
+                const openingCredit = formatNumber(row[10]);
+                const movementDebit = formatNumber(row[9]);
+                const movementCredit = formatNumber(row[8]);
+                const closingDebit = formatNumber(row[7]);
+                const closingCredit = formatNumber(row[6]);
+                
+                if (accountName) {
+                    tableRows += `
+                        <tr>
+                            <td>${accountCode}</td>
+                            <td>${accountName}</td>
+                            <td class="amount">${openingDebit}</td>
+                            <td class="amount">${openingCredit}</td>
+                            <td class="amount">${movementDebit}</td>
+                            <td class="amount">${movementCredit}</td>
+                            <td class="amount">${closingDebit}</td>
+                            <td class="amount">${closingCredit}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade show active" id="trial-balance">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">ميزان المراجعة العام</div>
+                            <div class="report-period">خلال الفترة من 2024/01/01 إلى ${period}</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">ميزان المراجعة</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('trial-balance')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('trial-balance', 'ميزان_المراجعة')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>كود الحساب</th>
+                                        <th>الحساب</th>
+                                        <th>أول المدة مدين</th>
+                                        <th>أول المدة دائن</th>
+                                        <th>الحركة مدين</th>
+                                        <th>الحركة دائن</th>
+                                        <th>الرصيد مدين</th>
+                                        <th>الرصيد دائن</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBalanceSheet() {
+            const data = excelData['قائمة المركز المال'] || [];
+            if (data.length === 0) return '';
+            
+            const companyName = data[1] ? data[1][1] : "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            for (let i = 4; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const itemName = row[1] || '';
+                const noteRef = row[2] || '';
+                const amount = formatNumber(row[3]);
+                
+                if (!itemName) continue;
+                
+                // تحديد نوع الصف
+                if (itemName.includes('الموجودات') || itemName.includes('المطلوبات') || itemName.includes('حقوق')) {
+                    tableRows += `
+                        <tr class="fs-group-header">
+                            <td colspan="3"><strong>${itemName}</strong></td>
+                        </tr>
+                    `;
+                } else if (itemName.includes('إجمالي')) {
+                    tableRows += `
+                        <tr class="fs-total-row">
+                            <td><strong>${itemName}</strong></td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount"><strong>${amount}</strong></td>
+                        </tr>
+                    `;
+                } else {
+                    tableRows += `
+                        <tr class="fs-item-row">
+                            <td>${itemName}</td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount">${amount}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade" id="balance-sheet">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">قائمة المركز المالي في ${period}م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة المركز المالي</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('balance-sheet')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('balance-sheet', 'قائمة_المركز_المالي')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>إيضاح</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderIncomeStatement() {
+            const data = excelData['الدخل الشامل'] || [];
+            if (data.length === 0) return '';
+            
+            const companyName = "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            for (let i = 3; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const itemName = row[1] || '';
+                const noteRef = row[2] || '';
+                const amount = formatNumber(row[3]);
+                
+                if (!itemName) continue;
+                
+                if (itemName.includes('إجمالي') || itemName.includes('صافي')) {
+                    tableRows += `
+                        <tr class="fs-total-row">
+                            <td><strong>${itemName}</strong></td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount"><strong>${amount}</strong></td>
+                        </tr>
+                    `;
+                } else {
+                    tableRows += `
+                        <tr class="fs-item-row">
+                            <td>${itemName}</td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount">${amount}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade" id="income-statement">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">قائمة الدخل الشامل للسنة المنتهية في ${period}م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة الدخل الشامل</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('income-statement')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('income-statement', 'قائمة_الدخل')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>إيضاح</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCashFlow() {
+            // سيتم إنشاء قائمة التدفقات النقدية من البيانات المتاحة
+            return `
+                <div class="tab-pane fade" id="cash-flow">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">مصنع بن حامد للمنتجات الأسمنتية</div>
+                            <div class="report-period">قائمة التدفقات النقدية للسنة المنتهية في 2024/12/31م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة التدفقات النقدية</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('cash-flow')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('cash-flow', 'قائمة_التدفقات_النقدية')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية</strong></td>
+                                    </tr>
+                                    <tr class="fs-item-row">
+                                        <td>صافي الربح قبل الزكاة</td>
+                                        <td class="amount">-</td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة التشغيلية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة الاستثمارية</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة الاستثمارية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة التمويلية</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة التمويلية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي التغير في النقدية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNote(noteId, sheetName, title, icon) {
+            const data = excelData[sheetName] || [];
+            if (data.length === 0) {
+                return `
+                    <div class="tab-pane fade" id="${noteId}">
+                        <div class="report-section">
+                            <div class="alert alert-warning">
+                                لا توجد بيانات متاحة لهذا الإيضاح
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            let tableRows = '';
+            let headers = [];
+            
+            // استخراج العناوين
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                if (row && row.some(cell => cell && cell.toString().trim())) {
+                    // البحث عن صف العناوين
+                    if (row.some(cell => cell && (cell.toString().includes('البيان') || cell.toString().includes('الحساب')))) {
+                        headers = row.filter(cell => cell && cell.toString().trim());
+                        break;
+                    }
+                }
+            }
+            
+            // إذا لم نجد عناوين، استخدم عناوين افتراضية
+            if (headers.length === 0) {
+                headers = ['البيان', 'المبلغ'];
+            }
+            
+            // استخراج البيانات
+            let startDataRow = headers.length > 0 ? 5 : 3;
+            for (let i = startDataRow; i < data.length; i++) {
+                const row = data[i];
+                if (!row || !row.some(cell => cell && cell.toString().trim())) continue;
+                
+                let rowHtml = '<tr class="fs-item-row">';
+                for (let j = 0; j < Math.min(row.length, headers.length); j++) {
+                    const cell = row[j] || '';
+                    const isNumber = !isNaN(parseFloat(cell)) && isFinite(cell);
+                    rowHtml += `<td class="${isNumber ? 'amount' : ''}">${isNumber ? formatNumber(cell) : cell}</td>`;
+                }
+                rowHtml += '</tr>';
+                tableRows += rowHtml;
+            }
+            
+            return `
+                <div class="tab-pane fade" id="${noteId}">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">مصنع بن حامد للمنتجات الأسمنتية</div>
+                            <div class="report-period">${title}</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">
+                                <i class="${icon} me-2"></i>${title}
+                            </h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('${noteId}')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('${noteId}', '${title.replace(/\s/g, '_')}')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        ${headers.map(h => `<th>${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNoteCash() {
+            return renderNote('note-cash', 'النقدية', 'إيضاح النقدية', 'fas fa-coins');
+        }
+
+        function renderNoteReceivables() {
+            return renderNote('note-receivables', 'ذمم مدينة', 'إيضاح الذمم المدينة', 'fas fa-users');
+        }
+
+        function renderNoteInventory() {
+            return renderNote('note-inventory', 'المخزون 2024', 'إيضاح المخزون', 'fas fa-boxes');
+        }
+
+        function renderNoteFixedAssets() {
+            return renderNote('note-fixed-assets', 'الاصول الثابتة', 'إيضاح الأصول الثابتة', 'fas fa-building');
+        }
+
+        function renderNotePayables() {
+            return renderNote('note-payables', 'ايضاح 5 ( الموردين )', 'إيضاح الموردين', 'fas fa-file-invoice-dollar');
+        }
+
+        function renderNoteCreditors() {
+            return renderNote('note-creditors', 'ايضاح 6 ( الدائنون )', 'إيضاح الدائنون', 'fas fa-hand-holding-usd');
+        }
+
+        function renderNoteEquity() {
+            return renderNote('note-equity', 'ايضاح رقم 7 حقوق الملكية', 'إيضاح حقوق الملكية', 'fas fa-landmark');
+        }
+
+        function renderNoteRevenue() {
+            return renderNote('note-revenue', 'الايرادات ', 'إيضاح الإيرادات', 'fas fa-dollar-sign');
+        }
+
+        function renderNoteExpenses() {
+            return renderNote('note-expenses', 'المصاريف ', 'إيضاح المصاريف', 'fas fa-receipt');
+        }
+
+        function renderNoteOtherRevenue() {
+            return renderNote('note-other-revenue', 'إيرادات أخري ', 'إيضاح الإيرادات الأخرى', 'fas fa-plus-circle');
+        }
+
+        function renderNoteOtherPayables() {
+            return renderNote('note-other-payables', 'أرصدة  دائنة أخري', 'إيضاح الأرصدة الدائنة الأخرى', 'fas fa-clipboard-list');
+        }
+
+        function formatNumber(value) {
+            if (!value || value === '') return '-';
+            const num = parseFloat(value);
+            if (isNaN(num)) return value;
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function printReport(reportId) {
+            const reportElement = document.getElementById(reportId);
+            if (!reportElement) return;
+            
+            const printWindow = window.open('', '_blank');
+            const reportContent = reportElement.innerHTML;
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>طباعة التقرير</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+                    <style>
+                        body { 
+                            font-family: 'Tajawal', Arial, sans-serif;
+                            direction: rtl;
+                            padding: 2rem;
+                            background: white;
+                            color: black;
+                        }
+                        .fs-table { 
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 2rem;
+                        }
+                        .fs-table th,
+                        .fs-table td {
+                            padding: 0.75rem;
+                            border: 1px solid #dee2e6;
+                            text-align: right;
+                        }
+                        .fs-table thead th {
+                            background-color: #f8f9fa;
+                            font-weight: bold;
+                            text-align: center;
+                        }
+                        .fs-group-header {
+                            background-color: #e9ecef;
+                            font-weight: bold;
+                        }
+                        .fs-total-row {
+                            background-color: #f8f9fa;
+                            font-weight: bold;
+                            border-top: 2px solid #000;
+                        }
+                        .amount {
+                            text-align: left;
+                            direction: ltr;
+                            font-family: 'Courier New', monospace;
+                        }
+                        .company-header {
+                            text-align: center;
+                            margin-bottom: 2rem;
+                            padding-bottom: 1rem;
+                            border-bottom: 2px solid #000;
+                        }
+                        .company-name {
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            margin-bottom: 0.5rem;
+                        }
+                        .report-period {
+                            font-size: 1rem;
+                            color: #666;
+                        }
+                        @media print {
+                            .no-print {
+                                display: none !important;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${reportContent}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+
+        function exportToExcel(reportId, filename) {
+            alert('سيتم تفعيل التصدير إلى Excel قريباً');
+        }
+    </script>
+</body>
+</html>
+
