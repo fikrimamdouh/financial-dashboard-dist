@@ -1515,29 +1515,17 @@
         }
 
         // Placeholder functions for other reports
-        function generateTrendAnalysis(data) {
-            return `<p class="text-center p-4">تحليل الاتجاهات - قيد التطوير</p>`;
-        }
+        function generateTrendAnalysis(data) { return ReportsLibrary.generateHorizontalAnalysis(data); }
 
-        function generateVerticalAnalysis(data) {
-            return `<p class="text-center p-4">التحليل الرأسي - قيد التطوير</p>`;
-        }
+        function generateVerticalAnalysis(data) { return ReportsLibrary.generateCommonSize(data); }
 
-        function generateHorizontalAnalysis(data) {
-            return `<p class="text-center p-4">التحليل الأفقي - قيد التطوير</p>`;
-        }
+        function generateHorizontalAnalysis(data) { return ReportsLibrary.generateHorizontalAnalysis(data); }
 
-        function generateCommonSize(data) {
-            return `<p class="text-center p-4">القوائم بالنسب المئوية - قيد التطوير</p>`;
-        }
+        function generateCommonSize(data) { return ReportsLibrary.generateCommonSize(data); }
 
-        function generateCashCycle(data) {
-            return `<p class="text-center p-4">دورة التحويل النقدي - قيد التطوير</p>`;
-        }
+        function generateCashCycle(data) { return ReportsLibrary.generateCashCycle(data); }
 
-        function generateEVA(data) {
-            return `<p class="text-center p-4">القيمة الاقتصادية المضافة - قيد التطوير</p>`;
-        }
+        function generateEVA(data) { return ReportsLibrary.generateEVA(data); }
 
         function generateWhatIfAnalysis(data) {
             const totals = calculateTotals(data);
@@ -1664,63 +1652,63 @@
         }
 
         function generateCVP(data) {
-            return `<p class="text-center p-4">تحليل التكلفة-الحجم-الربح - قيد التطوير</p>`;
+            return ReportsLibrary.generateCVPAnalysis(data);
         }
 
         function generateSensitivity(data) {
-            return `<p class="text-center p-4">تحليل الحساسية - قيد التطوير</p>`;
+            return ReportsLibrary.generateSensitivityAnalysis(data);
         }
 
         function generateScenarios(data) {
-            return `<p class="text-center p-4">تحليل السيناريوهات - قيد التطوير</p>`;
+            return ReportsLibrary.generateScenarioAnalysis(data);
         }
 
         function generateForecast(data) {
-            return `<p class="text-center p-4">التدفقات النقدية المتوقعة - قيد التطوير</p>`;
+            return ReportsLibrary.generateCashFlowForecast(data);
         }
 
         function generateScorecard(data) {
-            return `<p class="text-center p-4">بطاقة الأداء المتوازن - قيد التطوير</p>`;
+            return ReportsLibrary.generateBalancedScorecard(data);
         }
 
         function generateMasterBudget(data) {
-            return `<p class="text-center p-4">الموازنة الرئيسية - قيد التطوير</p>`;
+            return ReportsLibrary.generateMasterBudget(data);
         }
 
         function generateSalesBudget(data) {
-            return `<p class="text-center p-4">موازنة المبيعات - قيد التطوير</p>`;
+            return ReportsLibrary.generateSalesBudget(data);
         }
 
         function generateProductionBudget(data) {
-            return `<p class="text-center p-4">موازنة الإنتاج - قيد التطوير</p>`;
+            return ReportsLibrary.generateProductionBudget(data);
         }
 
         function generateCashBudget(data) {
-            return `<p class="text-center p-4">موازنة النقدية - قيد التطوير</p>`;
+            return ReportsLibrary.generateCashBudget(data);
         }
 
         function generateCapexBudget(data) {
-            return `<p class="text-center p-4">موازنة النفقات الرأسمالية - قيد التطوير</p>`;
+            return ReportsLibrary.generateCapitalBudget(data);
         }
 
         function generateVarianceAnalysis(data) {
-            return `<p class="text-center p-4">تحليل الانحرافات - قيد التطوير</p>`;
+            return ReportsLibrary.generateVarianceAnalysis(data);
         }
 
         function generateFlexibleBudget(data) {
-            return `<p class="text-center p-4">الموازنة المرنة - قيد التطوير</p>`;
+            return ReportsLibrary.generateFlexibleBudget(data);
         }
 
         function generateZeroBasedBudget(data) {
-            return `<p class="text-center p-4">الموازنة الصفرية - قيد التطوير</p>`;
+            return ReportsLibrary.generateZeroBasedBudget(data);
         }
 
         function generateAgingReport(data) {
-            return `<p class="text-center p-4">تقرير أعمار الذمم - قيد التطوير</p>`;
+            return ReportsLibrary.generateAgingReport(data);
         }
 
         function generateExpenseAnalysis(data) {
-            return `<p class="text-center p-4">تحليل المصروفات الاستثنائية - قيد التطوير</p>`;
+            return ReportsLibrary.generateExceptionalExpenses(data);
         }
 
         function generateAdjustmentsLog(auditFile) {
@@ -1763,15 +1751,15 @@
         }
 
         function generateInventoryAnalysis(data) {
-            return `<p class="text-center p-4">تحليل حركة المخزون - قيد التطوير</p>`;
+            return ReportsLibrary.generateInventoryMovement(data);
         }
 
         function generateWorkingCapital(data) {
-            return `<p class="text-center p-4">كفاءة رأس المال العامل - قيد التطوير</p>`;
+            return ReportsLibrary.generateWorkingCapitalEfficiency(data);
         }
 
         function generateRiskReport(data) {
-            return `<p class="text-center p-4">تقرير المخاطر المالية - قيد التطوير</p>`;
+            return ReportsLibrary.generateFinancialRisks(data);
         }
 
         function generateExecutiveDashboard(data) {
@@ -1814,11 +1802,11 @@
         }
 
         function generateOperationalDashboard(data) {
-            return `<p class="text-center p-4">لوحة الأداء التشغيلي - قيد التطوير</p>`;
+            return ReportsLibrary.generateOperationalDashboard(data);
         }
 
         function generateFinancialDashboard(data) {
-            return `<p class="text-center p-4">لوحة الأداء المالي - قيد التطوير</p>`;
+            return ReportsLibrary.generateFinancialDashboard(data);
         }
 
         // Print and PDF functions
@@ -1839,6 +1827,7 @@
             html2pdf().set(opt).from(element).save();
         }
     </script>
+    <script src="reports-library.js"></script>
 </body>
 </html>
 
