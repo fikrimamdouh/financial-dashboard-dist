@@ -3,61 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الحكمة المالية | Polaris</title>
+    <title>منصة الحكمة المالية - التقارير الشاملة | Polaris</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap'  );
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
+        
         :root { 
-            --font-family-main: 'Tajawal', sans-serif; --font-family-display: 'Orbitron', sans-serif; 
-            --color-primary-glow: #00BFFF; --color-bg: #010409; --color-surface: rgba(13, 17, 23, 0.8); 
-            --color-border: rgba(56, 139, 253, 0.3); --color-text-primary: #E6EDF3; --color-text-secondary: #7D8590;
-            --color-warning: #ffc107; --color-success: #28a745; --color-danger: #dc3545;
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Orbitron', sans-serif; 
+            --color-primary-glow: #00BFFF;
+            --color-bg: #010409;
+            --color-surface: rgba(13, 17, 23, 0.8); 
+            --color-border: rgba(56, 139, 253, 0.3);
+            --color-text-primary: #E6EDF3;
+            --color-text-secondary: #7D8590;
+            --color-warning: #ffc107;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
         }
-        body { font-family: var(--font-family-main); direction: rtl; background-color: var(--color-bg); color: var(--color-text-primary); }
-        .grid-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px); background-size: 40px 40px; z-index: -2; }
-        .glow-background { position: fixed; top: 50%; left: 50%; width: 800px; height: 800px; background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%); transform: translate(-50%, -50%); animation: pulse 10s infinite ease-in-out; z-index: -1; }
-        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } }
+        
+        body { 
+            font-family: var(--font-family-main);
+            direction: rtl;
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+        }
+        
+        .grid-background { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+        }
+        
+        .glow-background { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%);
+            transform: translate(-50%, -50%);
+            animation: pulse 10s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } 
+        }
         
         .main-content { padding: 2rem; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; }
-        .page-title { font-family: var(--font-family-display); font-size: 2rem; color: var(--color-primary-glow); text-shadow: 0 0 10px var(--color-primary-glow); }
-        .btn-primary-glow { background-color: var(--color-primary-glow); border-color: var(--color-primary-glow); color: var(--color-bg); font-weight: bold; box-shadow: 0 0 15px rgba(0, 191, 255, 0.5); transition: all 0.3s ease; }
-        .btn-primary-glow:hover:not(:disabled) { box-shadow: 0 0 25px rgba(0, 191, 255, 0.8); transform: translateY(-2px); }
-
-        .split-container { display: grid; grid-template-columns: 2.5fr 1fr; gap: 1.5rem; height: 80vh; }
-        .panel { background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; backdrop-filter: blur(5px); height: 100%; overflow-y: auto; }
-        .panel-title { font-family: var(--font-family-display); font-size: 1.2rem; margin-bottom: 1rem; }
         
-        .dashboard-container { display: flex; justify-content: space-around; gap: 1rem; background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; }
-        .ratio-card { text-align: center; }
-        .ratio-value { font-family: var(--font-family-display); font-size: 1.5rem; color: var(--color-primary-glow); }
-        .ratio-label { font-size: 0.8rem; color: var(--color-text-secondary); }
-        .alerts-container .alert { font-size: 0.9rem; padding: 0.5rem 1rem; }
-
-        .fs-table { width: 100%; color: var(--color-text-primary); margin-bottom: 2.5rem; font-size: 0.9rem; }
-        .fs-table th, .fs-table td { padding: 0.5rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-        .fs-table thead th { text-align: center; color: var(--color-text-secondary); font-size: 0.8rem; }
-        .fs-table .fs-group-header { font-family: var(--font-family-display); font-size: 1.1rem; color: var(--color-primary-glow); padding-top: 1.5rem; }
-        .fs-table .fs-item-row td:first-child { padding-right: 1.5rem; }
-        .fs-table .fs-total-row { font-weight: bold; border-top: 2px solid var(--color-primary-glow); }
-        .fs-table .amount { font-family: 'Orbitron', monospace; letter-spacing: 0.5px; }
-        .fs-table .note-ref { color: var(--color-text-secondary); font-size: 0.8rem; padding-right: 0.5rem; cursor: pointer; transition: color 0.2s; }
-        .fs-table .note-ref:hover { color: var(--color-primary-glow); }
-        .fs-table .percentage { font-size: 0.75rem; color: var(--color-text-secondary); display: block; }
-        .fs-table .change-value { font-size: 0.8rem; }
-        .fs-table .change-positive { color: var(--color-success); }
-        .fs-table .change-negative { color: var(--color-danger); }
-
-        .validation-status { font-family: var(--font-family-display); padding: 0.5rem 1rem; border-radius: 8px; font-size: 1rem; }
-        .validation-status.valid { background-color: rgba(40, 167, 69, 0.2); color: var(--color-success); border: 1px solid var(--color-success); }
-        .validation-status.invalid { background-color: rgba(220, 53, 69, 0.2); color: var(--color-danger); border: 1px solid var(--color-danger); }
-        .modal-content { background-color: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-primary); }
-        .modal-header { border-bottom-color: var(--color-border); }
-        .modal-title { font-family: var(--font-family-display); color: var(--color-primary-glow); }
-        .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        .page-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1rem;
+        }
+        
+        .page-title { 
+            font-family: var(--font-family-display);
+            font-size: 2.5rem;
+            color: var(--color-primary-glow);
+            text-shadow: 0 0 15px var(--color-primary-glow);
+            margin: 0;
+        }
+        
+        .sidebar-nav {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-pills .nav-link {
+            color: var(--color-text-primary);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--color-primary-glow);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--color-primary-glow);
+            color: var(--color-bg);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+        
+        .report-section {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-primary-glow);
+        }
+        
+        .report-title {
+            font-family: var(--font-family-display);
+            font-size: 1.8rem;
+            color: var(--color-primary-glow);
+            margin: 0;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-action {
+            background-color: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-action:hover {
+            background-color: var(--color-primary-glow);
+            border-color: var(--color-primary-glow);
+            color: var(--color-bg);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .fs-table {
+            width: 100%;
+            color: var(--color-text-primary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .fs-table th,
+        .fs-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+        
+        .fs-table thead th {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--color-primary-glow);
+            font-weight: 700;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .fs-table tbody tr:hover {
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        .fs-group-header {
+            font-family: var(--font-family-display);
+            font-size: 1.1rem;
+            color: var(--color-primary-glow);
+            font-weight: 700;
+            padding-top: 1.5rem !important;
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        .fs-subgroup-header {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            background-color: rgba(255, 255, 255, 0.02);
+            padding-right: 2rem !important;
+        }
+        
+        .fs-item-row td:first-child {
+            padding-right: 3rem;
+        }
+        
+        .fs-total-row {
+            font-weight: 700;
+            border-top: 2px solid var(--color-primary-glow);
+            background-color: rgba(0, 191, 255, 0.1);
+        }
+        
+        .amount {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            text-align: left;
+            direction: ltr;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            background-color: transparent;
+            color: var(--color-text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background-color: var(--color-primary-glow);
+            border-color: var(--color-primary-glow);
+            color: var(--color-bg);
+        }
+        
+        .toggle-btn:hover {
+            border-color: var(--color-primary-glow);
+            color: var(--color-primary-glow);
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .report-section {
+                page-break-inside: avoid;
+                border: none;
+                box-shadow: none;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .fs-table th,
+            .fs-table td {
+                color: black;
+            }
+        }
+        
+        .company-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+        
+        .company-name {
+            font-family: var(--font-family-display);
+            font-size: 1.5rem;
+            color: var(--color-primary-glow);
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-period {
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -65,440 +297,721 @@
     <div class="glow-background"></div>
 
     <main class="main-content">
-        <div class="page-header">
+        <div class="page-header no-print">
             <div>
-                <h1 class="page-title" id="pageTitle">منصة الحكمة المالية</h1>
-                <p class="text-secondary mb-0" id="clientNameSubtitle">جاري التحميل...</p>
+                <h1 class="page-title">منصة الحكمة المالية</h1>
+                <p class="text-secondary mb-0" id="clientNameSubtitle">التقارير المالية الشاملة</p>
             </div>
-            <div id="validation-status-container" class="text-center"></div>
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-primary-glow" id="exportButton" disabled><i class="fas fa-file-pdf me-2"></i>تصدير التقرير</button>
+            <div>
+                <button class="btn btn-action" onclick="window.location.href='account-mapping.html'">
+                    <i class="fas fa-arrow-right me-2"></i>العودة للمراجعة
+                </button>
             </div>
         </div>
 
-        <div id="loader" class="text-center mt-5"><div class="spinner-border text-info" role="status"></div><p class="mt-2">جاري استيراد البيانات المعتمدة...</p></div>
-        <div id="fatalErrorContainer" class="alert alert-danger" style="display: none;"></div>
+        <div id="loader" class="text-center mt-5">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-2">جاري تحميل البيانات المالية...</p>
+        </div>
 
         <div id="appContainer" style="display: none;">
-            <div class="dashboard-container">
-                <div id="ratios-dashboard" class="d-flex justify-content-around flex-grow-1"></div>
-                <div class="vr"></div>
-                <div id="alerts-container" class="flex-grow-1">
-                    <h6 class="panel-title mb-2 text-center">تنبيهات ذكية</h6>
-                    <div id="alerts-list"></div>
+            <div class="row">
+                <div class="col-md-3 no-print">
+                    <div class="sidebar-nav">
+                        <h5 class="mb-3" style="color: var(--color-primary-glow);">
+                            <i class="fas fa-list me-2"></i>القوائم والتقارير
+                        </h5>
+                        <ul class="nav nav-pills flex-column" id="reportsNav">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#trial-balance" data-bs-toggle="pill">
+                                    <i class="fas fa-balance-scale me-2"></i>ميزان المراجعة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#balance-sheet" data-bs-toggle="pill">
+                                    <i class="fas fa-file-invoice me-2"></i>قائمة المركز المالي
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#income-statement" data-bs-toggle="pill">
+                                    <i class="fas fa-chart-line me-2"></i>قائمة الدخل الشامل
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#cash-flow" data-bs-toggle="pill">
+                                    <i class="fas fa-money-bill-wave me-2"></i>قائمة التدفقات النقدية
+                                </a>
+                            </li>
+                            <li class="nav-item mt-3">
+                                <h6 style="color: var(--color-text-secondary); padding: 0.5rem;">الإيضاحات المتممة</h6>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-cash" data-bs-toggle="pill">
+                                    <i class="fas fa-coins me-2"></i>النقدية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-receivables" data-bs-toggle="pill">
+                                    <i class="fas fa-users me-2"></i>الذمم المدينة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-inventory" data-bs-toggle="pill">
+                                    <i class="fas fa-boxes me-2"></i>المخزون
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-fixed-assets" data-bs-toggle="pill">
+                                    <i class="fas fa-building me-2"></i>الأصول الثابتة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-payables" data-bs-toggle="pill">
+                                    <i class="fas fa-file-invoice-dollar me-2"></i>الموردين
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-creditors" data-bs-toggle="pill">
+                                    <i class="fas fa-hand-holding-usd me-2"></i>الدائنون
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-equity" data-bs-toggle="pill">
+                                    <i class="fas fa-landmark me-2"></i>حقوق الملكية
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-revenue" data-bs-toggle="pill">
+                                    <i class="fas fa-dollar-sign me-2"></i>الإيرادات
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-expenses" data-bs-toggle="pill">
+                                    <i class="fas fa-receipt me-2"></i>المصاريف
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-other-revenue" data-bs-toggle="pill">
+                                    <i class="fas fa-plus-circle me-2"></i>إيرادات أخرى
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#note-other-payables" data-bs-toggle="pill">
+                                    <i class="fas fa-clipboard-list me-2"></i>أرصدة دائنة أخرى
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="split-container">
-                <div class="panel" id="financial-statements-panel">
-                    <div id="financialStatementsView"></div>
-                </div>
-                <div class="panel">
-                    <h5 class="panel-title"><i class="fas fa-puzzle-piece text-warning me-2"></i>أداة ربط الحسابات</h5>
-                    <div id="unmapped-count" class="alert alert-warning-custom"></div>
-                    <ul class="list-group list-group-flush unmapped-list" id="unmappedAccountsList"></ul>
-                    <hr style="border-color: var(--color-border);">
-                    <div class="accordion" id="mappingAccordion"></div>
+                <div class="col-md-9">
+                    <div class="tab-content" id="reportsContent">
+                        <!-- المحتوى سيتم إنشاؤه ديناميكياً -->
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div class="modal fade" id="noteDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="noteDetailModalLabel">تفاصيل الإيضاح</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="noteDetailModalBody"></div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // =================================================================
-    // Polaris - Financial Wisdom Platform - Final Version
-    // =================================================================
+        let excelData = {};
+        let companyInfo = {};
 
-    let finalAuditFile = {};
-    let mappingConfig = {};
-    let statementsData = {};
-    let noteDetailModal;
-
-    document.addEventListener('DOMContentLoaded', ( ) => {
-        console.log("🚀 Initializing Financial Wisdom Platform...");
-        noteDetailModal = new bootstrap.Modal(document.getElementById('noteDetailModal'));
-        
-        const activeClientId = localStorage.getItem('activeClientId') || 'default_client';
-        const auditFileKey = `polarisAuditFile_${activeClientId}`;
-        const savedAuditFile = localStorage.getItem(auditFileKey);
-        if (!savedAuditFile) { handleFatalError("خطأ: لم يتم العثور على ملف مراجعة."); return; }
-        
-        finalAuditFile = JSON.parse(savedAuditFile);
-        document.getElementById('clientNameSubtitle').textContent = finalAuditFile.clientInfo.name;
-
-        const mappingKey = `polarisMapping_${activeClientId}`;
-        const savedMapping = localStorage.getItem(mappingKey);
-        if (savedMapping) { mappingConfig = JSON.parse(savedMapping); } 
-        else { mappingConfig = createDefaultMappingStructure(); }
-
-        runFullProcess();
-        
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('exportButton').addEventListener('click', exportFinalReport);
-    });
-
-    function handleFatalError(message) {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('fatalErrorContainer').textContent = message;
-        document.getElementById('fatalErrorContainer').style.display = 'block';
-    }
-
-    function runFullProcess() {
-        statementsData = aggregateStatements();
-        const { totals, netProfit, cashFlow, ratios } = calculateFinancials();
-        buildMappingUI();
-        renderFinancialStatements(totals, netProfit, cashFlow);
-        renderDashboards(ratios, totals, netProfit);
-        validateStatements(totals, netProfit, cashFlow);
-    }
-
-    function aggregateStatements() {
-        const aggregated = {};
-        const tb = finalAuditFile.processedData;
-        for (const [key, item] of Object.entries(mappingConfig)) {
-            aggregated[key] = {
-                name: item.name,
-                accounts: item.accounts,
-                cy_balance: item.accounts.reduce((sum, accId) => sum + (tb.find(a => a.account_id === accId)?.finalBalance || 0), 0),
-                py_balance: item.accounts.reduce((sum, accId) => sum + (tb.find(a => a.account_id === accId)?.pyb || 0), 0)
-            };
-        }
-        return aggregated;
-    }
-
-    function calculateFinancials() {
-        const sd = statementsData;
-        const totals = {
-            totalAssets: { cy: (sd.BS_Cash.cy_balance || 0) + (sd.BS_CurrentAssets_Other.cy_balance || 0) + (sd.BS_FixedAssets.cy_balance || 0), py: (sd.BS_Cash.py_balance || 0) + (sd.BS_CurrentAssets_Other.py_balance || 0) + (sd.BS_FixedAssets.py_balance || 0) },
-            totalLiabilities: { cy: (sd.BS_CurrentLiabilities.cy_balance || 0) + (sd.BS_NonCurrentLiabilities.cy_balance || 0), py: (sd.BS_CurrentLiabilities.py_balance || 0) + (sd.BS_NonCurrentLiabilities.py_balance || 0) },
-            totalEquity: { cy: (sd.BS_Equity_Capital.cy_balance || 0) + (sd.BS_Equity_RetainedEarnings.cy_balance || 0), py: (sd.BS_Equity_Capital.py_balance || 0) + (sd.BS_Equity_RetainedEarnings.py_balance || 0) },
-        };
-        totals.totalLiabilitiesAndEquity = { cy: totals.totalLiabilities.cy + totals.totalEquity.cy, py: totals.totalLiabilities.py + totals.totalEquity.py };
-
-        const netProfit = {
-            cy: (sd.IS_Revenue.cy_balance || 0) + (sd.IS_COGS.cy_balance || 0) + (sd.IS_AdminExpenses.cy_balance || 0) + (sd.IS_Zakat.cy_balance || 0),
-            py: (sd.IS_Revenue.py_balance || 0) + (sd.IS_COGS.py_balance || 0) + (sd.IS_AdminExpenses.py_balance || 0) + (sd.IS_Zakat.py_balance || 0)
-        };
-        totals.grossProfit = { cy: (sd.IS_Revenue.cy_balance || 0) + (sd.IS_COGS.cy_balance || 0), py: (sd.IS_Revenue.py_balance || 0) + (sd.IS_COGS.py_balance || 0) };
-        
-        const cashFlow = {
-            profitBeforeZakat: { cy: netProfit.cy - (sd.IS_Zakat.cy_balance || 0), py: netProfit.py - (sd.IS_Zakat.py_balance || 0) },
-            depreciation: { cy: sd.CF_Depreciation.cy_balance, py: sd.CF_Depreciation.py_balance },
-        };
-        cashFlow.operatingCashFlow = { cy: cashFlow.profitBeforeZakat.cy + cashFlow.depreciation.cy, py: cashFlow.profitBeforeZakat.py + cashFlow.depreciation.py };
-        cashFlow.netCashChange = { cy: cashFlow.operatingCashFlow.cy, py: cashFlow.operatingCashFlow.py };
-        cashFlow.cashAtBeginning = { cy: sd.BS_Cash.py_balance, py: 0 };
-        cashFlow.cashAtEnd = { cy: cashFlow.cashAtBeginning.cy + cashFlow.netCashChange.cy, py: 0 };
-
-        const ratios = {
-            currentRatio: sd.BS_CurrentLiabilities.cy_balance !== 0 ? ((sd.BS_Cash.cy_balance + sd.BS_CurrentAssets_Other.cy_balance) / sd.BS_CurrentLiabilities.cy_balance) : 0,
-            netProfitMargin: sd.IS_Revenue.cy_balance !== 0 ? (netProfit.cy / sd.IS_Revenue.cy_balance) * 100 : 0,
-            debtToEquity: totals.totalEquity.cy !== 0 ? (totals.totalLiabilities.cy / totals.totalEquity.cy) : 0,
-        };
-        
-        return { totals, netProfit, cashFlow, ratios };
-    }
-
-    function renderFinancialStatements(totals, netProfit, cashFlow) {
-        const container = document.getElementById('financialStatementsView');
-        const totalAssetsCY = totals.totalAssets.cy;
-        const totalLiabilitiesAndEquityCY = totals.totalLiabilitiesAndEquity.cy;
-        const revenueCY = statementsData.IS_Revenue.cy_balance;
-
-        container.innerHTML = `
-            <table class="fs-table">
-                <thead><tr><th>البند</th><th>السنة الحالية</th><th>التحليل الرأسي</th><th>سنة المقارنة</th><th>التغير ($)</th><th>التغير (%)</th></tr></thead>
-                <tbody>
-                    <tr><td colspan="6" class="fs-group-header">الأصول</td></tr>
-                    ${renderFsItem('BS_Cash', 1, totalAssetsCY)}
-                    ${renderFsItem('BS_CurrentAssets_Other', 2, totalAssetsCY)}
-                    <tr class="fs-total-row"><td>مجموع الأصول المتداولة</td>${renderTotalRow({cy: statementsData.BS_Cash.cy_balance + statementsData.BS_CurrentAssets_Other.cy_balance, py: statementsData.BS_Cash.py_balance + statementsData.BS_CurrentAssets_Other.py_balance}, totalAssetsCY)}</tr>
-                    ${renderFsItem('BS_FixedAssets', 3, totalAssetsCY)}
-                    <tr class="fs-total-row"><td>إجمالي الأصول</td>${renderTotalRow(totals.totalAssets, totalAssetsCY)}</tr>
-                    
-                    <tr><td colspan="6" class="fs-group-header">الالتزامات وحقوق الملكية</td></tr>
-                    ${renderFsItem('BS_CurrentLiabilities', 4, totalLiabilitiesAndEquityCY)}
-                    ${renderFsItem('BS_NonCurrentLiabilities', 5, totalLiabilitiesAndEquityCY)}
-                    <tr class="fs-total-row"><td>إجمالي الالتزامات</td>${renderTotalRow(totals.totalLiabilities, totalLiabilitiesAndEquityCY)}</tr>
-                    ${renderFsItem('BS_Equity', 6, totalLiabilitiesAndEquityCY)}
-                    <tr class="fs-total-row"><td>إجمالي الالتزامات وحقوق الملكية</td>${renderTotalRow(totals.totalLiabilitiesAndEquity, totalLiabilitiesAndEquityCY)}</tr>
-                </tbody>
-            </table>
-            <table class="fs-table">
-                <thead><tr><th>البند</th><th>السنة الحالية</th><th>التحليل الرأسي</th><th>سنة المقارنة</th><th>التغير ($)</th><th>التغير (%)</th></tr></thead>
-                <tbody>
-                    <tr><td colspan="6" class="fs-group-header">قائمة الدخل</td></tr>
-                    ${renderFsItem('IS_Revenue', 7, revenueCY)}
-                    ${renderFsItem('IS_COGS', 8, revenueCY)}
-                    <tr class="fs-total-row"><td>مجمل الربح</td>${renderTotalRow(totals.grossProfit, revenueCY)}</tr>
-                    ${renderFsItem('IS_AdminExpenses', 9, revenueCY)}
-                    ${renderFsItem('IS_Zakat', 10, revenueCY)}
-                    <tr class="fs-total-row"><td>صافي الربح / (الخسارة)</td>${renderTotalRow(netProfit, revenueCY)}</tr>
-                </tbody>
-            </table>
-        `;
-    }
-
-    function renderFsItem(key, noteNumber, baseForPercentage) {
-        const item = statementsData[key];
-        if (!item || (item.cy_balance === 0 && item.py_balance === 0 && key !== 'BS_Equity')) return '';
-        
-        const change = item.cy_balance - item.py_balance;
-        const percentageChange = item.py_balance !== 0 ? (change / Math.abs(item.py_balance)) * 100 : (item.cy_balance !== 0 ? 100 : 0);
-        const changeClass = change >= 0 ? 'change-positive' : 'change-negative';
-        const verticalAnalysis = baseForPercentage !== 0 ? `${((item.cy_balance / baseForPercentage) * 100).toFixed(1)}%` : '-';
-
-        return `
-            <tr class="fs-item-row">
-                <td><span class="note-ref" onclick="showNoteDetail('${key}', ${noteNumber})">(${noteNumber})</span>${item.name}</td>
-                <td class="amount text-center">${formatCurrency(item.cy_balance)}</td>
-                <td class="text-center"><span class="percentage">${verticalAnalysis}</span></td>
-                <td class="amount text-center">${formatCurrency(item.py_balance)}</td>
-                <td class="text-center"><span class="change-value ${changeClass}">${formatCurrency(change)}</span></td>
-                <td class="text-center"><span class="change-value ${changeClass}">${percentageChange.toFixed(1)}%</span></td>
-            </tr>`;
-    }
-
-    function renderTotalRow(item, baseForPercentage) {
-        const change = item.cy - item.py;
-        const percentageChange = item.py !== 0 ? (change / Math.abs(item.py)) * 100 : (item.cy !== 0 ? 100 : 0);
-        const changeClass = change >= 0 ? 'change-positive' : 'change-negative';
-        const verticalAnalysis = baseForPercentage !== 0 ? `${((item.cy / baseForPercentage) * 100).toFixed(1)}%` : '-';
-        return `
-            <td class="amount text-center">${formatCurrency(item.cy)}</td>
-            <td class="text-center"><span class="percentage">${verticalAnalysis}</span></td>
-            <td class="amount text-center">${formatCurrency(item.py)}</td>
-            <td class="text-center"><span class="change-value ${changeClass}">${formatCurrency(change)}</span></td>
-            <td class="text-center"><span class="change-value ${changeClass}">${percentageChange.toFixed(1)}%</span></td>
-        `;
-    }
-
-    function renderDashboards(ratios, totals, netProfit) {
-        document.getElementById('ratios-dashboard').innerHTML = `
-            <div class="ratio-card"><div class="ratio-value">${ratios.currentRatio.toFixed(2)}</div><div class="ratio-label">النسبة الجارية</div></div>
-            <div class="ratio-card"><div class="ratio-value">${ratios.netProfitMargin.toFixed(1)}%</div><div class="ratio-label">هامش صافي الربح</div></div>
-            <div class="ratio-card"><div class="ratio-value">${ratios.debtToEquity.toFixed(2)}</div><div class="ratio-label">الدين/حقوق الملكية</div></div>
-        `;
-        
-        const alerts = [];
-        if (ratios.currentRatio < 1.5 && ratios.currentRatio > 0) alerts.push({type: 'warning', text: 'انخفاض نسبة السيولة الجارية عن 1.5'});
-        const revenueChange = statementsData.IS_Revenue.cy_balance - statementsData.IS_Revenue.py_balance;
-        const expenseChange = statementsData.IS_AdminExpenses.cy_balance - statementsData.IS_AdminExpenses.py_balance;
-        if (expenseChange > revenueChange && expenseChange > 0) alerts.push({type: 'danger', text: 'نمو المصاريف يفوق نمو الإيرادات'});
-        if (alerts.length === 0) alerts.push({type: 'success', text: 'لا توجد تنبيهات جوهرية'});
-        
-        document.getElementById('alerts-list').innerHTML = alerts.map(a => `<div class="alert alert-${a.type} m-0 mb-1">${a.text}</div>`).join('');
-    }
-
-    function validateStatements(totals, netProfit, cashFlow) {
-        const container = document.getElementById('validation-status-container');
-        let errors = [];
-        if (Math.abs(totals.totalAssets.cy - totals.totalLiabilitiesAndEquity.cy) > 1) errors.push(`خلل توازن المركز المالي`);
-        
-        const retainedEarningsMovement = statementsData.BS_Equity_RetainedEarnings.cy_balance - statementsData.BS_Equity_RetainedEarnings.py_balance;
-        if (Math.abs(retainedEarningsMovement - netProfit.cy) > 1) errors.push(`عدم تطابق صافي الربح`);
-        
-        if (Math.abs(cashFlow.netCashChange.cy - (statementsData.BS_Cash.cy_balance - statementsData.BS_Cash.py_balance)) > 1) errors.push(`عدم توازن التدفقات النقدية`);
-
-        if (errors.length === 0) {
-            container.innerHTML = `<div class="validation-status valid"><i class="fas fa-check-circle me-2"></i>القوائم مترابطة</div>`;
-            document.getElementById('exportButton').disabled = false;
-        } else {
-            container.innerHTML = `<div class="validation-status invalid" title="${errors.join(' | ')}"><i class="fas fa-exclamation-triangle me-2"></i>(${errors.length}) أخطاء</div>`;
-            document.getElementById('exportButton').disabled = true;
-        }
-    }
-
-    function showNoteDetail(itemKey, noteNumber) {
-        const item = mappingConfig[itemKey];
-        const modalTitle = document.getElementById('noteDetailModalLabel');
-        const modalBody = document.getElementById('noteDetailModalBody');
-        
-        modalTitle.textContent = `إيضاح (${noteNumber}): ${item.name}`;
-        
-        if (item.accounts.length === 0) {
-            modalBody.innerHTML = `<p class="text-secondary">لا توجد حسابات مربوطة بهذا البند.</p>`;
-        } else {
-            let tableRows = '';
-            item.accounts.forEach(accId => {
-                const account = finalAuditFile.processedData.find(a => a.account_id === accId);
-                if (account) {
-                    tableRows += `<tr><td>${account.account_id}</td><td>${account.name}</td><td class="amount">${formatCurrency(account.finalBalance)}</td></tr>`;
-                }
-            });
-            modalBody.innerHTML = `
-                <table class="table table-dark table-striped">
-                    <thead><tr><th>رقم الحساب</th><th>اسم الحساب</th><th>الرصيد</th></tr></thead>
-                    <tbody>${tableRows}</tbody>
-                </table>`;
-        }
-        noteDetailModal.show();
-    }
-
-    function setupDragAndDrop() {
-        const draggables = document.querySelectorAll('.unmapped-list .list-group-item');
-        const dropzones = document.querySelectorAll('.mapped-area');
-        let draggedItem = null;
-        draggables.forEach(draggable => {
-            draggable.addEventListener('dragstart', (e) => {
-                draggedItem = e.target;
-                setTimeout(() => e.target.style.display = 'none', 0);
-            });
-            draggable.addEventListener('dragend', () => {
-                setTimeout(() => { if (draggedItem) draggedItem.style.display = 'flex'; draggedItem = null; }, 0);
-            });
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log("🚀 تحميل منصة الحكمة المالية...");
+            
+            try {
+                await loadExcelFile();
+                renderAllReports();
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+            } catch (error) {
+                console.error("خطأ في تحميل البيانات:", error);
+                document.getElementById('loader').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>خطأ في تحميل البيانات</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
         });
-        dropzones.forEach(zone => {
-            zone.addEventListener('dragover', (e) => { e.preventDefault(); e.target.closest('.mapped-area')?.classList.add('drag-over'); });
-            zone.addEventListener('dragleave', (e) => { e.target.closest('.mapped-area')?.classList.remove('drag-over'); });
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const targetZone = e.target.closest('.mapped-area');
-                if (targetZone) {
-                    targetZone.classList.remove('drag-over');
-                    if (draggedItem) {
-                        const accountId = draggedItem.dataset.accountId;
-                        const targetKey = targetZone.dataset.targetKey;
-                        mappingConfig[targetKey].accounts.push(accountId);
-                        saveMappingConfig();
-                        runFullProcess();
+
+        async function loadExcelFile() {
+            const response = await fetch('financial-data.json');
+            excelData = await response.json();
+            console.log("✅ تم تحميل البيانات المالية بنجاح", Object.keys(excelData));
+        }
+
+        function renderAllReports() {
+            const container = document.getElementById('reportsContent');
+            
+            container.innerHTML = `
+                ${renderTrialBalance()}
+                ${renderBalanceSheet()}
+                ${renderIncomeStatement()}
+                ${renderCashFlow()}
+                ${renderNoteCash()}
+                ${renderNoteReceivables()}
+                ${renderNoteInventory()}
+                ${renderNoteFixedAssets()}
+                ${renderNotePayables()}
+                ${renderNoteCreditors()}
+                ${renderNoteEquity()}
+                ${renderNoteRevenue()}
+                ${renderNoteExpenses()}
+                ${renderNoteOtherRevenue()}
+                ${renderNoteOtherPayables()}
+            `;
+        }
+
+        function renderTrialBalance() {
+            const data = excelData['ميزان المراجعة 2024'] || [];
+            if (data.length === 0) return '';
+            
+            // استخراج معلومات الشركة من الصفوف الأولى
+            const companyName = "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            let startRow = 3; // البداية من الصف الرابع (بعد العناوين)
+            
+            for (let i = startRow; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const accountName = row[12] || '';
+                const accountCode = row[13] || '';
+                const openingDebit = formatNumber(row[11]);
+                const openingCredit = formatNumber(row[10]);
+                const movementDebit = formatNumber(row[9]);
+                const movementCredit = formatNumber(row[8]);
+                const closingDebit = formatNumber(row[7]);
+                const closingCredit = formatNumber(row[6]);
+                
+                if (accountName) {
+                    tableRows += `
+                        <tr>
+                            <td>${accountCode}</td>
+                            <td>${accountName}</td>
+                            <td class="amount">${openingDebit}</td>
+                            <td class="amount">${openingCredit}</td>
+                            <td class="amount">${movementDebit}</td>
+                            <td class="amount">${movementCredit}</td>
+                            <td class="amount">${closingDebit}</td>
+                            <td class="amount">${closingCredit}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade show active" id="trial-balance">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">ميزان المراجعة العام</div>
+                            <div class="report-period">خلال الفترة من 2024/01/01 إلى ${period}</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">ميزان المراجعة</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('trial-balance')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('trial-balance', 'ميزان_المراجعة')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>كود الحساب</th>
+                                        <th>الحساب</th>
+                                        <th>أول المدة مدين</th>
+                                        <th>أول المدة دائن</th>
+                                        <th>الحركة مدين</th>
+                                        <th>الحركة دائن</th>
+                                        <th>الرصيد مدين</th>
+                                        <th>الرصيد دائن</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBalanceSheet() {
+            const data = excelData['قائمة المركز المال'] || [];
+            if (data.length === 0) return '';
+            
+            const companyName = data[1] ? data[1][1] : "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            for (let i = 4; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const itemName = row[1] || '';
+                const noteRef = row[2] || '';
+                const amount = formatNumber(row[3]);
+                
+                if (!itemName) continue;
+                
+                // تحديد نوع الصف
+                if (itemName.includes('الموجودات') || itemName.includes('المطلوبات') || itemName.includes('حقوق')) {
+                    tableRows += `
+                        <tr class="fs-group-header">
+                            <td colspan="3"><strong>${itemName}</strong></td>
+                        </tr>
+                    `;
+                } else if (itemName.includes('إجمالي')) {
+                    tableRows += `
+                        <tr class="fs-total-row">
+                            <td><strong>${itemName}</strong></td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount"><strong>${amount}</strong></td>
+                        </tr>
+                    `;
+                } else {
+                    tableRows += `
+                        <tr class="fs-item-row">
+                            <td>${itemName}</td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount">${amount}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade" id="balance-sheet">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">قائمة المركز المالي في ${period}م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة المركز المالي</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('balance-sheet')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('balance-sheet', 'قائمة_المركز_المالي')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>إيضاح</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderIncomeStatement() {
+            const data = excelData['الدخل الشامل'] || [];
+            if (data.length === 0) return '';
+            
+            const companyName = "مصنع بن حامد للمنتجات الأسمنتية";
+            const period = "2024/12/31";
+            
+            let tableRows = '';
+            for (let i = 3; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const itemName = row[1] || '';
+                const noteRef = row[2] || '';
+                const amount = formatNumber(row[3]);
+                
+                if (!itemName) continue;
+                
+                if (itemName.includes('إجمالي') || itemName.includes('صافي')) {
+                    tableRows += `
+                        <tr class="fs-total-row">
+                            <td><strong>${itemName}</strong></td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount"><strong>${amount}</strong></td>
+                        </tr>
+                    `;
+                } else {
+                    tableRows += `
+                        <tr class="fs-item-row">
+                            <td>${itemName}</td>
+                            <td class="text-center">${noteRef}</td>
+                            <td class="amount">${amount}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="tab-pane fade" id="income-statement">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">${companyName}</div>
+                            <div class="report-period">قائمة الدخل الشامل للسنة المنتهية في ${period}م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة الدخل الشامل</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('income-statement')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('income-statement', 'قائمة_الدخل')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>إيضاح</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCashFlow() {
+            // سيتم إنشاء قائمة التدفقات النقدية من البيانات المتاحة
+            return `
+                <div class="tab-pane fade" id="cash-flow">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">مصنع بن حامد للمنتجات الأسمنتية</div>
+                            <div class="report-period">قائمة التدفقات النقدية للسنة المنتهية في 2024/12/31م</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">قائمة التدفقات النقدية</h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('cash-flow')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('cash-flow', 'قائمة_التدفقات_النقدية')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        <th>البيان</th>
+                                        <th>المبلغ (ريال سعودي)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية</strong></td>
+                                    </tr>
+                                    <tr class="fs-item-row">
+                                        <td>صافي الربح قبل الزكاة</td>
+                                        <td class="amount">-</td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة التشغيلية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة الاستثمارية</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة الاستثمارية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-group-header">
+                                        <td colspan="2"><strong>التدفقات النقدية من الأنشطة التمويلية</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي النقد من الأنشطة التمويلية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                    <tr class="fs-total-row">
+                                        <td><strong>صافي التغير في النقدية</strong></td>
+                                        <td class="amount"><strong>-</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNote(noteId, sheetName, title, icon) {
+            const data = excelData[sheetName] || [];
+            if (data.length === 0) {
+                return `
+                    <div class="tab-pane fade" id="${noteId}">
+                        <div class="report-section">
+                            <div class="alert alert-warning">
+                                لا توجد بيانات متاحة لهذا الإيضاح
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            let tableRows = '';
+            let headers = [];
+            
+            // استخراج العناوين
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                if (row && row.some(cell => cell && cell.toString().trim())) {
+                    // البحث عن صف العناوين
+                    if (row.some(cell => cell && (cell.toString().includes('البيان') || cell.toString().includes('الحساب')))) {
+                        headers = row.filter(cell => cell && cell.toString().trim());
+                        break;
                     }
                 }
-            });
-        });
-    }
+            }
+            
+            // إذا لم نجد عناوين، استخدم عناوين افتراضية
+            if (headers.length === 0) {
+                headers = ['البيان', 'المبلغ'];
+            }
+            
+            // استخراج البيانات
+            let startDataRow = headers.length > 0 ? 5 : 3;
+            for (let i = startDataRow; i < data.length; i++) {
+                const row = data[i];
+                if (!row || !row.some(cell => cell && cell.toString().trim())) continue;
+                
+                let rowHtml = '<tr class="fs-item-row">';
+                for (let j = 0; j < Math.min(row.length, headers.length); j++) {
+                    const cell = row[j] || '';
+                    const isNumber = !isNaN(parseFloat(cell)) && isFinite(cell);
+                    rowHtml += `<td class="${isNumber ? 'amount' : ''}">${isNumber ? formatNumber(cell) : cell}</td>`;
+                }
+                rowHtml += '</tr>';
+                tableRows += rowHtml;
+            }
+            
+            return `
+                <div class="tab-pane fade" id="${noteId}">
+                    <div class="report-section">
+                        <div class="company-header">
+                            <div class="company-name">مصنع بن حامد للمنتجات الأسمنتية</div>
+                            <div class="report-period">${title}</div>
+                        </div>
+                        
+                        <div class="report-header no-print">
+                            <h2 class="report-title">
+                                <i class="${icon} me-2"></i>${title}
+                            </h2>
+                            <div class="report-actions">
+                                <button class="btn-action" onclick="printReport('${noteId}')">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </button>
+                                <button class="btn-action" onclick="exportToExcel('${noteId}', '${title.replace(/\s/g, '_')}')">
+                                    <i class="fas fa-file-excel me-2"></i>تصدير Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="fs-table">
+                                <thead>
+                                    <tr>
+                                        ${headers.map(h => `<th>${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-    function exportFinalReport() {
-        const reportWindow = window.open('', '_blank');
-        const reportContent = document.getElementById('financial-statements-panel').innerHTML;
-        const clientName = finalAuditFile.clientInfo.name;
-        
-        reportWindow.document.write(\`
-            <html>
+        function renderNoteCash() {
+            return renderNote('note-cash', 'النقدية', 'إيضاح النقدية', 'fas fa-coins');
+        }
+
+        function renderNoteReceivables() {
+            return renderNote('note-receivables', 'ذمم مدينة', 'إيضاح الذمم المدينة', 'fas fa-users');
+        }
+
+        function renderNoteInventory() {
+            return renderNote('note-inventory', 'المخزون 2024', 'إيضاح المخزون', 'fas fa-boxes');
+        }
+
+        function renderNoteFixedAssets() {
+            return renderNote('note-fixed-assets', 'الاصول الثابتة', 'إيضاح الأصول الثابتة', 'fas fa-building');
+        }
+
+        function renderNotePayables() {
+            return renderNote('note-payables', 'ايضاح 5 ( الموردين )', 'إيضاح الموردين', 'fas fa-file-invoice-dollar');
+        }
+
+        function renderNoteCreditors() {
+            return renderNote('note-creditors', 'ايضاح 6 ( الدائنون )', 'إيضاح الدائنون', 'fas fa-hand-holding-usd');
+        }
+
+        function renderNoteEquity() {
+            return renderNote('note-equity', 'ايضاح رقم 7 حقوق الملكية', 'إيضاح حقوق الملكية', 'fas fa-landmark');
+        }
+
+        function renderNoteRevenue() {
+            return renderNote('note-revenue', 'الايرادات ', 'إيضاح الإيرادات', 'fas fa-dollar-sign');
+        }
+
+        function renderNoteExpenses() {
+            return renderNote('note-expenses', 'المصاريف ', 'إيضاح المصاريف', 'fas fa-receipt');
+        }
+
+        function renderNoteOtherRevenue() {
+            return renderNote('note-other-revenue', 'إيرادات أخري ', 'إيضاح الإيرادات الأخرى', 'fas fa-plus-circle');
+        }
+
+        function renderNoteOtherPayables() {
+            return renderNote('note-other-payables', 'أرصدة  دائنة أخري', 'إيضاح الأرصدة الدائنة الأخرى', 'fas fa-clipboard-list');
+        }
+
+        function formatNumber(value) {
+            if (!value || value === '') return '-';
+            const num = parseFloat(value);
+            if (isNaN(num)) return value;
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function printReport(reportId) {
+            const reportElement = document.getElementById(reportId);
+            if (!reportElement) return;
+            
+            const printWindow = window.open('', '_blank');
+            const reportContent = reportElement.innerHTML;
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
                 <head>
-                    <title>التقرير المالي - \${clientName}</title>
+                    <meta charset="UTF-8">
+                    <title>طباعة التقرير</title>
                     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
                     <style>
-                        body { direction: rtl; padding: 2rem; }
-                        .fs-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 0.9rem; }
-                        .fs-table th, .fs-table td { padding: 0.5rem; border: 1px solid #dee2e6; text-align: center; }
-                        .fs-table th { background-color: #f8f9fa; }
-                        .fs-table .fs-group-header { font-weight: bold; background-color: #e9ecef; }
-                        .fs-table .fs-item-row td:first-child { text-align: right; padding-right: 1rem; }
-                        .fs-table .fs-total-row { font-weight: bold; background-color: #f8f9fa; }
-                        .fs-table .note-ref, .fs-table .percentage, .fs-table .change-value { display: none; }
+                        body { 
+                            font-family: 'Tajawal', Arial, sans-serif;
+                            direction: rtl;
+                            padding: 2rem;
+                            background: white;
+                            color: black;
+                        }
+                        .fs-table { 
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 2rem;
+                        }
+                        .fs-table th,
+                        .fs-table td {
+                            padding: 0.75rem;
+                            border: 1px solid #dee2e6;
+                            text-align: right;
+                        }
+                        .fs-table thead th {
+                            background-color: #f8f9fa;
+                            font-weight: bold;
+                            text-align: center;
+                        }
+                        .fs-group-header {
+                            background-color: #e9ecef;
+                            font-weight: bold;
+                        }
+                        .fs-total-row {
+                            background-color: #f8f9fa;
+                            font-weight: bold;
+                            border-top: 2px solid #000;
+                        }
+                        .amount {
+                            text-align: left;
+                            direction: ltr;
+                            font-family: 'Courier New', monospace;
+                        }
+                        .company-header {
+                            text-align: center;
+                            margin-bottom: 2rem;
+                            padding-bottom: 1rem;
+                            border-bottom: 2px solid #000;
+                        }
+                        .company-name {
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            margin-bottom: 0.5rem;
+                        }
+                        .report-period {
+                            font-size: 1rem;
+                            color: #666;
+                        }
+                        @media print {
+                            .no-print {
+                                display: none !important;
+                            }
+                        }
                     </style>
                 </head>
                 <body>
-                    <h1 class="text-center">القوائم المالية</h1>
-                    <h2 class="text-center">\${clientName}</h2>
-                    <h3 class="text-center">كما في \${new Date( ).toLocaleDateString('ar-SA')}</h3>
-                    <hr>
-                    \${reportContent}
+                    ${reportContent}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        };
+                    </script>
                 </body>
-            </html>
-        \`);
-        reportWindow.document.close();
-        reportWindow.print();
-    }
-
-       function createDefaultMappingStructure() {
-        return {
-            'BS_Cash': { name: 'النقد وما في حكمه', accounts: [] },
-            'BS_CurrentAssets_Other': { name: 'أصول متداولة أخرى', accounts: [] },
-            'BS_FixedAssets': { name: 'الأصول غير المتداولة', accounts: [] },
-            'BS_CurrentLiabilities': { name: 'الالتزامات المتداولة', accounts: [] },
-            'BS_NonCurrentLiabilities': { name: 'الالتزامات غير المتداولة', accounts: [] },
-            'BS_Equity': { name: 'حقوق الملكية (للعرض فقط)', accounts: [] },
-            'BS_Equity_Capital': { name: 'رأس المال', accounts: [] },
-            'BS_Equity_RetainedEarnings': { name: 'الأرباح المبقاة', accounts: [] },
-            'IS_Revenue': { name: 'الإيرادات', accounts: [] },
-            'IS_COGS': { name: 'تكلفة المبيعات', accounts: [] },
-            'IS_AdminExpenses': { name: 'مصروفات عمومية وإدارية', accounts: [] },
-            'IS_Zakat': { name: 'الزكاة والضرائب', accounts: [] },
-            'CF_Depreciation': { name: 'الإهلاك (للتدفقات النقدية)', accounts: [] },
-        };
-    }
-
-    function buildMappingUI() {
-        const unmappedList = document.getElementById('unmappedAccountsList');
-        const accordion = document.getElementById('mappingAccordion');
-        unmappedList.innerHTML = '';
-        accordion.innerHTML = '';
-
-        const allMappedAccounts = Object.values(mappingConfig).flatMap(item => item.accounts);
-        const unmappedAccounts = finalAuditFile.trialBalance.filter(acc => !allMappedAccounts.includes(acc.account_id));
-
-        document.getElementById('unmapped-count').textContent = `لديك ${unmappedAccounts.length} حسابات غير مربوطة.`;
-        unmappedAccounts.forEach(account => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.textContent = `${account.account_id} - ${account.name}`;
-            li.draggable = true;
-            li.dataset.accountId = account.account_id;
-            unmappedList.appendChild(li);
-        });
-
-        Object.entries(mappingConfig).forEach(([key, item]) => {
-            if (key === 'BS_Equity') return; 
+                </html>
+            `);
             
-            const itemHtml = `
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${key}">
-                            ${item.name}
-                        </button>
-                    </h2>
-                    <div id="collapse-${key}" class="accordion-collapse collapse" data-bs-parent="#mappingAccordion">
-                        <div class="accordion-body mapped-area" data-target-key="${key}">
-                            ${getMappedAccountsHtml(item.accounts)}
-                        </div>
-                    </div>
-                </div>`;
-            accordion.innerHTML += itemHtml;
-        });
-
-        setupDragAndDrop();
-    }
-    
-    function getMappedAccountsHtml(accountIds) {
-        if (!accountIds || accountIds.length === 0) {
-            return `<p class="text-secondary small text-center m-0">أفلت الحسابات هنا</p>`;
+            printWindow.document.close();
         }
-        return accountIds.map(id => {
-            const account = finalAuditFile.trialBalance.find(acc => acc.account_id === id);
-            return `<span class="badge bg-primary m-1 p-2">${account ? account.name : id}</span>`;
-        }).join('');
-    }
 
-    function saveMappingConfig() {
-        const activeClientId = localStorage.getItem('activeClientId') || 'default_client';
-        const mappingKey = `polarisMapping_${activeClientId}`;
-        localStorage.setItem(mappingKey, JSON.stringify(mappingConfig));
-        console.log("💾 Account mapping saved.");
-    }
-
-    function formatCurrency(value) {
-        if (value == null || isNaN(value)) return '-';
-        const absValue = Math.abs(value);
-        const formatted = absValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        if (Math.abs(value) < 1) return '0';
-        return value < 0 ? `(${formatted})` : formatted;
-    }
+        function exportToExcel(reportId, filename) {
+            alert('سيتم تفعيل التصدير إلى Excel قريباً');
+        }
     </script>
 </body>
 </html>
