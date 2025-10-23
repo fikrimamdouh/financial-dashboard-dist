@@ -103,8 +103,22 @@ function calculateTotals(data) {
     return totals;
 }
 
-function getCompanyHeader(auditFile) {
-    const companyName = auditFile.clientInfo?.name || 'الشركة';
+function getCompanyHeader(data) {
+    // دعم كل من auditFile و tbData
+    let companyName = 'مصنع بن حامد للمنتجات الأسمنتية';
+    
+    if (data) {
+        // إذا كان auditFile
+        if (data.clientInfo && data.clientInfo.name) {
+            companyName = data.clientInfo.name;
+        }
+        // إذا كان tbData (مصفوفة)
+        else if (Array.isArray(data) && data.length > 0) {
+            // يمكن استخراج اسم الشركة من البيانات إذا كان موجوداً
+            companyName = 'مصنع بن حامد للمنتجات الأسمنتية';
+        }
+    }
+    
     const currentYear = new Date().getFullYear();
     
     return `
