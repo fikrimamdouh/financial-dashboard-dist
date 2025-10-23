@@ -3,144 +3,525 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرصد Polaris للحكمة والمعايير الحية</title>
+    <title>ديوان الحكمة المالية - منصة التقارير الشاملة | Polaris</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap'  );
-        :root { --font-family-main: 'Tajawal', sans-serif; --font-family-display: 'Orbitron', sans-serif; --color-primary-glow: #00BFFF; --color-bg: #010409; --color-surface: rgba(13, 17, 23, 0.8); --color-border: rgba(56, 139, 253, 0.3); --color-text-primary: #E6EDF3; --color-text-secondary: #7D8590; }
-        body { font-family: var(--font-family-main); direction: rtl; background-color: var(--color-bg); color: var(--color-text-primary); display: flex; }
-        .grid-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px); background-size: 40px 40px; z-index: -2; }
-        .glow-background { position: fixed; top: 50%; left: 50%; width: 800px; height: 800px; background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%); transform: translate(-50%, -50%); animation: pulse 10s infinite ease-in-out; z-index: -1; }
-        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } }
-        .sidebar { width: 80px; height: 100vh; background-color: var(--color-surface); border-left: 1px solid var(--color-border); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; padding: 1.5rem 0; flex-shrink: 0; position: sticky; top: 0; }
-        .app-logo { color: var(--color-primary-glow); font-size: 2rem; margin-bottom: 2.5rem; }
-        .main-content { flex-grow: 1; padding: 2rem 3rem; overflow-y: auto; height: 100vh; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .page-title { font-family: var(--font-family-display); font-size: 2.5rem; margin: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
         
-        .pantheon-wing { background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; backdrop-filter: blur(5px); }
-        .wing-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border); }
-        .wing-icon { font-size: 2rem; color: var(--color-primary-glow); text-shadow: 0 0 10px var(--color-primary-glow); }
-        .wing-title { font-family: var(--font-family-display); font-size: 1.5rem; margin: 0; }
-        .wing-subtitle { color: var(--color-text-secondary); margin: 0; }
-        .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-        .report-card { background-color: rgba(0,0,0,0.2); border: 1px solid transparent; padding: 1rem; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; }
-        .report-card:hover { transform: translateY(-5px); border-color: var(--color-primary-glow); background-color: rgba(0, 191, 255, 0.05); }
-        .report-card h6 { margin-bottom: 0.25rem; }
-        .report-card p { font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0; }
-        .compliance-wing { border-color: var(--color-primary-glow); box-shadow: 0 0 20px rgba(0, 191, 255, 0.2); animation: glow-border 2s infinite alternate; }
-        @keyframes glow-border { from { box-shadow: 0 0 10px rgba(0, 191, 255, 0.1); } to { box-shadow: 0 0 30px rgba(0, 191, 255, 0.4); } }
+        :root { 
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Orbitron', sans-serif; 
+            --color-primary-glow: #00BFFF;
+            --color-bg: #010409;
+            --color-surface: rgba(13, 17, 23, 0.8); 
+            --color-border: rgba(56, 139, 253, 0.3);
+            --color-text-primary: #E6EDF3;
+            --color-text-secondary: #7D8590;
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+        }
         
-        /* Modal Styles from polaris-theme.css for self-containment */
-        .modal-content { background-color: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-primary); backdrop-filter: blur(15px); border-radius: 12px; }
-        .modal-header, .modal-footer { border-color: var(--color-border); }
-        .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        body { 
+            font-family: var(--font-family-main);
+            direction: rtl;
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            display: flex;
+        }
+        
+        .grid-background { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, rgba(56, 139, 253, 0.1) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(56, 139, 253, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+        }
+        
+        .glow-background { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.1), transparent 60%);
+            transform: translate(-50%, -50%);
+            animation: pulse 10s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; } 
+        }
+        
+        .sidebar { 
+            width: 80px;
+            height: 100vh;
+            background-color: var(--color-surface);
+            border-left: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+        }
+        
+        .app-logo { 
+            color: var(--color-primary-glow);
+            font-size: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .main-content { 
+            flex-grow: 1;
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        
+        .page-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .page-title { 
+            font-family: var(--font-family-display);
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--color-primary-glow);
+            text-shadow: 0 0 15px var(--color-primary-glow);
+        }
+        
+        .pantheon-wing { 
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .wing-header { 
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .wing-icon { 
+            font-size: 2rem;
+            color: var(--color-primary-glow);
+            text-shadow: 0 0 10px var(--color-primary-glow);
+        }
+        
+        .wing-title { 
+            font-family: var(--font-family-display);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .wing-subtitle { 
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+        
+        .report-grid { 
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .report-card { 
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid transparent;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .report-card:hover { 
+            transform: translateY(-5px);
+            border-color: var(--color-primary-glow);
+            background-color: rgba(0, 191, 255, 0.05);
+            box-shadow: 0 5px 20px rgba(0, 191, 255, 0.2);
+        }
+        
+        .report-card h6 { 
+            margin-bottom: 0.25rem;
+            color: var(--color-text-primary);
+        }
+        
+        .report-card p { 
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0;
+        }
+        
+        .modal-content { 
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+        }
+        
+        .modal-header,
+        .modal-footer { 
+            border-color: var(--color-border);
+        }
+        
+        .modal-title {
+            font-family: var(--font-family-display);
+            color: var(--color-primary-glow);
+        }
+        
+        .btn-close { 
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        
+        .btn-primary-glow {
+            background-color: var(--color-primary-glow);
+            border-color: var(--color-primary-glow);
+            color: var(--color-bg);
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-glow:hover {
+            box-shadow: 0 0 25px rgba(0, 191, 255, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .report-table {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-table th {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--color-primary-glow);
+            padding: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .report-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .report-table tbody tr:hover {
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        .kpi-card {
+            background-color: rgba(0, 191, 255, 0.05);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-family: var(--font-family-display);
+            font-size: 2rem;
+            color: var(--color-primary-glow);
+            margin: 0.5rem 0;
+        }
+        
+        .kpi-label {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1.5rem 0;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .modal-content {
+                border: none;
+                box-shadow: none;
+            }
+        }
     </style>
 </head>
-<body class="polaris-body">
-
+<body>
     <div class="grid-background"></div>
     <div class="glow-background"></div>
 
-    <nav class="sidebar">
+    <nav class="sidebar no-print">
         <a href="index.html" class="app-logo" title="Polaris"><i class="fas fa-atom"></i></a>
     </nav>
 
     <main class="main-content">
-        <div class="page-header">
+        <div class="page-header no-print">
             <h1 class="page-title">ديوان الحكمة المالية</h1>
+            <button class="btn btn-primary-glow" onclick="window.location.href='account-mapping.html'">
+                <i class="fas fa-arrow-right me-2"></i>العودة للميزان
+            </button>
         </div>
 
-        <!-- Compliance Wing (Appears only when needed) -->
-        <div class="pantheon-wing compliance-wing">
-            <div class="wing-header">
-                <i class="wing-icon fas fa-satellite-dish"></i>
-                <div>
-                    <h3 class="wing-title">مرصد المعايير الحية</h3>
-                    <p class="wing-subtitle">تم رصد تحديث جديد في المعايير الدولية (IFRS 18). النظام جاهز لمساعدتك على التوافق.</p>
-                </div>
-            </div>
-            <div class="report-grid">
-                <div id="report-compliance-simulator" class="report-card"><h6><i class="fas fa-vial"></i> محاكي الأثر</h6><p>شاهد كيف ستبدو قوائمك المالية لو تم تطبيق المعيار الجديد.</p></div>
-                <div id="report-compliance-checklist" class="report-card"><h6><i class="fas fa-tasks"></i> قائمة التحقق للتطبيق</h6><p>قائمة مهام تفصيلية توجهك خطوة بخطوة لتطبيق المتطلبات الجديدة.</p></div>
-                <div id="report-compliance-disclosures" class="report-card"><h6><i class="fas fa-file-alt"></i> مولد الإفصاحات الانتقالية</h6><p>صياغة آلية للإيضاحات المطلوبة لشرح أثر تطبيق المعيار الجديد.</p></div>
-            </div>
-        </div>
-
-        <!-- Sovereign Reports Wing -->
+        <!-- جناح التقارير السيادية -->
         <div class="pantheon-wing">
             <div class="wing-header">
                 <i class="wing-icon fas fa-gavel"></i>
                 <div>
                     <h3 class="wing-title">جناح التقارير السيادية</h3>
-                    <p class="wing-subtitle">الوضع الرسمي والقانوني للكيان أمام الجهات الخارجية.</p>
+                    <p class="wing-subtitle">الوضع الرسمي والقانوني للكيان أمام الجهات الخارجية</p>
                 </div>
             </div>
             <div class="report-grid">
-                <div id="report-sovereign-fs" class="report-card"><h6>القوائم المالية الأساسية</h6><p>المركز المالي، الدخل الشامل، حقوق الملكية، التدفقات النقدية.</p></div>
-                <div id="report-sovereign-notes" class="report-card"><h6>الإيضاحات المتممة</h6><p>توليد آلي للإيضاحات بناءً على الأحداث المسجلة.</p></div>
-                <div id="report-sovereign-audit" class="report-card"><h6>تقرير المراجع المستقل</h6><p>قوالب لجميع أنواع الرأي (غير متحفظ، متحفظ، ...).</p></div>
-                <div id="report-sovereign-zakat" class="report-card"><h6>الإقرار الزكوي النهائي</h6><p>النسخة النهائية المعتمدة من الإقرار الزكوي.</p></div>
-                <div id="report-sovereign-vat" class="report-card"><h6>إقرار ضريبة القيمة المضافة</h6><p>النسخة النهائية المعتمدة من إقرار ق.م.</p></div>
+                <div class="report-card" data-report="sovereign-fs">
+                    <h6><i class="fas fa-file-invoice"></i> القوائم المالية الأساسية</h6>
+                    <p>المركز المالي، الدخل الشامل، حقوق الملكية، التدفقات النقدية</p>
+                </div>
+                <div class="report-card" data-report="sovereign-notes">
+                    <h6><i class="fas fa-sticky-note"></i> الإيضاحات المتممة</h6>
+                    <p>توليد آلي للإيضاحات بناءً على الأحداث المسجلة</p>
+                </div>
+                <div class="report-card" data-report="sovereign-audit">
+                    <h6><i class="fas fa-stamp"></i> تقرير المراجع المستقل</h6>
+                    <p>قوالب لجميع أنواع الرأي (غير متحفظ، متحفظ، سلبي)</p>
+                </div>
+                <div class="report-card" data-report="sovereign-zakat">
+                    <h6><i class="fas fa-hand-holding-usd"></i> الإقرار الزكوي النهائي</h6>
+                    <p>النسخة النهائية المعتمدة من الإقرار الزكوي</p>
+                </div>
             </div>
         </div>
 
-        <!-- Financial Diagnostics Wing -->
+        <!-- جناح التحليل المالي المتقدم -->
         <div class="pantheon-wing">
             <div class="wing-header">
-                <i class="wing-icon fas fa-stethoscope"></i>
+                <i class="wing-icon fas fa-chart-line"></i>
                 <div>
-                    <h3 class="wing-title">جناح التشخيص المالي</h3>
-                    <p class="wing-subtitle">قياس صحة وسلامة الشركة من الداخل.</p>
+                    <h3 class="wing-title">جناح التحليل المالي المتقدم</h3>
+                    <p class="wing-subtitle">تحليل شامل لجميع جوانب الأداء المالي</p>
                 </div>
             </div>
             <div class="report-grid">
-                <div id="report-diag-analysis" class="report-card"><h6>تقرير التحليل المالي الشامل</h6><p>تحليل السيولة، الربحية، الكفاءة، والرفع المالي.</p></div>
-                <div id="report-diag-trends" class="report-card"><h6>تقرير تحليل الاتجاهات</h6><p>تطور المؤشرات الرئيسية على مدار 5 سنوات أو 12 ربعًا.</p></div>
-                <div id="report-diag-vertical" class="report-card"><h6>التحليل الرأسي والأفقي</h6><p>مقارنة البنود كنسبة من الإجمالي أو مقارنة مع فترات سابقة.</p></div>
+                <div class="report-card" data-report="analysis-ratios">
+                    <h6><i class="fas fa-calculator"></i> النسب المالية الشاملة</h6>
+                    <p>السيولة، الربحية، الكفاءة، المديونية</p>
+                </div>
+                <div class="report-card" data-report="analysis-dupont">
+                    <h6><i class="fas fa-sitemap"></i> تحليل DuPont</h6>
+                    <p>تحليل مفصل للعائد على حقوق الملكية</p>
+                </div>
+                <div class="report-card" data-report="analysis-zscore">
+                    <h6><i class="fas fa-exclamation-triangle"></i> مؤشر Altman Z-Score</h6>
+                    <p>تقييم مخاطر الإفلاس والصحة المالية</p>
+                </div>
+                <div class="report-card" data-report="analysis-trends">
+                    <h6><i class="fas fa-chart-area"></i> تحليل الاتجاهات</h6>
+                    <p>تطور المؤشرات على مدار 5 سنوات</p>
+                </div>
+                <div class="report-card" data-report="analysis-vertical">
+                    <h6><i class="fas fa-percentage"></i> التحليل الرأسي</h6>
+                    <p>مقارنة البنود كنسبة من الإجمالي</p>
+                </div>
+                <div class="report-card" data-report="analysis-horizontal">
+                    <h6><i class="fas fa-arrows-alt-h"></i> التحليل الأفقي</h6>
+                    <p>مقارنة مع الفترات السابقة</p>
+                </div>
+                <div class="report-card" data-report="analysis-commonsize">
+                    <h6><i class="fas fa-balance-scale"></i> القوائم بالنسب المئوية</h6>
+                    <p>Common Size Financial Statements</p>
+                </div>
+                <div class="report-card" data-report="analysis-cashcycle">
+                    <h6><i class="fas fa-sync"></i> دورة التحويل النقدي</h6>
+                    <p>Cash Conversion Cycle Analysis</p>
+                </div>
+                <div class="report-card" data-report="analysis-eva">
+                    <h6><i class="fas fa-gem"></i> القيمة الاقتصادية المضافة</h6>
+                    <p>Economic Value Added (EVA)</p>
+                </div>
             </div>
         </div>
 
-        <!-- Strategic Foresight Wing -->
+        <!-- جناح الرؤية الاستراتيجية -->
         <div class="pantheon-wing">
             <div class="wing-header">
                 <i class="wing-icon fas fa-chess-queen"></i>
                 <div>
                     <h3 class="wing-title">جناح الرؤية الاستراتيجية</h3>
-                    <p class="wing-subtitle">أدوات تساعد الإدارة على اتخاذ قرارات مستقبلية.</p>
+                    <p class="wing-subtitle">أدوات تساعد الإدارة على اتخاذ قرارات مستقبلية</p>
                 </div>
             </div>
             <div class="report-grid">
-                <div id="report-strategic-whatif" class="report-card"><h6>تحليل "ماذا لو"</h6><p>محاكاة تأثير قرارات مثل زيادة الأسعار أو خفض التكاليف.</p></div>
-                <div id="report-strategic-breakeven" class="report-card"><h6>تقرير نقطة التعادل</h6><p>تحديد حجم المبيعات المطلوب لتغطية جميع التكاليف.</p></div>
-                <div id="report-strategic-cashflow" class="report-card"><h6>التدفقات النقدية المتوقعة</h6><p>توقع وضع السيولة في المستقبل بناءً على الاتجاهات الحالية.</p></div>
+                <div class="report-card" data-report="strategic-whatif">
+                    <h6><i class="fas fa-question-circle"></i> تحليل "ماذا لو"</h6>
+                    <p>محاكاة تأثير القرارات المختلفة</p>
+                </div>
+                <div class="report-card" data-report="strategic-breakeven">
+                    <h6><i class="fas fa-balance-scale-right"></i> نقطة التعادل</h6>
+                    <p>تحديد حجم المبيعات المطلوب لتغطية التكاليف</p>
+                </div>
+                <div class="report-card" data-report="strategic-cvp">
+                    <h6><i class="fas fa-chart-pie"></i> تحليل التكلفة-الحجم-الربح</h6>
+                    <p>CVP Analysis للتخطيط الاستراتيجي</p>
+                </div>
+                <div class="report-card" data-report="strategic-sensitivity">
+                    <h6><i class="fas fa-sliders-h"></i> تحليل الحساسية</h6>
+                    <p>تأثير التغيرات في المتغيرات الرئيسية</p>
+                </div>
+                <div class="report-card" data-report="strategic-scenarios">
+                    <h6><i class="fas fa-project-diagram"></i> تحليل السيناريوهات</h6>
+                    <p>أفضل/أسوأ/أكثر احتمالاً</p>
+                </div>
+                <div class="report-card" data-report="strategic-forecast">
+                    <h6><i class="fas fa-crystal-ball"></i> التدفقات النقدية المتوقعة</h6>
+                    <p>توقع وضع السيولة في المستقبل</p>
+                </div>
+                <div class="report-card" data-report="strategic-scorecard">
+                    <h6><i class="fas fa-trophy"></i> بطاقة الأداء المتوازن</h6>
+                    <p>Balanced Scorecard</p>
+                </div>
             </div>
         </div>
 
-        <!-- Internal Control Wing -->
+        <!-- جناح الموازنات التقديرية -->
+        <div class="pantheon-wing">
+            <div class="wing-header">
+                <i class="wing-icon fas fa-calendar-alt"></i>
+                <div>
+                    <h3 class="wing-title">جناح الموازنات التقديرية</h3>
+                    <p class="wing-subtitle">التخطيط المالي ومقارنة الفعلي بالمخطط</p>
+                </div>
+            </div>
+            <div class="report-grid">
+                <div class="report-card" data-report="budget-master">
+                    <h6><i class="fas fa-clipboard-list"></i> الموازنة الرئيسية</h6>
+                    <p>Master Budget للسنة القادمة</p>
+                </div>
+                <div class="report-card" data-report="budget-sales">
+                    <h6><i class="fas fa-shopping-cart"></i> موازنة المبيعات</h6>
+                    <p>تقدير المبيعات المتوقعة</p>
+                </div>
+                <div class="report-card" data-report="budget-production">
+                    <h6><i class="fas fa-industry"></i> موازنة الإنتاج</h6>
+                    <p>تخطيط الإنتاج والمخزون</p>
+                </div>
+                <div class="report-card" data-report="budget-cash">
+                    <h6><i class="fas fa-money-bill-wave"></i> موازنة النقدية</h6>
+                    <p>التدفقات النقدية المخططة</p>
+                </div>
+                <div class="report-card" data-report="budget-capex">
+                    <h6><i class="fas fa-building"></i> موازنة النفقات الرأسمالية</h6>
+                    <p>Capital Expenditure Budget</p>
+                </div>
+                <div class="report-card" data-report="budget-variance">
+                    <h6><i class="fas fa-not-equal"></i> تحليل الانحرافات</h6>
+                    <p>مقارنة الفعلي بالمخطط</p>
+                </div>
+                <div class="report-card" data-report="budget-flexible">
+                    <h6><i class="fas fa-expand-arrows-alt"></i> الموازنة المرنة</h6>
+                    <p>Flexible Budget Analysis</p>
+                </div>
+                <div class="report-card" data-report="budget-zerobased">
+                    <h6><i class="fas fa-redo"></i> الموازنة الصفرية</h6>
+                    <p>Zero-Based Budgeting</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- جناح الرقابة والتدقيق الداخلي -->
         <div class="pantheon-wing">
             <div class="wing-header">
                 <i class="wing-icon fas fa-shield-alt"></i>
                 <div>
                     <h3 class="wing-title">جناح الرقابة والتدقيق الداخلي</h3>
-                    <p class="wing-subtitle">كشف المخاطر ونقاط الضعف في العمليات الداخلية.</p>
+                    <p class="wing-subtitle">كشف المخاطر ونقاط الضعف في العمليات الداخلية</p>
                 </div>
             </div>
             <div class="report-grid">
-                <div id="report-control-aging" class="report-card"><h6>تقرير أعمار الذمم</h6><p>تصنيف ديون العملاء والموردين حسب فترة تأخرها.</p></div>
-                <div id="report-control-expenses" class="report-card"><h6>تحليل المصروفات الاستثنائية</h6><p>تسليط الضوء على أي مصروفات غير عادية أو متكررة.</p></div>
-                <div id="report-control-log" class="report-card"><h6>سجل التعديلات والقيود</h6><p>عرض جميع قيود التسوية والتصحيح التي تم إجراؤها.</p></div>
+                <div class="report-card" data-report="control-aging">
+                    <h6><i class="fas fa-hourglass-half"></i> تقرير أعمار الذمم</h6>
+                    <p>تصنيف ديون العملاء والموردين</p>
+                </div>
+                <div class="report-card" data-report="control-expenses">
+                    <h6><i class="fas fa-search-dollar"></i> تحليل المصروفات الاستثنائية</h6>
+                    <p>كشف المصروفات غير العادية</p>
+                </div>
+                <div class="report-card" data-report="control-log">
+                    <h6><i class="fas fa-history"></i> سجل التعديلات والقيود</h6>
+                    <p>عرض جميع قيود التسوية</p>
+                </div>
+                <div class="report-card" data-report="control-inventory">
+                    <h6><i class="fas fa-boxes"></i> تحليل حركة المخزون</h6>
+                    <p>معدل الدوران والبضاعة الراكدة</p>
+                </div>
+                <div class="report-card" data-report="control-workingcapital">
+                    <h6><i class="fas fa-cogs"></i> كفاءة رأس المال العامل</h6>
+                    <p>Working Capital Management</p>
+                </div>
+                <div class="report-card" data-report="control-risks">
+                    <h6><i class="fas fa-exclamation-circle"></i> تقرير المخاطر المالية</h6>
+                    <p>تحديد وتقييم المخاطر</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- جناح لوحة المؤشرات -->
+        <div class="pantheon-wing">
+            <div class="wing-header">
+                <i class="wing-icon fas fa-tachometer-alt"></i>
+                <div>
+                    <h3 class="wing-title">جناح لوحة المؤشرات</h3>
+                    <p class="wing-subtitle">مؤشرات الأداء الرئيسية في لوحة واحدة</p>
+                </div>
+            </div>
+            <div class="report-grid">
+                <div class="report-card" data-report="dashboard-executive">
+                    <h6><i class="fas fa-user-tie"></i> لوحة الإدارة التنفيذية</h6>
+                    <p>نظرة شاملة للإدارة العليا</p>
+                </div>
+                <div class="report-card" data-report="dashboard-operational">
+                    <h6><i class="fas fa-tasks"></i> لوحة الأداء التشغيلي</h6>
+                    <p>KPIs التشغيلية اليومية</p>
+                </div>
+                <div class="report-card" data-report="dashboard-financial">
+                    <h6><i class="fas fa-coins"></i> لوحة الأداء المالي</h6>
+                    <p>المؤشرات المالية الحرجة</p>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <!-- Modal for displaying generated reports -->
+    <!-- Modal for displaying reports -->
     <div class="modal fade" id="reportModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="reportModalTitle"></h5>
@@ -149,9 +530,14 @@
                 <div class="modal-body" id="reportModalBody">
                     <!-- Report content will be injected here -->
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer no-print">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إغلاق</button>
-                    <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fas fa-print me-2"></i>طباعة التقرير</button>
+                    <button type="button" class="btn btn-primary-glow" onclick="printReport()">
+                        <i class="fas fa-print me-2"></i>طباعة
+                    </button>
+                    <button type="button" class="btn btn-primary-glow" onclick="savePDF()">
+                        <i class="fas fa-file-pdf me-2"></i>حفظ PDF
+                    </button>
                 </div>
             </div>
         </div>
@@ -160,188 +546,1062 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function( ) {
-            const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        let reportModal;
+        let auditFile = {};
+        let currentReportId = '';
+        let currentReportTitle = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
             
+            // Load audit file from localStorage
+            const activeClientId = localStorage.getItem('activeClientId');
+            if (activeClientId) {
+                const savedAuditFile = localStorage.getItem(`polarisAuditFile_${activeClientId}`);
+                if (savedAuditFile) {
+                    auditFile = JSON.parse(savedAuditFile);
+                }
+            }
+            
+            // Add click handlers to all report cards
             document.querySelectorAll('.report-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    generateReport(this.id, this.querySelector('h6').innerText);
+                    const reportId = this.getAttribute('data-report');
+                    const title = this.querySelector('h6').innerText;
+                    generateReport(reportId, title);
                 });
             });
+        });
 
-            function generateReport(reportId, title) {
-                const modalTitleEl = document.getElementById('reportModalTitle');
-                const modalBodyEl = document.getElementById('reportModalBody');
-                modalTitleEl.textContent = title;
+        function generateReport(reportId, title) {
+            currentReportId = reportId;
+            currentReportTitle = title;
+            
+            const modalTitleEl = document.getElementById('reportModalTitle');
+            const modalBodyEl = document.getElementById('reportModalBody');
+            modalTitleEl.textContent = title;
 
-                const activeClientId = localStorage.getItem('activeClientId');
-                if (!activeClientId) {
-                    modalBodyEl.innerHTML = generateErrorHTML('لا يوجد عميل نشط', 'الرجاء اختيار عميل أولاً من بروتوكول التأسيس لتوليد التقارير.', 'company-setup.html');
-                    reportModal.show();
-                    return;
-                }
-
-                const savedAuditFile = localStorage.getItem(`polarisAuditFile_${activeClientId}`);
-                if (!savedAuditFile) {
-                    modalBodyEl.innerHTML = generateErrorHTML('بيانات المراجعة غير موجودة', 'الرجاء إكمال عملية المراجعة واعتماد الميزان في صفحة "ملف المراجعة الإلكتروني" أولاً.', 'review-deck.html');
-                    reportModal.show();
-                    return;
-                }
-
-                const auditFile = JSON.parse(savedAuditFile);
-                const isFinalized = auditFile.finalizedEntities.includes(auditFile.activeEntityId);
-                
-                // بعض التقارير (مثل الرقابية) يمكن عرضها قبل الاعتماد النهائي
-                const requiresFinalization = reportId.startsWith('report-sovereign');
-                if (requiresFinalization && !isFinalized) {
-                     modalBodyEl.innerHTML = generateErrorHTML('الميزان لم يتم اعتماده', 'يجب اعتماد ميزان المراجعة النهائي في صفحة "ملف المراجعة الإلكتروني" قبل توليد التقارير السيادية.', 'review-deck.html');
-                    reportModal.show();
-                    return;
-                }
-                
-                const tbData = getFinalTrialBalance(auditFile);
-                const prevTbData = getPreviousTrialBalance(auditFile);
-                let reportContent = '';
-
-                switch (reportId) {
-                    // Sovereign
-                    case 'report-sovereign-fs': reportContent = generateFinancialStatements(tbData); break;
-                    case 'report-sovereign-zakat': reportContent = generateZakatReport(tbData); break;
-                    
-                    // Diagnostics
-                    case 'report-diag-analysis': reportContent = generateFinancialAnalysis(tbData); break;
-                    case 'report-diag-trends': reportContent = generateTrendAnalysis(tbData, prevTbData); break;
-                    
-                    // Strategic
-                    case 'report-strategic-whatif': reportContent = generateWhatIfAnalysis(tbData); break;
-                    
-                    // Control
-                    case 'report-control-aging': reportContent = generateAgingReport(tbData); break;
-                    case 'report-control-expenses': reportContent = generateExpenseAnalysis(tbData); break;
-                    case 'report-control-log': reportContent = generateAdjustmentsLog(auditFile); break;
-                    
-                    default:
-                        reportContent = `<p class="text-center text-secondary p-4">التقرير المطلوب (${title}) قيد الإنشاء حاليًا ضمن محرك التقارير.</p>`;
-                        break;
-                }
-                
-                modalBodyEl.innerHTML = reportContent;
+            if (!auditFile || !auditFile.trialBalance) {
+                modalBodyEl.innerHTML = generateErrorHTML(
+                    'بيانات المراجعة غير موجودة',
+                    'الرجاء إكمال عملية المراجعة في صفحة "المحطة المركزية" أولاً.',
+                    'account-mapping.html'
+                );
                 reportModal.show();
+                return;
             }
 
-            function getFinalTrialBalance(auditFile) {
-                const activeTB = auditFile.trialBalances[auditFile.activeEntityId]?.data || [];
-                const adjustments = auditFile.adjustments[auditFile.activeEntityId] || [];
-                return activeTB.map(acc => {
-                    let adjAmount = adjustments.reduce((sum, aje) => {
-                        if (aje.debitAccount === acc['اسم الحساب']) return sum + aje.amount;
-                        if (aje.creditAccount === acc['اسم الحساب']) return sum - aje.amount;
-                        return sum;
-                    }, 0);
-                    const bookBalance = (parseFloat(acc['رصيد آخر المدة مدين'] || 0) - parseFloat(acc['رصيد آخر المدة دائن'] || 0));
-                    const finalBalance = bookBalance + adjAmount;
-                    const classification = classifyAccount(acc);
-                    return { ...acc, finalBalance, classification };
-                });
+            const tbData = auditFile.trialBalance || [];
+            let reportContent = '';
+
+            // Generate report based on ID
+            switch (reportId) {
+                // Sovereign Reports
+                case 'sovereign-fs':
+                    reportContent = generateFinancialStatements(tbData);
+                    break;
+                case 'sovereign-notes':
+                    reportContent = generateNotes(tbData);
+                    break;
+                case 'sovereign-audit':
+                    reportContent = generateAuditReport(tbData);
+                    break;
+                case 'sovereign-zakat':
+                    reportContent = generateZakatReport(tbData);
+                    break;
+
+                // Financial Analysis
+                case 'analysis-ratios':
+                    reportContent = generateFinancialRatios(tbData);
+                    break;
+                case 'analysis-dupont':
+                    reportContent = generateDupontAnalysis(tbData);
+                    break;
+                case 'analysis-zscore':
+                    reportContent = generateZScore(tbData);
+                    break;
+                case 'analysis-trends':
+                    reportContent = generateTrendAnalysis(tbData);
+                    break;
+                case 'analysis-vertical':
+                    reportContent = generateVerticalAnalysis(tbData);
+                    break;
+                case 'analysis-horizontal':
+                    reportContent = generateHorizontalAnalysis(tbData);
+                    break;
+                case 'analysis-commonsize':
+                    reportContent = generateCommonSize(tbData);
+                    break;
+                case 'analysis-cashcycle':
+                    reportContent = generateCashCycle(tbData);
+                    break;
+                case 'analysis-eva':
+                    reportContent = generateEVA(tbData);
+                    break;
+
+                // Strategic Reports
+                case 'strategic-whatif':
+                    reportContent = generateWhatIfAnalysis(tbData);
+                    break;
+                case 'strategic-breakeven':
+                    reportContent = generateBreakEven(tbData);
+                    break;
+                case 'strategic-cvp':
+                    reportContent = generateCVP(tbData);
+                    break;
+                case 'strategic-sensitivity':
+                    reportContent = generateSensitivity(tbData);
+                    break;
+                case 'strategic-scenarios':
+                    reportContent = generateScenarios(tbData);
+                    break;
+                case 'strategic-forecast':
+                    reportContent = generateForecast(tbData);
+                    break;
+                case 'strategic-scorecard':
+                    reportContent = generateScorecard(tbData);
+                    break;
+
+                // Budget Reports
+                case 'budget-master':
+                    reportContent = generateMasterBudget(tbData);
+                    break;
+                case 'budget-sales':
+                    reportContent = generateSalesBudget(tbData);
+                    break;
+                case 'budget-production':
+                    reportContent = generateProductionBudget(tbData);
+                    break;
+                case 'budget-cash':
+                    reportContent = generateCashBudget(tbData);
+                    break;
+                case 'budget-capex':
+                    reportContent = generateCapexBudget(tbData);
+                    break;
+                case 'budget-variance':
+                    reportContent = generateVarianceAnalysis(tbData);
+                    break;
+                case 'budget-flexible':
+                    reportContent = generateFlexibleBudget(tbData);
+                    break;
+                case 'budget-zerobased':
+                    reportContent = generateZeroBasedBudget(tbData);
+                    break;
+
+                // Control Reports
+                case 'control-aging':
+                    reportContent = generateAgingReport(tbData);
+                    break;
+                case 'control-expenses':
+                    reportContent = generateExpenseAnalysis(tbData);
+                    break;
+                case 'control-log':
+                    reportContent = generateAdjustmentsLog(auditFile);
+                    break;
+                case 'control-inventory':
+                    reportContent = generateInventoryAnalysis(tbData);
+                    break;
+                case 'control-workingcapital':
+                    reportContent = generateWorkingCapital(tbData);
+                    break;
+                case 'control-risks':
+                    reportContent = generateRiskReport(tbData);
+                    break;
+
+                // Dashboard Reports
+                case 'dashboard-executive':
+                    reportContent = generateExecutiveDashboard(tbData);
+                    break;
+                case 'dashboard-operational':
+                    reportContent = generateOperationalDashboard(tbData);
+                    break;
+                case 'dashboard-financial':
+                    reportContent = generateFinancialDashboard(tbData);
+                    break;
+
+                default:
+                    reportContent = `<p class="text-center text-secondary p-4">التقرير المطلوب (${title}) قيد الإنشاء حالياً ضمن محرك التقارير.</p>`;
+                    break;
             }
 
-            function getPreviousTrialBalance(auditFile) {
-                const prevTBKey = `prev_${auditFile.activeEntityId}`;
-                const prevTB = auditFile.trialBalances[prevTBKey]?.data || [];
-                return prevTB.map(acc => {
-                    const balance = (parseFloat(acc['رصيد آخر المدة مدين'] || 0) - parseFloat(acc['رصيد آخر المدة دائن'] || 0));
-                    return { ...acc, finalBalance: balance };
-                });
-            }
+            modalBodyEl.innerHTML = reportContent;
+            reportModal.show();
+        }
 
-            function classifyAccount(account) {
-                const accNum = account['رقم الحساب'] ? account['رقم الحساب'].toString() : '';
-                const accName = account['اسم الحساب'] ? account['اسم الحساب'].toLowerCase() : '';
-                if (accName.includes('عملاء') || accName.includes('مدينون')) return 'receivables';
-                if (accName.includes('نقد') || accName.includes('بنك')) return 'cash';
-                if (accNum.startsWith('1')) return 'assets';
-                if (accNum.startsWith('2')) return 'liabilities';
-                if (accNum.startsWith('3')) return 'equity';
-                if (accNum.startsWith('4')) return 'revenue';
-                if (accNum.startsWith('5') || accNum.startsWith('6')) return 'expenses';
-                return 'unknown';
+        // Helper Functions
+        function formatCurrency(val) {
+            if (!val) return '0.00';
+            return parseFloat(val).toLocaleString('ar-SA', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function calculateTotals(data) {
+            const totals = {
+                assets: 0,
+                currentAssets: 0,
+                fixedAssets: 0,
+                liabilities: 0,
+                currentLiabilities: 0,
+                longTermLiabilities: 0,
+                equity: 0,
+                revenue: 0,
+                expenses: 0,
+                cogs: 0,
+                operatingExpenses: 0
+            };
+
+            data.forEach(acc => {
+                const balance = acc.finalBalance || acc.final_balance || 0;
+                const category = acc.category || '';
+                const subCategory = acc.sub_category || '';
+
+                if (category === 'assets') {
+                    totals.assets += balance;
+                    if (subCategory && subCategory.includes('current')) {
+                        totals.currentAssets += balance;
+                    } else {
+                        totals.fixedAssets += balance;
+                    }
+                } else if (category === 'liabilities') {
+                    totals.liabilities += balance;
+                    if (subCategory && subCategory.includes('current')) {
+                        totals.currentLiabilities += balance;
+                    } else {
+                        totals.longTermLiabilities += balance;
+                    }
+                } else if (category === 'equity') {
+                    totals.equity += balance;
+                } else if (category === 'revenue') {
+                    totals.revenue += balance;
+                } else if (category === 'expenses') {
+                    totals.expenses += Math.abs(balance);
+                    if (subCategory === 'cogs') {
+                        totals.cogs += Math.abs(balance);
+                    } else {
+                        totals.operatingExpenses += Math.abs(balance);
+                    }
+                }
+            });
+
+            totals.netIncome = totals.revenue - totals.expenses;
+            totals.grossProfit = totals.revenue - totals.cogs;
+
+            return totals;
+        }
+
+        function generateErrorHTML(title, message, buttonLink) {
+            return `
+                <div class="text-center p-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4>${title}</h4>
+                    <p class="text-secondary">${message}</p>
+                    <a href="${buttonLink}" class="btn btn-primary-glow mt-2">
+                        الانتقال إلى الصفحة المطلوبة
+                    </a>
+                </div>
+            `;
+        }
+
+        // Report Generation Functions
+        function generateFinancialStatements(data) {
+            const totals = calculateTotals(data);
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            
+            return `
+                <div class="company-header text-center mb-4">
+                    <h3>${companyName}</h3>
+                    <p class="text-secondary">القوائم المالية الأساسية</p>
+                    <p class="text-secondary">للسنة المنتهية في ${new Date().getFullYear()}</p>
+                </div>
+
+                <h5 class="mb-3">قائمة المركز المالي</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">المبلغ (ريال سعودي)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-group-divider">
+                            <td><strong>الأصول</strong></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>الأصول المتداولة</td>
+                            <td class="text-end">${formatCurrency(totals.currentAssets)}</td>
+                        </tr>
+                        <tr>
+                            <td>الأصول الثابتة</td>
+                            <td class="text-end">${formatCurrency(totals.fixedAssets)}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>إجمالي الأصول</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.assets)}</strong></td>
+                        </tr>
+                        <tr class="table-group-divider">
+                            <td><strong>الالتزامات</strong></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>الالتزامات المتداولة</td>
+                            <td class="text-end">${formatCurrency(totals.currentLiabilities)}</td>
+                        </tr>
+                        <tr>
+                            <td>الالتزامات طويلة الأجل</td>
+                            <td class="text-end">${formatCurrency(totals.longTermLiabilities)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>إجمالي الالتزامات</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.liabilities)}</strong></td>
+                        </tr>
+                        <tr class="table-group-divider">
+                            <td><strong>حقوق الملكية</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.equity + totals.netIncome)}</strong></td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>إجمالي الالتزامات وحقوق الملكية</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.liabilities + totals.equity + totals.netIncome)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="mb-3 mt-5">قائمة الدخل الشامل</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">المبلغ (ريال سعودي)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>الإيرادات</td>
+                            <td class="text-end">${formatCurrency(totals.revenue)}</td>
+                        </tr>
+                        <tr>
+                            <td>تكلفة البضاعة المباعة</td>
+                            <td class="text-end">(${formatCurrency(totals.cogs)})</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>إجمالي الربح</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.grossProfit)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>المصروفات التشغيلية</td>
+                            <td class="text-end">(${formatCurrency(totals.operatingExpenses)})</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>صافي الربح/الخسارة</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.netIncome)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateNotes(data) {
+            return `
+                <h5 class="mb-3">الإيضاحات المتممة للقوائم المالية</h5>
+                <p class="text-secondary">يتم توليد الإيضاحات بناءً على البيانات المتوفرة في ميزان المراجعة.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    للحصول على إيضاحات تفصيلية، يُرجى الانتقال إلى صفحة "منصة الحكمة المالية" (consolidation-cockpit.html)
+                </div>
+            `;
+        }
+
+        function generateAuditReport(data) {
+            const companyName = auditFile.clientInfo?.name || 'الشركة';
+            const year = new Date().getFullYear();
+            
+            return `
+                <div class="text-center mb-4">
+                    <h4>تقرير المراجع المستقل</h4>
+                    <p class="text-secondary">إلى السادة/ مساهمي ${companyName}</p>
+                </div>
+
+                <h5>الرأي</h5>
+                <p>لقد راجعنا القوائم المالية المرفقة لـ ${companyName}، والتي تتضمن قائمة المركز المالي كما في 31 ديسمبر ${year}، وقوائم الدخل الشامل والتغيرات في حقوق الملكية والتدفقات النقدية للسنة المنتهية في ذلك التاريخ، والإيضاحات المتممة للقوائم المالية.</p>
+                
+                <p>في رأينا، إن القوائم المالية المرفقة تعبر بعدالة، من جميع النواحي الجوهرية، عن المركز المالي للشركة كما في 31 ديسمبر ${year}، وعن أدائها المالي وتدفقاتها النقدية للسنة المنتهية في ذلك التاريخ وفقاً للمعايير الدولية للتقرير المالي المعتمدة في المملكة العربية السعودية والإصدارات الأخرى المعتمدة من الهيئة السعودية للمراجعين والمحاسبين.</p>
+
+                <h5 class="mt-4">أساس الرأي</h5>
+                <p>لقد قمنا بمراجعتنا وفقاً لمعايير المراجعة المعتمدة في المملكة العربية السعودية. إن مسؤولياتنا بموجب تلك المعايير موضحة بشكل أكبر في قسم "مسؤوليات المراجع" من تقريرنا.</p>
+
+                <div class="mt-5">
+                    <p><strong>مكتب المراجعة</strong></p>
+                    <p>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</p>
+                </div>
+            `;
+        }
+
+        function generateZakatReport(data) {
+            const totals = calculateTotals(data);
+            const zakatBase = totals.equity + totals.netIncome;
+            const zakatDue = zakatBase * 0.025;
+            
+            return `
+                <h5 class="mb-3">الإقرار الزكوي المبسط</h5>
+                <p class="text-secondary small">ملاحظة: هذا حساب مبسط ومباشر من الأرصدة النهائية.</p>
+                
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">المبلغ (ريال سعودي)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>صافي الربح المحاسبي</td>
+                            <td class="text-end">${formatCurrency(totals.netIncome)}</td>
+                        </tr>
+                        <tr>
+                            <td>حقوق الملكية أول المدة</td>
+                            <td class="text-end">${formatCurrency(totals.equity)}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>الوعاء الزكوي (مبسط)</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(zakatBase)}</strong></td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>الزكاة المستحقة (2.5%)</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(zakatDue)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    هذا الحساب تقديري. يُرجى مراجعة مستشار زكوي معتمد للحساب الدقيق.
+                </div>
+            `;
+        }
+
+        function generateFinancialRatios(data) {
+            const totals = calculateTotals(data);
+            
+            // Liquidity Ratios
+            const currentRatio = totals.currentLiabilities > 0 ? 
+                (totals.currentAssets / totals.currentLiabilities) : 0;
+            const quickRatio = totals.currentLiabilities > 0 ? 
+                ((totals.currentAssets - totals.currentAssets * 0.3) / totals.currentLiabilities) : 0;
+            
+            // Profitability Ratios
+            const grossMargin = totals.revenue > 0 ? 
+                ((totals.grossProfit / totals.revenue) * 100) : 0;
+            const netMargin = totals.revenue > 0 ? 
+                ((totals.netIncome / totals.revenue) * 100) : 0;
+            const roa = totals.assets > 0 ? 
+                ((totals.netIncome / totals.assets) * 100) : 0;
+            const roe = (totals.equity + totals.netIncome) > 0 ? 
+                ((totals.netIncome / (totals.equity + totals.netIncome)) * 100) : 0;
+            
+            // Leverage Ratios
+            const debtRatio = totals.assets > 0 ? 
+                ((totals.liabilities / totals.assets) * 100) : 0;
+            const debtToEquity = (totals.equity + totals.netIncome) > 0 ? 
+                (totals.liabilities / (totals.equity + totals.netIncome)) : 0;
+            
+            return `
+                <h5 class="mb-4">النسب المالية الشاملة</h5>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">النسبة الجارية</div>
+                            <div class="kpi-value">${currentRatio.toFixed(2)}</div>
+                            <small class="text-secondary">Current Ratio</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">النسبة السريعة</div>
+                            <div class="kpi-value">${quickRatio.toFixed(2)}</div>
+                            <small class="text-secondary">Quick Ratio</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">هامش الربح الإجمالي</div>
+                            <div class="kpi-value">${grossMargin.toFixed(1)}%</div>
+                            <small class="text-secondary">Gross Margin</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">هامش الربح الصافي</div>
+                            <div class="kpi-value">${netMargin.toFixed(1)}%</div>
+                            <small class="text-secondary">Net Margin</small>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="mt-4">نسب السيولة</h6>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>النسبة</th>
+                            <th>القيمة</th>
+                            <th>التفسير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>النسبة الجارية (Current Ratio)</td>
+                            <td>${currentRatio.toFixed(2)}</td>
+                            <td>${currentRatio >= 2 ? 'ممتاز' : currentRatio >= 1.5 ? 'جيد' : currentRatio >= 1 ? 'مقبول' : 'ضعيف'}</td>
+                        </tr>
+                        <tr>
+                            <td>النسبة السريعة (Quick Ratio)</td>
+                            <td>${quickRatio.toFixed(2)}</td>
+                            <td>${quickRatio >= 1 ? 'جيد' : 'يحتاج تحسين'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-4">نسب الربحية</h6>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>النسبة</th>
+                            <th>القيمة</th>
+                            <th>الدلالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>هامش الربح الإجمالي</td>
+                            <td>${grossMargin.toFixed(2)}%</td>
+                            <td>نسبة الربح من المبيعات قبل المصروفات</td>
+                        </tr>
+                        <tr>
+                            <td>هامش الربح الصافي</td>
+                            <td>${netMargin.toFixed(2)}%</td>
+                            <td>نسبة الربح النهائي من المبيعات</td>
+                        </tr>
+                        <tr>
+                            <td>العائد على الأصول (ROA)</td>
+                            <td>${roa.toFixed(2)}%</td>
+                            <td>كفاءة استخدام الأصول</td>
+                        </tr>
+                        <tr>
+                            <td>العائد على حقوق الملكية (ROE)</td>
+                            <td>${roe.toFixed(2)}%</td>
+                            <td>عائد المساهمين</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-4">نسب المديونية</h6>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>النسبة</th>
+                            <th>القيمة</th>
+                            <th>التفسير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>نسبة الدين</td>
+                            <td>${debtRatio.toFixed(2)}%</td>
+                            <td>${debtRatio <= 50 ? 'منخفض' : debtRatio <= 70 ? 'متوسط' : 'مرتفع'}</td>
+                        </tr>
+                        <tr>
+                            <td>الدين إلى حقوق الملكية</td>
+                            <td>${debtToEquity.toFixed(2)}</td>
+                            <td>${debtToEquity <= 1 ? 'جيد' : debtToEquity <= 2 ? 'مقبول' : 'مرتفع'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateDupontAnalysis(data) {
+            const totals = calculateTotals(data);
+            
+            const netMargin = totals.revenue > 0 ? (totals.netIncome / totals.revenue) : 0;
+            const assetTurnover = totals.assets > 0 ? (totals.revenue / totals.assets) : 0;
+            const equityMultiplier = (totals.equity + totals.netIncome) > 0 ? 
+                (totals.assets / (totals.equity + totals.netIncome)) : 0;
+            const roe = netMargin * assetTurnover * equityMultiplier;
+            
+            return `
+                <h5 class="mb-3">تحليل DuPont للعائد على حقوق الملكية</h5>
+                <p class="text-secondary">تحليل مفصل لمكونات العائد على حقوق الملكية</p>
+
+                <div class="alert alert-info">
+                    <strong>ROE = هامش الربح الصافي × معدل دوران الأصول × مضاعف حقوق الملكية</strong>
+                </div>
+
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>المكون</th>
+                            <th>الحساب</th>
+                            <th>القيمة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>هامش الربح الصافي</td>
+                            <td>صافي الربح ÷ الإيرادات</td>
+                            <td>${(netMargin * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr>
+                            <td>معدل دوران الأصول</td>
+                            <td>الإيرادات ÷ إجمالي الأصول</td>
+                            <td>${assetTurnover.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>مضاعف حقوق الملكية</td>
+                            <td>إجمالي الأصول ÷ حقوق الملكية</td>
+                            <td>${equityMultiplier.toFixed(2)}</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>العائد على حقوق الملكية (ROE)</strong></td>
+                            <td></td>
+                            <td><strong>${(roe * 100).toFixed(2)}%</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <h6>التفسير:</h6>
+                    <ul>
+                        <li><strong>هامش الربح الصافي:</strong> يقيس كفاءة الشركة في تحويل المبيعات إلى أرباح</li>
+                        <li><strong>معدل دوران الأصول:</strong> يقيس كفاءة استخدام الأصول لتوليد الإيرادات</li>
+                        <li><strong>مضاعف حقوق الملكية:</strong> يقيس مستوى الرفع المالي (الاعتماد على الديون)</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function generateZScore(data) {
+            const totals = calculateTotals(data);
+            
+            const workingCapital = totals.currentAssets - totals.currentLiabilities;
+            const retainedEarnings = totals.equity * 0.5; // تقدير
+            const ebit = totals.netIncome * 1.2; // تقدير
+            const marketValue = (totals.equity + totals.netIncome) * 1.5; // تقدير
+            
+            const x1 = totals.assets > 0 ? (workingCapital / totals.assets) : 0;
+            const x2 = totals.assets > 0 ? (retainedEarnings / totals.assets) : 0;
+            const x3 = totals.assets > 0 ? (ebit / totals.assets) : 0;
+            const x4 = totals.liabilities > 0 ? (marketValue / totals.liabilities) : 0;
+            const x5 = totals.assets > 0 ? (totals.revenue / totals.assets) : 0;
+            
+            const zScore = (1.2 * x1) + (1.4 * x2) + (3.3 * x3) + (0.6 * x4) + (1.0 * x5);
+            
+            let interpretation = '';
+            let riskLevel = '';
+            if (zScore > 2.99) {
+                interpretation = 'منطقة آمنة - احتمالية إفلاس منخفضة جداً';
+                riskLevel = 'success';
+            } else if (zScore >= 1.81) {
+                interpretation = 'منطقة رمادية - يجب المراقبة';
+                riskLevel = 'warning';
+            } else {
+                interpretation = 'منطقة خطر - احتمالية إفلاس مرتفعة';
+                riskLevel = 'danger';
             }
             
-            const formatCurrency = (val) => val.toLocaleString('ar-EG', {style:'currency', currency:'SAR'});
+            return `
+                <h5 class="mb-3">مؤشر Altman Z-Score</h5>
+                <p class="text-secondary">تقييم مخاطر الإفلاس والصحة المالية</p>
 
-            function generateErrorHTML(title, message, buttonLink) {
-                return `<div class="text-center p-4"><i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i><h4>${title}</h4><p class="text-secondary">${message}</p><a href="${buttonLink}" class="btn btn-primary mt-2">الانتقال إلى الصفحة المطلوبة</a></div>`;
+                <div class="alert alert-${riskLevel} text-center">
+                    <h3>Z-Score = ${zScore.toFixed(2)}</h3>
+                    <p class="mb-0">${interpretation}</p>
+                </div>
+
+                <table class="table report-table mt-4">
+                    <thead>
+                        <tr>
+                            <th>المكون</th>
+                            <th>الوزن</th>
+                            <th>القيمة</th>
+                            <th>المساهمة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>رأس المال العامل / إجمالي الأصول</td>
+                            <td>1.2</td>
+                            <td>${x1.toFixed(3)}</td>
+                            <td>${(1.2 * x1).toFixed(3)}</td>
+                        </tr>
+                        <tr>
+                            <td>الأرباح المحتجزة / إجمالي الأصول</td>
+                            <td>1.4</td>
+                            <td>${x2.toFixed(3)}</td>
+                            <td>${(1.4 * x2).toFixed(3)}</td>
+                        </tr>
+                        <tr>
+                            <td>EBIT / إجمالي الأصول</td>
+                            <td>3.3</td>
+                            <td>${x3.toFixed(3)}</td>
+                            <td>${(3.3 * x3).toFixed(3)}</td>
+                        </tr>
+                        <tr>
+                            <td>القيمة السوقية / إجمالي الالتزامات</td>
+                            <td>0.6</td>
+                            <td>${x4.toFixed(3)}</td>
+                            <td>${(0.6 * x4).toFixed(3)}</td>
+                        </tr>
+                        <tr>
+                            <td>المبيعات / إجمالي الأصول</td>
+                            <td>1.0</td>
+                            <td>${x5.toFixed(3)}</td>
+                            <td>${(1.0 * x5).toFixed(3)}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td colspan="3"><strong>Z-Score الإجمالي</strong></td>
+                            <td><strong>${zScore.toFixed(2)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <h6>مقياس التفسير:</h6>
+                    <ul>
+                        <li><strong>Z > 2.99:</strong> منطقة آمنة (احتمالية إفلاس منخفضة)</li>
+                        <li><strong>1.81 ≤ Z ≤ 2.99:</strong> منطقة رمادية (يجب المراقبة)</li>
+                        <li><strong>Z < 1.81:</strong> منطقة خطر (احتمالية إفلاس مرتفعة)</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Placeholder functions for other reports
+        function generateTrendAnalysis(data) {
+            return `<p class="text-center p-4">تحليل الاتجاهات - قيد التطوير</p>`;
+        }
+
+        function generateVerticalAnalysis(data) {
+            return `<p class="text-center p-4">التحليل الرأسي - قيد التطوير</p>`;
+        }
+
+        function generateHorizontalAnalysis(data) {
+            return `<p class="text-center p-4">التحليل الأفقي - قيد التطوير</p>`;
+        }
+
+        function generateCommonSize(data) {
+            return `<p class="text-center p-4">القوائم بالنسب المئوية - قيد التطوير</p>`;
+        }
+
+        function generateCashCycle(data) {
+            return `<p class="text-center p-4">دورة التحويل النقدي - قيد التطوير</p>`;
+        }
+
+        function generateEVA(data) {
+            return `<p class="text-center p-4">القيمة الاقتصادية المضافة - قيد التطوير</p>`;
+        }
+
+        function generateWhatIfAnalysis(data) {
+            const totals = calculateTotals(data);
+            
+            return `
+                <h5 class="mb-3">تحليل "ماذا لو"</h5>
+                <p class="text-secondary">محاكاة تأثير القرارات المختلفة على الأداء المالي</p>
+
+                <h6 class="mt-4">السيناريو 1: زيادة الإيرادات بنسبة 10%</h6>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th>الوضع الحالي</th>
+                            <th>السيناريو المقترح</th>
+                            <th>التغير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>الإيرادات</td>
+                            <td>${formatCurrency(totals.revenue)}</td>
+                            <td>${formatCurrency(totals.revenue * 1.1)}</td>
+                            <td class="text-success">+10%</td>
+                        </tr>
+                        <tr>
+                            <td>صافي الربح</td>
+                            <td>${formatCurrency(totals.netIncome)}</td>
+                            <td>${formatCurrency(totals.netIncome + (totals.revenue * 0.1 * 0.2))}</td>
+                            <td class="text-success">+${formatCurrency(totals.revenue * 0.1 * 0.2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-4">السيناريو 2: خفض المصروفات بنسبة 5%</h6>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th>الوضع الحالي</th>
+                            <th>السيناريو المقترح</th>
+                            <th>التغير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>المصروفات</td>
+                            <td>${formatCurrency(totals.expenses)}</td>
+                            <td>${formatCurrency(totals.expenses * 0.95)}</td>
+                            <td class="text-success">-5%</td>
+                        </tr>
+                        <tr>
+                            <td>صافي الربح</td>
+                            <td>${formatCurrency(totals.netIncome)}</td>
+                            <td>${formatCurrency(totals.netIncome + (totals.expenses * 0.05))}</td>
+                            <td class="text-success">+${formatCurrency(totals.expenses * 0.05)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateBreakEven(data) {
+            const totals = calculateTotals(data);
+            const fixedCosts = totals.operatingExpenses;
+            const variableCostRatio = totals.cogs / totals.revenue;
+            const contributionMarginRatio = 1 - variableCostRatio;
+            const breakEvenSales = contributionMarginRatio > 0 ? (fixedCosts / contributionMarginRatio) : 0;
+            
+            return `
+                <h5 class="mb-3">تحليل نقطة التعادل</h5>
+                <p class="text-secondary">تحديد حجم المبيعات المطلوب لتغطية جميع التكاليف</p>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="kpi-card">
+                            <div class="kpi-label">نقطة التعادل (مبيعات)</div>
+                            <div class="kpi-value">${formatCurrency(breakEvenSales)}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="kpi-card">
+                            <div class="kpi-label">هامش المساهمة</div>
+                            <div class="kpi-value">${(contributionMarginRatio * 100).toFixed(1)}%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>البيان</th>
+                            <th class="text-end">القيمة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>التكاليف الثابتة</td>
+                            <td class="text-end">${formatCurrency(fixedCosts)}</td>
+                        </tr>
+                        <tr>
+                            <td>نسبة التكاليف المتغيرة</td>
+                            <td class="text-end">${(variableCostRatio * 100).toFixed(1)}%</td>
+                        </tr>
+                        <tr>
+                            <td>نسبة هامش المساهمة</td>
+                            <td class="text-end">${(contributionMarginRatio * 100).toFixed(1)}%</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>نقطة التعادل (مبيعات)</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(breakEvenSales)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>المبيعات الفعلية</td>
+                            <td class="text-end">${formatCurrency(totals.revenue)}</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>هامش الأمان</strong></td>
+                            <td class="text-end"><strong>${formatCurrency(totals.revenue - breakEvenSales)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateCVP(data) {
+            return `<p class="text-center p-4">تحليل التكلفة-الحجم-الربح - قيد التطوير</p>`;
+        }
+
+        function generateSensitivity(data) {
+            return `<p class="text-center p-4">تحليل الحساسية - قيد التطوير</p>`;
+        }
+
+        function generateScenarios(data) {
+            return `<p class="text-center p-4">تحليل السيناريوهات - قيد التطوير</p>`;
+        }
+
+        function generateForecast(data) {
+            return `<p class="text-center p-4">التدفقات النقدية المتوقعة - قيد التطوير</p>`;
+        }
+
+        function generateScorecard(data) {
+            return `<p class="text-center p-4">بطاقة الأداء المتوازن - قيد التطوير</p>`;
+        }
+
+        function generateMasterBudget(data) {
+            return `<p class="text-center p-4">الموازنة الرئيسية - قيد التطوير</p>`;
+        }
+
+        function generateSalesBudget(data) {
+            return `<p class="text-center p-4">موازنة المبيعات - قيد التطوير</p>`;
+        }
+
+        function generateProductionBudget(data) {
+            return `<p class="text-center p-4">موازنة الإنتاج - قيد التطوير</p>`;
+        }
+
+        function generateCashBudget(data) {
+            return `<p class="text-center p-4">موازنة النقدية - قيد التطوير</p>`;
+        }
+
+        function generateCapexBudget(data) {
+            return `<p class="text-center p-4">موازنة النفقات الرأسمالية - قيد التطوير</p>`;
+        }
+
+        function generateVarianceAnalysis(data) {
+            return `<p class="text-center p-4">تحليل الانحرافات - قيد التطوير</p>`;
+        }
+
+        function generateFlexibleBudget(data) {
+            return `<p class="text-center p-4">الموازنة المرنة - قيد التطوير</p>`;
+        }
+
+        function generateZeroBasedBudget(data) {
+            return `<p class="text-center p-4">الموازنة الصفرية - قيد التطوير</p>`;
+        }
+
+        function generateAgingReport(data) {
+            return `<p class="text-center p-4">تقرير أعمار الذمم - قيد التطوير</p>`;
+        }
+
+        function generateExpenseAnalysis(data) {
+            return `<p class="text-center p-4">تحليل المصروفات الاستثنائية - قيد التطوير</p>`;
+        }
+
+        function generateAdjustmentsLog(auditFile) {
+            const adjustments = auditFile.adjustments || [];
+            
+            if (adjustments.length === 0) {
+                return `<p class="text-center text-secondary p-4">لا توجد قيود تسوية مسجلة لهذا الكيان.</p>`;
             }
+            
+            let rows = '';
+            adjustments.forEach((aje, index) => {
+                rows += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${aje.description || aje.desc || '-'}</td>
+                        <td>${aje.debitAccount || '-'}</td>
+                        <td>${aje.creditAccount || '-'}</td>
+                        <td class="text-end">${formatCurrency(aje.amount || 0)}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <h5 class="mb-3">سجل قيود التسوية</h5>
+                <table class="table report-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الوصف</th>
+                            <th>الحساب المدين</th>
+                            <th>الحساب الدائن</th>
+                            <th class="text-end">المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            `;
+        }
 
-            const generateFinancialStatements = data => {
-                const totals = { assets: 0, liabilities: 0, equity: 0, revenue: 0, expenses: 0 };
-                data.forEach(acc => { if (totals.hasOwnProperty(acc.classification)) totals[acc.classification] += acc.finalBalance; });
-                const netIncome = totals.revenue - totals.expenses;
-                totals.equity += netIncome;
-                return `<h5 class="font-family-display">قائمة المركز المالي</h5><table class="table table-sm"><tr><td>إجمالي الأصول</td><td class="text-end fw-bold">${formatCurrency(totals.assets)}</td></tr><tr><td>إجمالي الالتزامات</td><td class="text-end fw-bold">${formatCurrency(totals.liabilities)}</td></tr><tr><td>إجمالي حقوق الملكية</td><td class="text-end fw-bold">${formatCurrency(totals.equity)}</td></tr><tr class="table-group-divider"><td><strong>إجمالي ل. وح.م</strong></td><td class="text-end fw-bold">${formatCurrency(totals.liabilities + totals.equity)}</td></tr></table><hr><h5 class="font-family-display">قائمة الدخل</h5><table class="table table-sm"><tr><td>الإيرادات</td><td class="text-end">${formatCurrency(totals.revenue)}</td></tr><tr><td>المصروفات</td><td class="text-end">(${formatCurrency(Math.abs(totals.expenses))})</td></tr><tr class="table-group-divider"><td><strong>صافي الربح/الخسارة</strong></td><td class="text-end fw-bold">${formatCurrency(netIncome)}</td></tr></table>`;
+        function generateInventoryAnalysis(data) {
+            return `<p class="text-center p-4">تحليل حركة المخزون - قيد التطوير</p>`;
+        }
+
+        function generateWorkingCapital(data) {
+            return `<p class="text-center p-4">كفاءة رأس المال العامل - قيد التطوير</p>`;
+        }
+
+        function generateRiskReport(data) {
+            return `<p class="text-center p-4">تقرير المخاطر المالية - قيد التطوير</p>`;
+        }
+
+        function generateExecutiveDashboard(data) {
+            const totals = calculateTotals(data);
+            
+            return `
+                <h5 class="mb-4">لوحة الإدارة التنفيذية</h5>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">إجمالي الإيرادات</div>
+                            <div class="kpi-value">${formatCurrency(totals.revenue)}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">صافي الربح</div>
+                            <div class="kpi-value">${formatCurrency(totals.netIncome)}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">إجمالي الأصول</div>
+                            <div class="kpi-value">${formatCurrency(totals.assets)}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-label">حقوق الملكية</div>
+                            <div class="kpi-value">${formatCurrency(totals.equity + totals.netIncome)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="executiveChart"></canvas>
+                </div>
+            `;
+        }
+
+        function generateOperationalDashboard(data) {
+            return `<p class="text-center p-4">لوحة الأداء التشغيلي - قيد التطوير</p>`;
+        }
+
+        function generateFinancialDashboard(data) {
+            return `<p class="text-center p-4">لوحة الأداء المالي - قيد التطوير</p>`;
+        }
+
+        // Print and PDF functions
+        function printReport() {
+            window.print();
+        }
+
+        function savePDF() {
+            const element = document.getElementById('reportModalBody');
+            const opt = {
+                margin: 1,
+                filename: `${currentReportTitle}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
-            const generateZakatReport = data => {
-                const totals = { assets: 0, liabilities: 0, equity: 0, revenue: 0, expenses: 0 };
-                data.forEach(acc => { if (totals.hasOwnProperty(acc.classification)) totals[acc.classification] += acc.finalBalance; });
-                const netIncome = totals.revenue - totals.expenses;
-                const zakatBase = totals.equity + netIncome;
-                const zakatDue = zakatBase * 0.025;
-                return `<p class="text-secondary small">ملاحظة: هذا حساب مبسط ومباشر من الأرصدة النهائية.</p><table class="table"><tr><td>صافي الربح المحاسبي</td><td class="text-end">${formatCurrency(netIncome)}</td></tr><tr><td>حقوق الملكية أول المدة</td><td class="text-end">${formatCurrency(totals.equity)}</td></tr><tr class="table-group-divider"><td><strong>الوعاء الزكوي (مبسط)</strong></td><td class="text-end fw-bold">${formatCurrency(zakatBase)}</td></tr><tr><td><strong>الزكاة المستحقة (2.5%)</strong></td><td class="text-end fw-bold text-success">${formatCurrency(zakatDue)}</td></tr></table>`;
-            };
-            const generateFinancialAnalysis = data => {
-                const totals = { assets: 0, liabilities: 0, revenue: 0, expenses: 0 };
-                data.forEach(acc => { if (totals.hasOwnProperty(acc.classification)) totals[acc.classification] += acc.finalBalance; });
-                const currentAssets = totals.assets;
-                const currentLiabilities = totals.liabilities;
-                const netIncome = totals.revenue - totals.expenses;
-                const currentRatio = currentLiabilities > 0 ? (currentAssets / currentLiabilities).toFixed(2) : 'N/A';
-                const netMargin = totals.revenue > 0 ? ((netIncome / totals.revenue) * 100).toFixed(2) : 'N/A';
-                return `<table class="table"><thead><tr><th>المؤشر</th><th>القيمة</th><th>الدلالة</th></tr></thead><tbody><tr><td><strong>نسبة السيولة الحالية</strong></td><td>${currentRatio}</td><td>قدرة الشركة على سداد التزاماتها قصيرة الأجل.</td></tr><tr><td><strong>هامش صافي الربح</strong></td><td>${netMargin}%</td><td>مقدار الربح المحقق عن كل ريال من المبيعات.</td></tr></tbody></table>`;
-            };
-            const generateTrendAnalysis = (currentData, prevData) => {
-                if (prevData.length === 0) return '<p class="text-secondary text-center p-4">لا يمكن إنشاء التقرير. الرجاء رفع ميزان المراجعة للفترة السابقة في شاشة "استيعاب البيانات".</p>';
-                let rows = '';
-                currentData.forEach(acc => {
-                    const prevAcc = prevData.find(p => p['اسم الحساب'] === acc['اسم الحساب']);
-                    if (prevAcc) {
-                        const change = acc.finalBalance - prevAcc.finalBalance;
-                        const pctChange = prevAcc.finalBalance !== 0 ? ((change / Math.abs(prevAcc.finalBalance)) * 100).toFixed(1) : 'N/A';
-                        if (Math.abs(change) > 0) {
-                            rows += `<tr><td>${acc['اسم الحساب']}</td><td>${formatCurrency(prevAcc.finalBalance)}</td><td>${formatCurrency(acc.finalBalance)}</td><td>${formatCurrency(change)}</td><td>${pctChange}%</td></tr>`;
-                        }
-                    }
-                });
-                return `<table class="table table-sm"><thead><tr><th>الحساب</th><th>رصيد سابق</th><th>رصيد حالي</th><th>التغير</th><th>%</th></tr></thead><tbody>${rows}</tbody></table>`;
-            };
-            const generateWhatIfAnalysis = data => {
-                const totals = { revenue: 0, expenses: 0 };
-                data.forEach(acc => { if (totals.hasOwnProperty(acc.classification)) totals[acc.classification] += acc.finalBalance; });
-                const netIncome = totals.revenue - totals.expenses;
-                const newRevenue = totals.revenue * 1.10;
-                const newNetIncome = newRevenue - totals.expenses;
-                return `<p>محاكاة تأثير زيادة الإيرادات بنسبة 10%:</p><table class="table"><thead><tr><th>البند</th><th>الوضع الحالي</th><th>السيناريو المقترح</th></tr></thead><tbody><tr><td>الإيرادات</td><td>${formatCurrency(totals.revenue)}</td><td>${formatCurrency(newRevenue)}</td></tr><tr><td>صافي الربح</td><td>${formatCurrency(netIncome)}</td><td class="text-success fw-bold">${formatCurrency(newNetIncome)}</td></tr></tbody></table>`;
-            };
-            const generateAgingReport = data => {
-                const receivables = data.find(acc => acc.classification === 'receivables');
-                if (!receivables) return '<p class="text-secondary text-center p-4">لم يتم العثور على حساب "عملاء" أو "مدينون" في ميزان المراجعة.</p>';
-                return `<p>هذا تقرير مبسط يعرض الرصيد الإجمالي للذمم المدينة:</p><h4>إجمالي رصيد العملاء: <span class="text-primary">${formatCurrency(receivables.finalBalance)}</span></h4><p class="text-secondary small mt-3">للحصول على تقرير تفصيلي، يجب ربط النظام بنظام الفوترة الفرعي.</p>`;
-            };
-            const generateExpenseAnalysis = data => {
-                const expenses = data.filter(acc => acc.classification === 'expenses');
-                if (expenses.length === 0) return '<p class="text-secondary text-center p-4">لا توجد حسابات مصروفات في ميزان المراجعة.</p>';
-                let rows = '';
-                expenses.forEach(exp => { rows += `<tr><td>${exp['اسم الحساب']}</td><td class="text-end">${formatCurrency(Math.abs(exp.finalBalance))}</td></tr>`; });
-                return `<table class="table table-sm"><thead><tr><th>بند المصروف</th><th class="text-end">المبلغ</th></tr></thead><tbody>${rows}</tbody></table>`;
-            };
-            const generateAdjustmentsLog = (auditFile) => {
-                const adjustments = auditFile.adjustments[auditFile.activeEntityId] || [];
-                if (adjustments.length === 0) return '<p class="text-secondary text-center p-4">لا توجد قيود تسوية مسجلة لهذا الكيان.</p>';
-                let rows = '';
-                adjustments.forEach(aje => { rows += `<tr><td>${aje.desc}</td><td>${aje.debitAccount}</td><td>${aje.creditAccount}</td><td class="text-end">${formatCurrency(aje.amount)}</td></tr>`; });
-                return `<table class="table table-striped"><thead><tr><th>الوصف</th><th>الحساب المدين</th><th>الحساب الدائن</th><th class="text-end">المبلغ</th></tr></thead><tbody>${rows}</tbody></table>`;
-            };
-        });
+            
+            html2pdf().set(opt).from(element).save();
+        }
     </script>
-
 </body>
 </html>
+
