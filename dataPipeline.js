@@ -1,4 +1,3 @@
-// dataPipeline.js - النسخة النهائية المصححة
 ;(() => {
     'use strict';
     if (typeof CryptoJS === 'undefined') {
@@ -16,7 +15,7 @@
     ];
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.1',
+        VERSION: '1.0.2',
         STEPS,
 
         save(step, data) {
@@ -80,22 +79,137 @@
             a.click();
         }
     };
-// ================================================================
-// --- START: آلية التحقق الذكية (V2) - تتجاهل الصفحة الرئيسية ---
-// ================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    const step = document.body.getAttribute('data-step');
 
-    // **الإصلاح: أضفنا شرطاً للتحقق من أن الخطوة ليست "home"**
-    if (step && step !== 'home' && !PolarisDataFlow.canProceed(step)) {
-        alert('أكمل الخطوة السابقة أولاً!');
-        history.back();
-    }
-    
-    // شريط التقدم سيعمل كالمعتاد
-    PolarisDataFlow._updateProgress(step || 'home');
-});
-// ================================================================
-// --- END: آلية التحقق الذكية ---
-// ================================================================
+    // ================================================================
+    // --- الميزات الجديدة: حساب الفرق والربط الديناميكي ---
+    // ================================================================
+
+    window.PolarisBalanceChecker = {
+        /**
+         * حساب الفرق في ميزان المراجعة
+         * @param {Array} trialBalance - مصفوفة الحسابات
+         * @returns {Object} - كائن يحتوي على الفرق والتفاصيل
+         */
+        calculateBalance(trialBalance) {
+            if (!Array.isArray(trialBalance) || trialBalance.length === 0) {
+                return {
+                    totalDebits: 0,
+                    totalCredits: 0,
+                    difference: 0,
+                    isBalanced: true,
+                    message: 'لا توجد حسابات'
+                };
+            }
+
+            let totalDebits = 0;
+            let totalCredits = 0;
+
+            trialBalance.forEach(account => {
+                const finalBalance = (parseFloat(account.calculated_balance) || parseFloat(account.book_balance) || 0);
+                if (finalBalance > 0) {
+                    totalDebits += finalBalance;
+                } else if (finalBalance < 0) {
+                    totalCredits += Math.abs(finalBalance);
+                }
+            });
+
+            const difference = Math.abs(totalDebits - totalCredits);
+            const isBalanced = difference < 0.01;
+
+            return {
+                totalDebits,
+                totalCredits,
+                difference,
+                isBalanced,
+                message: isBalanced ? 'ميزان المراجعة متوازن' : `ميزان المراجعة غير متوازن - الفرق: ${difference.toFixed(2)}`
+            };
+        },
+
+        /**
+         * تحديد الحسابات غير الطبيعية
+         * @param {Array} trialBalance - مصفوفة الحسابات
+         * @returns {Array} - مصفوفة الحسابات غير الطبيعية
+         */
+        findAbnormalBalances(trialBalance) {
+            if (!Array.isArray(trialBalance)) return [];
+
+            return trialBalance.filter(account => {
+                const balance = parseFloat(account.calculated_balance) || parseFloat(account.book_balance) || 0;
+                const category = account.category;
+
+                // أصول برصيد دائن (سالب) = غير طبيعي
+                if (category === 'assets' && balance < 0) return true;
+
+                // التزامات برصيد مدين (موجب) = غير طبيعي
+                if (category === 'liabilities' && balance > 0) return true;
+
+                return false;
+            });
+        },
+
+        /**
+         * تحديد حسابات المقاصة
+         * @param {Array} trialBalance - مصفوفة الحسابات
+         * @returns {Array} - مصفوفة حسابات المقاصة
+         */
+        findClearingAccounts(trialBalance) {
+            if (!Array.isArray(trialBalance)) return [];
+
+            return trialBalance.filter(account => {
+                return account.category === 'clearing' || 
+                       (account.name && account.name.includes('مقاصة')) ||
+                       (account.name && account.name.includes('وسيط'));
+            });
+        },
+
+        /**
+         * حساب صافي الربح المعدل
+         */
+        calculateAdjustedNetProfit(trialBalance) {
+            if (!Array.isArray(trialBalance)) return { before: 0, adjustments: 0, after: 0 };
+
+            let revenues = 0;
+            let expenses = 0;
+            let adjustmentEffect = 0;
+
+            trialBalance.forEach(account => {
+                const balance = parseFloat(account.calculated_balance) || parseFloat(account.book_balance) || 0;
+                const category = account.category;
+
+                if (category === 'revenue') {
+                    revenues += balance;
+                } else if (category === 'expenses' || category === 'cost_of_revenue') {
+                    expenses += balance;
+                } else if (account.is_adjustment || account.is_aje) {
+                    adjustmentEffect += balance;
+                }
+            });
+
+            const netProfitBefore = revenues - expenses;
+            const netProfitAfter = netProfitBefore + adjustmentEffect;
+
+            return {
+                before: netProfitBefore,
+                adjustments: adjustmentEffect,
+                after: netProfitAfter,
+                revenues,
+                expenses
+            };
+        }
+    };
+
+    // ================================================================
+    // --- بدء التحقق الذكي ---
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const step = document.body.getAttribute('data-step');
+
+        if (step && step !== 'home' && !PolarisDataFlow.canProceed(step)) {
+            alert('أكمل الخطوة السابقة أولاً!');
+            history.back();
+        }
+        
+        PolarisDataFlow._updateProgress(step || 'home');
+    });
+    // ================================================================
 })();

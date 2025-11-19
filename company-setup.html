@@ -67,6 +67,42 @@
             width: 0%; 
             transition: width 0.5s ease; 
         }
+
+
+/* ================================================================ */
+/* --- START: إصلاح وضوح خط الطوابع الزمنية (V1) --- */
+/* ================================================================ */
+
+.client-card .timestamp-info {
+    font-size: 0.8rem; /* تصغير الخط قليلاً ليتناسب مع التصميم */
+    color: var(--color-text-secondary) !important; /* **الإصلاح الجوهري**: استخدام لون ثانوي واضح */
+    opacity: 0.85; /* زيادة الوضوح قليلاً */
+}
+
+.client-card .timestamp-info i {
+    width: 20px; /* محاذاة الأيقونات بشكل أفضل */
+}
+
+/* ================================================================ */
+/* --- END: إصلاح وضوح الخط --- */
+/* ================================================================ */
+/* ================================================================ */
+/* --- START: إصلاح وضوح مؤشرات الأداء على البطاقة --- */
+/* ================================================================ */
+
+.client-card .kpi-item span {
+    color: var(--color-text-secondary) !important; /* استخدام لون ثانوي واضح */
+    opacity: 0.9;
+}
+
+.client-card .kpi-item strong {
+    font-size: 1.1rem; /* تكبير حجم الرقم قليلاً */
+}
+
+/* ================================================================ */
+/* --- END: إصلاح وضوح المؤشرات --- */
+/* ================================================================ */
+
     </style>
 </head>
 
@@ -99,15 +135,41 @@
         </div>
 
         <div class="control-pane">
-            <div id="pathSelection">
-                <h5 class="font-family-display text-center mb-4">اختر نوع العميل لتأسيس فترة مالية</h5>
-                <div class="d-flex justify-content-center gap-4">
-                    <button class="btn btn-outline-secondary p-4" onclick="selectPath('single')"><i class="fas fa-user-tie fa-2x mb-2"></i>  
-كيان فردي مستقل</button>
-                    <button class="btn btn-outline-secondary p-4" onclick="selectPath('group')"><i class="fas fa-sitemap fa-2x mb-2"></i>  
-مجموعة كيانات مجمعة</button>
-                </div>
-            </div>
+    <!-- ================================================================ -->
+<!-- START: واجهة اختيار المسار مع خيار الاستعادة (V2) -->
+<!-- ================================================================ -->
+<div id="pathSelection">
+    <h5 class="font-family-display text-center mb-4">اختر مسار العمل</h5>
+    <div class="d-flex justify-content-center gap-4">
+        <!-- المسار الأول: تأسيس جديد -->
+        <button class="btn btn-outline-secondary p-4" onclick="selectPath('single')">
+            <i class="fas fa-user-tie fa-2x mb-2"></i>  
+تأسيس كيان فردي
+        </button>
+        <button class="btn btn-outline-secondary p-4" onclick="selectPath('group')">
+            <i class="fas fa-sitemap fa-2x mb-2"></i>  
+تأسيس مجموعة
+        </button>
+        
+        <!-- فاصل بصري -->
+        <div class="vr"></div>
+
+        <!-- المسار الثاني: استعادة من نسخة احتياطية -->
+       <!-- الكود المحدث -->
+<button class="btn btn-outline-info p-4" onclick="triggerImport()">
+    <i class="fas fa-file-import fa-2x mb-2"></i>  
+استيراد مشروع
+</button>
+
+    </div>
+</div>
+
+<!-- حقل رفع الملفات المخفي (ضروري لعملية الاستعادة) -->
+<input type="file" id="restoreInput" class="d-none" accept=".json" onchange="handleImport(event)">
+<!-- ================================================================ -->
+<!-- END: واجهة اختيار المسار المحدثة -->
+<!-- ================================================================ -->
+
 
             <div id="formContainer" style="display: none;">
                 <!-- Form for Single Entity -->
@@ -226,7 +288,8 @@
             if (!identifier || !startDate || !path) return null;
             const prefix = path === 'group' ? 'GROUP' : 'SINGLE';
             // تنظيف الاسم وأخذ أول 15 حرفًا فقط
-            const cleanIdentifier = identifier.replace(/[\s\W]/g, '_').substring(0, 15);
+// السطر الصحيح
+const cleanIdentifier = identifier.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 15);
             const cleanDate = startDate.replace(/-/g, '');
             // إضافة جزء عشوائي لضمان عدم التكرار نهائيًا
             const randomSuffix = Math.random().toString(36).substring(2, 8);
@@ -236,9 +299,10 @@
         /**
          * الدالة الرئيسية للحفظ والانتقال بعد تصحيح الخطأ المنطقي.
          */
- // ==================================================================
-// --- START: النسخة النهائية والمصححة لدالة الحفظ في company-setup.html ---
-// ==================================================================
+// في ملف company-setup.html داخل وسم <script>
+
+// في ملف company-setup.html داخل وسم <script>
+
 function saveAndProceed() {
     const form = document.getElementById(currentPath === 'single' ? 'singleEntityForm' : 'groupEntityForm');
     if (!form.checkValidity()) {
@@ -246,60 +310,58 @@ function saveAndProceed() {
         return;
     }
 
-    let dataToSave;
-    let uniqueId;
-    let clientNameForId, startDateForId;
+    let clientInfo, newUniqueId;
 
     if (currentPath === 'single') {
-        clientNameForId = document.getElementById('single_companyName').value.trim();
-        startDateForId = document.getElementById('single_startDate').value;
-        
-        dataToSave = {
+        clientInfo = {
             type: 'single',
-            companyName: clientNameForId,
+            name: document.getElementById('single_companyName').value.trim(),
             cr: document.getElementById('single_cr').value.trim(),
-            startDate: startDateForId,
-            // *** التصحيح هنا: إضافة تاريخ الانتهاء ***
-            endDate: document.getElementById('single_endDate').value, 
+            startDate: document.getElementById('single_startDate').value,
+            endDate: document.getElementById('single_endDate').value,
             framework: document.getElementById('single_framework').value
         };
-        uniqueId = generateUniqueId(clientNameForId, startDateForId, 'single');
-
+        newUniqueId = generateUniqueId(clientInfo.name, clientInfo.startDate, 'single');
     } else { // 'group'
         if (subsidiariesInGroup.length === 0) {
             alert('يجب إضافة كيان تابع واحد على الأقل للمجموعة.');
             return;
         }
-        clientNameForId = document.getElementById('group_name').value.trim();
-        startDateForId = document.getElementById('group_startDate').value;
-
-        dataToSave = {
+        clientInfo = {
             type: 'group',
-            groupName: clientNameForId,
-            startDate: startDateForId,
-            // *** التصحيح هنا: إضافة تاريخ الانتهاء ***
+            name: document.getElementById('group_name').value.trim(),
+            startDate: document.getElementById('group_startDate').value,
             endDate: document.getElementById('group_endDate').value,
             subsidiaries: subsidiariesInGroup
         };
-        uniqueId = generateUniqueId(clientNameForId, startDateForId, 'group');
+        newUniqueId = generateUniqueId(clientInfo.name, clientInfo.startDate, 'group');
     }
 
-    if (!uniqueId) {
-        alert("خطأ حرج: لم يتمكن النظام من إنشاء معرّف فريد.");
-        return;
-    }
+    clientInfo.id = newUniqueId;
+    clientInfo.createdAt = new Date().toISOString();
+    clientInfo.updatedAt = new Date().toISOString();
 
-    // حفظ البيانات في المصدر الموثوق
-    const legacyDataFormat = { path: currentPath, details: dataToSave };
-    localStorage.setItem(`clientSetup_${uniqueId}`, JSON.stringify(legacyDataFormat));
+    // ================== الإصلاح النهائي هنا ==================
+    
+    // 1. الحفظ المشفر والمنظم عبر نظام تدفق البيانات (للتحقق من الخطوات)
+    PolarisDataFlow.save('client-info', clientInfo);
+    
+    // 2. **(الإضافة الحاسمة)** الحفظ الخام لبيانات التأسيس لضمان التوافق مع الصفحات الأخرى
+    const setupDataToSave = { 
+        path: currentPath, 
+        details: clientInfo 
+    };
+    localStorage.setItem(`clientSetup_${newUniqueId}`, JSON.stringify(setupDataToSave));
 
-    // تعيين العميل النشط والانتقال
-    localStorage.setItem('activeClientId', uniqueId);
-    window.location.href = `data-ingestion.html?clientId=${uniqueId}`;
+    // 3. تعيين العميل النشط للانتقال بين الصفحات
+    localStorage.setItem('activeClientId', newUniqueId);
+    console.log("تم تأسيس العميل بنجاح. المعرف النشط هو:", newUniqueId);
+    
+    // ==========================================================
+
+    // الانتقال إلى صفحة استيعاب البيانات
+    window.location.href = 'data-ingestion.html';
 }
-// ==================================================================
-// --- END: النسخة النهائية والمصححة ---
-// ==================================================================
 
         // ================================================================
         // END: الكود المُصحح والمُعدل
@@ -378,95 +440,188 @@ function saveAndProceed() {
             if (path === 'group') { renderSubsidiariesList(); }
         }
 
-        function goBackToSelection() {
-            currentPath = '';
-            document.getElementById('formContainer').style.display = 'none';
-            document.getElementById('saveAndProceedBtn').style.display = 'none';
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('pathSelection').style.display = 'block';
-            document.getElementById('singleEntityForm').reset();
-            document.getElementById('groupEntityForm').reset();
+     // ==================================================================
+// --- دالة الرجوع الذكية (V2) - مع تأكيد عند الاستيراد ---
+// ==================================================================
+function goBackToSelection() {
+    // **المنطق الجديد**: التحقق إذا كنا في وضع الاستيراد
+    if (document.body.dataset.importMode === 'true') {
+        // إذا كان المستخدم قد استورد ملفاً، قم بتحذيره قبل الإلغاء
+        if (!confirm("لقد قمت باستيراد بيانات مشروع. هل أنت متأكد من رغبتك في إلغاء هذه العملية؟ ستفقد البيانات التي تم استيرادها.")) {
+            return; // إذا ضغط المستخدم على "Cancel"، لا تفعل شيئاً
+        }
+    }
+
+    // --- السلوك القديم (يتم تنفيذه فقط إذا وافق المستخدم على الإلغاء أو إذا لم يكن في وضع الاستيراد) ---
+    currentPath = '';
+    document.getElementById('formContainer').style.display = 'none';
+    document.getElementById('saveAndProceedBtn').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('pathSelection').style.display = 'block';
+    
+    // إعادة تعيين النماذج
+    document.getElementById('singleEntityForm').reset();
+    document.getElementById('groupEntityForm').reset();
+    
+    // (الأهم) تنظيف أي بيانات مستوردة مؤقتة
+    sessionStorage.removeItem('importedTrialBalance');
+    sessionStorage.removeItem('importedAdjustments');
+    sessionStorage.removeItem('importedNotes');
+    delete document.body.dataset.importMode;
+}
+// ==================================================================
+// --- END: دالة الرجوع الذكية ---
+// ==================================================================
+// ==================================================================
+// --- START: الدالة المفقودة لعرض حالة المشروع ---
+// ==================================================================
+/**
+ * تقرأ حالة المشروع من localStorage وتعيد نصاً وأيقونة ولوناً للعرض.
+ * @param {string} uniqueId - المعرف الفريد للمشروع.
+ * @returns {object} - كائن يحتوي على { text, icon, color }.
+ */
+function getStatusDisplay(uniqueId) {
+    const statusString = localStorage.getItem(`projectStatus_${uniqueId}`);
+    if (statusString) {
+        try {
+            // محاولة قراءة الحالة ككائن JSON (الطريقة الجديدة)
+            const status = JSON.parse(statusString);
+            return { 
+                text: status.text || "حالة غير معروفة", 
+                icon: status.icon || "fa-question-circle", 
+                color: status.color || "text-warning" 
+            };
+        } catch (e) {
+            // إذا فشل التحليل، تعامل معها كنص عادي (للتوافق مع الإصدارات القديمة)
+            return { 
+                text: statusString, 
+                icon: "fa-question-circle", 
+                color: "text-warning" 
+            };
+        }
+    }
+    // الحالة الافتراضية لأي مشروع جديد لم تبدأ المراجعة فيه بعد
+    return { text: "تأسيس جديد", icon: "fa-flag", color: "text-info" };
+}
+// ==================================================================
+// --- END: الدالة المفقودة ---
+// ==================================================================
+
+
+ // ==================================================================
+// ==================================================================
+// --- دالة عرض سجل المشاريع (V3 - مع عرض الطوابع الزمنية) ---
+// ==================================================================
+// ==================================================================
+// --- دالة عرض سجل المشاريع (V3 - النسخة النهائية الآمنة والشاملة) ---
+// ==================================================================
+// ==================================================================
+// --- دالة عرض سجل المشاريع (V4 - مع مؤشرات الأداء) ---
+// ==================================================================
+function loadEstablishedClients() {
+    const clientsList = document.getElementById('clientsList');
+    const noClientsMessage = document.getElementById('noClientsMessage');
+    if (!clientsList || !noClientsMessage) return;
+    clientsList.innerHTML = '';
+    
+    const allSetups = [];
+    // ... (كود جمع المشاريع من localStorage يبقى كما هو) ...
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('clientSetup_')) {
+            try {
+                const item = localStorage.getItem(key);
+                const parsedData = JSON.parse(item);
+                if (parsedData && parsedData.details) {
+                    allSetups.push({ key: key.replace('clientSetup_', ''), data: parsedData });
+                }
+            } catch (e) { console.error(`Could not parse data for key: ${key}`, e); }
+        }
+    }
+
+    allSetups.sort((a, b) => {
+        const dateA = new Date(a.data.details.updatedAt || 0);
+        const dateB = new Date(b.data.details.updatedAt || 0);
+        return dateB - dateA;
+    });
+
+    noClientsMessage.style.display = allSetups.length > 0 ? 'none' : 'block';
+
+    allSetups.forEach(({ key: uniqueId, data }) => {
+        const details = data.details;
+        const name = details.name || details.companyName || details.groupName || "مشروع بدون اسم";
+        const { startDate, endDate, createdAt, updatedAt } = details;
+        const statusDisplay = getStatusDisplay(uniqueId);
+
+        // **الإضافة الجديدة: قراءة بيانات حقيبة المراجعة للحصول على المؤشرات**
+        let kpiHtml = '';
+        const auditFileJSON = localStorage.getItem(`polarisAuditFile_${uniqueId}`);
+        if (auditFileJSON) {
+            try {
+                const auditFile = JSON.parse(auditFileJSON);
+                const adjCount = auditFile.adjustments ? auditFile.adjustments.length : 0;
+                const unclassifiedCount = auditFile.trialBalance ? auditFile.trialBalance.filter(acc => !acc.category).length : 0;
+
+       // ===== استبدله بهذا الكود الجديد =====
+kpiHtml = `
+    <div class="d-flex justify-content-around mt-3 text-center">
+        <div class="kpi-item">
+            <strong class="d-block">${adjCount}</strong>
+            <span>تسويات</span>
+        </div>
+        <div class="kpi-item">
+            <strong class="d-block ${unclassifiedCount > 0 ? 'text-danger' : ''}">${unclassifiedCount}</strong>
+            <span>غير مصنف</span>
+                        </div>
+                    </div>
+                `;
+            } catch (e) { /* تجاهل الخطأ إذا كان ملف المراجعة تالفاً */ }
         }
 
-        function getStatusDisplay(uniqueId) {
-            const statusString = localStorage.getItem(`projectStatus_${uniqueId}`);
-            if (statusString) {
-                try {
-                    const status = JSON.parse(statusString);
-                    return { text: status.text || "حالة غير معروفة", icon: status.icon || "fa-question-circle", color: status.color || "text-warning" };
-                } catch (e) {
-                    return { text: statusString, icon: "fa-question-circle", color: "text-warning" };
-                }
-            }
-            return { text: "تأسيس جديد", icon: "fa-flag", color: "text-info" };
-        }
-
-        function loadEstablishedClients() {
-            const clientsList = document.getElementById('clientsList');
-            const noClientsMessage = document.getElementById('noClientsMessage');
-            if (!clientsList || !noClientsMessage) return;
-            clientsList.innerHTML = '';
-            
-            const allSetups = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('clientSetup_')) {
-                    try {
-                        const item = localStorage.getItem(key);
-                        const parsedData = JSON.parse(item);
-                        if (parsedData && parsedData.details) {
-                            allSetups.push({ key: key.replace('clientSetup_', ''), data: parsedData });
-                        }
-                    } catch (e) {
-                        console.error(`Could not parse corrupted data for key: ${key}`, e);
-                    }
-                }
-            }
-
-            allSetups.sort((a, b) => {
-                const nameA = a.data.details.companyName || a.data.details.groupName;
-                const nameB = b.data.details.companyName || b.data.details.groupName;
-                return nameA.localeCompare(nameB) || a.data.details.startDate.localeCompare(b.data.details.startDate);
-            });
-
-            noClientsMessage.style.display = allSetups.length > 0 ? 'none' : 'block';
-
-            allSetups.forEach(({ key: uniqueId, data }) => {
-                const isGroup = data.path === 'group';
-                const name = isGroup ? data.details.groupName : data.details.companyName;
-                const identifier = isGroup ? `Group: ${data.details.groupName}` : `CR: ${data.details.cr}`;
-                const { startDate, endDate } = data.details;
-                const statusDisplay = getStatusDisplay(uniqueId);
-                
-                let subInfo = '';
-                if (isGroup && data.details.subsidiaries && data.details.subsidiaries.length > 0) {
-                    const count = data.details.subsidiaries.length;
-                    subInfo = `<p class="text-muted small mt-2"><i class="fas fa-code-branch me-1"></i> ${count} كيانات تابعة</p>`;
-                }
-
-                const cardHtml = `
-                    <div class="col-lg-4 col-md-6">
-                        <div class="client-card">
-                            <div>
-                                <h6 class="font-family-display mb-2"><i class="fas ${isGroup ? 'fa-sitemap text-primary' : 'fa-user-tie'} me-2"></i>${name}</h6>
-                                <div class="mb-3"><span class="financial-period">${startDate} → ${endDate}</span></div>
-                                <p class="text-muted small font-monospace">${identifier}</p>
-                                ${subInfo}
+        const formatTimestamp = (isoString) => {
+            if (!isoString) return 'غير متوفر';
+            const date = new Date(isoString);
+            return date.toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        };
+        
+        const cardHtml = `
+            <div class="col-lg-4 col-md-6">
+                <div class="client-card">
+                    <div>
+                        <h6 class="font-family-display mb-2"><i class="fas fa-folder-open me-2"></i>${name}</h6>
+                        <div class="mb-3"><span class="financial-period">${startDate || 'N/A'} → ${endDate || 'N/A'}</span></div>
+                        
+                        <div class="d-flex flex-column gap-2">
+                            <div class="timestamp-info" title="تاريخ الإنشاء">
+                                <i class="fas fa-calendar-plus fa-fw me-1 text-success"></i>
+                                <span>${formatTimestamp(createdAt)}</span>
                             </div>
-                            <div>
-                                <div class="project-status ${statusDisplay.color}">
-                                    <i class="fas ${statusDisplay.icon} me-2"></i>${statusDisplay.text}
-                                </div>
-                                <div class="client-actions d-flex justify-content-between align-items-center">
-                                    <a href="#" onclick="openWorkspace('${uniqueId}')" class="btn btn-sm btn-outline-light"><i class="fas fa-door-open me-1"></i> إكمال العمل</a>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="requestDeleteClient('${uniqueId}', '${name}', '${startDate} to ${endDate}', ${isGroup})"><i class="fas fa-trash-alt"></i> حذف</button>
-                                </div>
+                            <div class="timestamp-info" title="آخر نشاط">
+                                <i class="fas fa-pencil-alt fa-fw me-1 text-warning"></i>
+                                <span>${formatTimestamp(updatedAt)}</span>
                             </div>
                         </div>
-                    </div>`;
-                clientsList.innerHTML += cardHtml;
-            });
-        }
+                        
+                        <!-- ==== عرض المؤشرات الجديدة هنا ==== -->
+                        ${kpiHtml}
+                        
+                    </div>
+                    <div>
+                        <div class="project-status ${statusDisplay.color}">
+                            <i class="fas ${statusDisplay.icon} me-2"></i>${statusDisplay.text}
+                        </div>
+                        <div class="client-actions d-flex justify-content-between align-items-center">
+                            <a href="#" onclick="openWorkspace('${uniqueId}')" class="btn btn-sm btn-outline-light"><i class="fas fa-door-open me-1"></i> إكمال العمل</a>
+ 
+<button class="btn btn-sm btn-outline-danger" onclick="requestDeleteClient('${uniqueId}', '${name}', '${startDate || ''} to ${endDate || ''}', '${data.path}' === 'group')"><i class="fas fa-trash-alt"></i> حذف</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        clientsList.innerHTML += cardHtml;
+    });
+}
+
 
         function requestDeleteClient(uniqueId, name, period, isGroup) {
             document.getElementById('clientNameToDelete').textContent = name;
@@ -511,6 +666,103 @@ function saveAndProceed() {
             // Update progress bar
             PolarisDataFlow._updateProgress('client-info');
         });
+// =======================================================================
+// --- START: دوال استيراد المشاريع الذكية (V2) ---
+// =======================================================================
+
+/**
+ * يتم استدعاؤها عند الضغط على زر "استيراد مشروع".
+ * تفتح نافذة اختيار الملفات.
+ */
+function triggerImport() {
+    document.getElementById('restoreInput').click();
+}
+
+/**
+ * يتم استدعاؤها بعد اختيار المستخدم لملف النسخة الاحتياطية.
+ * تقرأ الملف وتملأ نموذج التأسيس بالبيانات.
+ * @param {Event} event - الكائن الذي يحتوي على معلومات الملف المرفوع.
+ */
+function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            // التحقق من أن الملف يحتوي على البيانات الأساسية
+            if (data.clientInfo && data.clientInfo.name && data.trialBalance) {
+                
+                // 1. استدعاء دالة جديدة لملء النموذج بالبيانات المستوردة
+                populateFormWithImportedData(data);
+
+                // 2. تخزين بيانات ميزان المراجعة مؤقتاً
+                // سيتم استخدامها لاحقاً عند الضغط على "حفظ والمتابعة"
+                sessionStorage.setItem('importedTrialBalance', JSON.stringify(data.trialBalance));
+                sessionStorage.setItem('importedAdjustments', JSON.stringify(data.adjustments || []));
+                sessionStorage.setItem('importedNotes', JSON.stringify(data.notes || {})); // لتخزين الملاحظات
+
+            } else {
+                throw new Error("ملف النسخة الاحتياطية غير صالح أو لا يحتوي على البيانات المطلوبة.");
+            }
+
+        } catch (error) {
+            console.error("❌ فشلت عملية الاستيراد:", error);
+            alert(`فشلت عملية الاستيراد: ${error.message}`);
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
+
+/**
+// =======================================================================
+// --- START: دالة ملء النموذج (V2 - تدعم تعديل التاريخ) ---
+// =======================================================================
+/**
+ * تملأ نموذج التأسيس بالبيانات من الملف المستورد وتنقلك إلى وضع التعديل.
+ * @param {object} data - البيانات المستوردة من ملف JSON.
+ */
+function populateFormWithImportedData(data) {
+    const clientInfo = data.clientInfo;
+    const isGroup = clientInfo.type === 'group';
+
+    // 1. الانتقال إلى واجهة النموذج المناسبة
+    selectPath(clientInfo.type || 'single');
+
+    if (isGroup) {
+        // ملء بيانات المجموعة
+        document.getElementById('group_name').value = `${clientInfo.name} (نسخة مستوردة)`;
+        
+        // **التعديل الجوهري هنا: وضع التواريخ في حقول الإدخال**
+        document.getElementById('group_startDate').value = clientInfo.startDate;
+        document.getElementById('group_endDate').value = clientInfo.endDate;
+        
+        // ملء الكيانات التابعة
+        subsidiariesInGroup = clientInfo.subsidiaries || [];
+        renderSubsidiariesList();
+    } else {
+        // ملء بيانات الكيان الفردي
+        document.getElementById('single_companyName').value = `${clientInfo.name} (نسخة مستوردة)`;
+        document.getElementById('single_cr').value = clientInfo.cr || 'N/A';
+        
+        // **التعديل الجوهري هنا: وضع التواريخ في حقول الإدخال**
+        document.getElementById('single_startDate').value = clientInfo.startDate;
+        document.getElementById('single_endDate').value = clientInfo.endDate;
+        
+        document.getElementById('single_framework').value = clientInfo.framework || 'IFRS';
+    }
+
+    // 2. إضافة علامة مميزة للإشارة إلى أننا في وضع "الاستيراد"
+    document.body.dataset.importMode = 'true';
+    
+    // 3. عرض رسالة إرشادية للمستخدم
+    alert("تمت قراءة بيانات المشروع بنجاح. يمكنك الآن مراجعة البيانات وتعديلها (مثل اسم المشروع أو فترة المراجعة) ثم الضغط على 'حفظ والمتابعة' لإنشاء مشروع جديد.");
+}
+
     </script>
 </body>
 </html>

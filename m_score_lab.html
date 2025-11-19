@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مختبر Beneish M-Score</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { background:#0d1117; color:#c9d1d9; }
+    .card { background:#161b22; border:1px solid #30363d; }
+    .metric { display:flex; justify-content:space-between; padding:.5rem 0; border-bottom:1px dashed #30363d; }
+    .metric:last-child { border-bottom:none; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center }
+    .toolbar .btn { border-radius:8px; }
+    .stat { display:flex; flex-direction:column; padding:.75rem 1rem; border-radius:8px; background:#0f1620; border:1px solid #243041 }
+    .stat .label { font-size:.85rem; color:#8b949e }
+    .stat .value { font-weight:700; font-size:1.1rem }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem }
+    @media (max-width:992px){ .grid{ grid-template-columns:repeat(2,1fr) } }
+    .top-icons{ display:flex; gap:.5rem; align-items:center; margin:.5rem 0 1rem 0 }
+    .top-icons a{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid #30363d; border-radius:8px; color:#c9d1d9; text-decoration:none }
+    .top-icons a:hover{ background:#1f2937 }
+  </style>
+</head>
+<body class="container py-4">
+  <nav class="navbar navbar-expand-lg" style="background:#161b22; border-bottom:1px solid #30363d;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html" style="font-family:'Orbitron',sans-serif; font-weight:900; color:#00D4FF; letter-spacing:2px;">
+        <i class="fas fa-satellite-dish" style="margin-left:.5rem; animation: rotate-slow 10s linear infinite;"></i>
+        POLARIS
+      </a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <a id="top_home" href="index.html" title="الرئيسية" class="btn btn-sm" style="border:1px solid #30363d; color:#c9d1d9;"><i class="fas fa-home"></i></a>
+        <a id="top_mapping" href="account-mapping.html" title="الاستيعاب" class="btn btn-sm" style="border:1px solid #30363d; color:#c9d1d9;"><i class="fas fa-balance-scale"></i></a>
+        <a id="top_cockpit" href="consolidation-cockpit.html" title="القوائم المالية" class="btn btn-sm" style="border:1px solid #30363d; color:#c9d1d9;"><i class="fas fa-file-invoice"></i></a>
+        <a id="top_reports" href="reporting-pantheon.html" title="التقارير" class="btn btn-sm" style="border:1px solid #30363d; color:#c9d1d9;"><i class="fas fa-book-open"></i></a>
+        <a id="top_vat" href="vat-center.html" title="القيمة المضافة" class="btn btn-sm" style="border:1px solid #30363d; color:#c9d1d9;"><i class="fas fa-percentage"></i></a>
+      </div>
+    </div>
+  </nav>
+  <h3 class="mb-2 d-flex align-items-center gap-2"><i class="fas fa-flask"></i><span>مختبر M-Score الذكي</span></h3>
+  <p class="text-secondary">تم تحميل البيانات الحالية تلقائيًا. أدخل بيانات الفترة السابقة واحفظها للمستقبل.</p>
+  
+  
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">البيانات الحالية (من النظام)</h6>
+          <button class="btn btn-outline-success btn-sm" id="pullCurrent"><i class="fas fa-download me-1"></i>سحب البيانات</button>
+        </div>
+        <table class="table table-sm table-bordered mb-0">
+          <thead><tr><th>البند</th><th class="text-end">القيمة</th></tr></thead>
+          <tbody id="tblCurrent"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">البيانات السابقة (إدخال يدوي/نسخة)</h6>
+          <div class="d-flex gap-2">
+            <input type="file" id="priorFile" accept=".json,application/json" class="form-control form-control-sm" style="max-width:220px;">
+            <button class="btn btn-outline-info btn-sm" id="useSaved"><i class="fas fa-database me-1"></i>استخدام المحفوظ</button>
+          </div>
+        </div>
+        <table class="table table-sm table-bordered mb-2">
+          <thead><tr><th>البند</th><th class="text-end">القيمة</th></tr></thead>
+          <tbody>
+            <tr><td>الإيرادات</td><td><input id="prev_sales" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>الذمم المدينة</td><td><input id="prev_recv" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>تكلفة البضاعة</td><td><input id="prev_cogs" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>إجمالي الأصول</td><td><input id="prev_assets" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>الأصول المتداولة</td><td><input id="prev_currAssets" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>الأصول الثابتة</td><td><input id="prev_fixedAssets" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>مصاريف الإهلاك</td><td><input id="prev_dep" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>مصاريف بيعية وإدارية</td><td><input id="prev_sga" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>إجمالي الالتزامات</td><td><input id="prev_liab" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>صافي الدخل</td><td><input id="prev_ni" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+            <tr><td>التدفق النقدي التشغيلي</td><td><input id="prev_cfo" class="form-control form-control-sm" type="number" step="0.01"></td></tr>
+          </tbody>
+        </table>
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-outline-secondary btn-sm" id="savePrior"><i class="fas fa-save me-1"></i>حفظ المقارنة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3 mt-3">
+    <h6 class="mb-2">النتائج</h6>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div></div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" id="calculateBtn"><i class="fas fa-calculator me-1"></i>حساب</button>
+        <button class="btn btn-success btn-sm" id="syncReport"><i class="fas fa-sync me-1"></i>مزامنة مع التقرير</button>
+      </div>
+    </div>
+    <div class="grid mb-2">
+      <div class="stat"><span class="label">DSRI</span><span class="value" id="dsri">-</span></div>
+      <div class="stat"><span class="label">GMI</span><span class="value" id="gmi">-</span></div>
+      <div class="stat"><span class="label">AQI</span><span class="value" id="aqi">-</span></div>
+      <div class="stat"><span class="label">SGI</span><span class="value" id="sgi">-</span></div>
+      <div class="stat"><span class="label">DEPI</span><span class="value" id="depi">-</span></div>
+      <div class="stat"><span class="label">SGAI</span><span class="value" id="sgai">-</span></div>
+      <div class="stat"><span class="label">LVGI</span><span class="value" id="lvgi">-</span></div>
+      <div class="stat"><span class="label">TATA</span><span class="value" id="tata">-</span></div>
+    </div>
+    <div class="stat" style="background:#0d1a26">
+      <span class="label">M-Score</span>
+      <span class="value" id="mscore">-</span>
+    </div>
+    <div id="mscoreExplain" class="mt-2"></div>
+  </div>
+
+  <script>
+    const VAT = 0.15;
+    function format(n){ return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0); }
+    function getCid(){ const p=new URLSearchParams(location.search); return p.get('clientId')||localStorage.getItem('activeClientId'); }
+    (function(){ const cid=getCid(); if(cid){ ['top_home','top_mapping','top_cockpit','top_reports','top_vat'].forEach(id=>{ const el=document.getElementById(id); if(el){ const u=new URL(el.getAttribute('href'), location.origin); if(!u.searchParams.get('clientId')) u.searchParams.set('clientId', cid); el.setAttribute('href', u.pathname+u.search); } }); } })();
+    function loadCurrent(){
+      const cid=getCid();
+      const final=cid?localStorage.getItem(`finalAudit_${cid}`):null;
+      const map=cid?localStorage.getItem(`accountMappingData_${cid}`):null;
+      let data={ trialBalance:[], adjustments:[], revenue:0, cogs:0, currentAssets:0, fixedAssets:0, assets:0, liabilities:0, depreciationExpense:0, operatingExpenses:0, cashFlow:0, netIncome:0 };
+      if(final){ try{ const audit=JSON.parse(final); data.trialBalance=audit.trialBalance||[]; data.adjustments=audit.adjustments||[]; }catch{} }
+      function calcFinal(acc, adj){ const ob_d=parseFloat(acc.ob_debit)||0, ob_c=parseFloat(acc.ob_credit)||0, mv_d=parseFloat(acc.move_debit)||0, mv_c=parseFloat(acc.move_credit)||0; let f=(ob_d-ob_c)+(mv_d-mv_c); (adj||[]).forEach(a=>{ if(String(a.debit_account)===String(acc.account_id)) f+=(parseFloat(a.amount)||0); if(String(a.credit_account)===String(acc.account_id)) f-=(parseFloat(a.amount)||0); }); return f; }
+      const mapCat = acc=>String(acc.category||'').toLowerCase();
+      data.revenue = data.trialBalance.filter(a=>mapCat(a)==='revenue').reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.cogs = data.trialBalance.filter(a=>mapCat(a)==='cogs').reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.currentAssets = data.trialBalance.filter(a=>mapCat(a)==='assets' && String(a.sub_category||'').startsWith('11')).reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.fixedAssets = data.trialBalance.filter(a=>String(a.sub_category||'').startsWith('12')).reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.assets = data.currentAssets + data.fixedAssets;
+      data.liabilities = data.trialBalance.filter(a=>mapCat(a)==='liabilities').reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.depreciationExpense = data.trialBalance.filter(a=>String(a.sub_category||'')==='depreciation_expense').reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.operatingExpenses = data.trialBalance.filter(a=>String(a.category||'').toLowerCase()==='operating_expenses').reduce((s,a)=>s+Math.abs(calcFinal(a,data.adjustments)),0);
+      data.cashFlow = Math.abs(parseFloat(localStorage.getItem('cashFlowFromOps_'+cid))||0);
+      data.netIncome = Math.abs(parseFloat(localStorage.getItem('netIncome_'+cid))|| (data.revenue - data.cogs - data.operatingExpenses - data.depreciationExpense));
+      return data;
+    }
+    let priorData=null; let currentLoaded=false;
+    function fillPriorInputs(metrics){
+      if(!metrics) return;
+      const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value = (val||0); };
+      set('prev_sales', metrics.revenue);
+      set('prev_recv', metrics.receivables);
+      set('prev_cogs', metrics.cogs);
+      set('prev_assets', metrics.assets);
+      set('prev_currAssets', metrics.currentAssets);
+      set('prev_fixedAssets', metrics.fixedAssets);
+      set('prev_dep', metrics.depreciationExpense);
+      set('prev_sga', metrics.operatingExpenses);
+      set('prev_liab', metrics.liabilities);
+      set('prev_ni', metrics.netIncome);
+      set('prev_cfo', metrics.cashFlow);
+    }
+    function handlePullCurrent(){ const cid=getCid(); const final=cid?localStorage.getItem(`finalAudit_${cid}`):null; if(final){ currentLoaded=true; const curr=loadCurrent(); populateCurrentUI(curr); alert('تم سحب البيانات الفعلية بنجاح.'); } else { alert('لا توجد بيانات فعلية معتمدة لهذا العميل.'); } }
+    function handleUseSaved(){ try{ const pj=localStorage.getItem('priorYearDataLoaded'); if(pj){ const parsed=JSON.parse(pj); priorData=parsed; const m=parsed.metrics||parsed; fillPriorInputs(m); alert('تم تحميل السنة السابقة من الذاكرة.'); } else alert('لا توجد بيانات سنة سابقة محفوظة.'); }catch{ alert('تعذر قراءة البيانات المحفوظة.'); } }
+    function handlePriorFileChange(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ const parsed=JSON.parse(ev.target.result); priorData=parsed; const m=parsed.metrics||parsed.priorYearData||parsed.prior||parsed; fillPriorInputs(m); alert('تم تحميل ملف السنة السابقة.'); }catch{ alert('ملف غير صالح'); } }; r.readAsText(f); }
+    function handleLoadBackup(){ const inp=document.getElementById('fullBackupFile'); if(!inp || !inp.files || inp.files.length===0){ alert('اختر ملف النسخة أولًا.'); return; } const f=inp.files[0]; const r=new FileReader(); r.onload=ev=>{ try{ const backup=JSON.parse(ev.target.result); const cid=getCid(); if(backup.finalAudit && cid){ const s = JSON.stringify(backup.finalAudit); localStorage.setItem(`finalAudit_${cid}`, s); currentLoaded=true; const curr=loadCurrent(); populateCurrentUI(curr); } const priorSrc= backup.priorYearData || backup.prior || backup.metrics; if(priorSrc){ const saved = priorSrc.metrics? priorSrc.metrics : priorSrc; localStorage.setItem('priorYearDataLoaded', JSON.stringify(saved)); priorData = saved; fillPriorInputs(saved); } alert('تم استيراد النسخة وتهيئة البيانات الفعلية والمقارنة.'); }catch{ alert('تعذر قراءة ملف النسخة.'); } }; r.readAsText(f); }
+    function renderTable(id, entries){
+      const tbody=document.getElementById(id);
+      if(!tbody) return;
+      tbody.innerHTML=entries.map(e=>`<tr><td>${e.label}</td><td class="text-end">${e.value}</td></tr>`).join('');
+    }
+    function populateCurrentUI(curr){
+      const recv=curr.trialBalance ? curr.trialBalance.filter(a=>String(a.sub_category||'').startsWith('113')).reduce((s,a)=>s+Math.abs((parseFloat(a.ob_debit)||0)-(parseFloat(a.ob_credit)||0)+(parseFloat(a.move_debit)||0)-(parseFloat(a.move_credit)||0)),0) : 0;
+      renderTable('tblCurrent',[
+        {label:'الإيرادات', value:format(curr.revenue)},
+        {label:'الذمم المدينة', value:format(recv)},
+        {label:'تكلفة البضاعة', value:format(curr.cogs)},
+        {label:'إجمالي الأصول', value:format(curr.assets)},
+        {label:'الأصول المتداولة', value:format(curr.currentAssets)},
+        {label:'الأصول الثابتة', value:format(curr.fixedAssets)},
+        {label:'مصاريف الإهلاك', value:format(curr.depreciationExpense)},
+        {label:'مصاريف بيعية وإدارية', value:format(curr.operatingExpenses)},
+        {label:'إجمالي الالتزامات', value:format(curr.liabilities)},
+        {label:'صافي الدخل', value:format(curr.netIncome)},
+        {label:'التدفق النقدي التشغيلي', value:format(curr.cashFlow)}
+      ]);
+    }
+    function handleCalculate(){
+      const curr=loadCurrent();
+      populateCurrentUI(curr);
+      const tbPrev=(priorData&&priorData.trialBalance)||[];
+      const adjPrev=(priorData&&priorData.adjustments)||[];
+      const num = (id)=>{ const el=document.getElementById(id); if(!el) return null; const v=parseFloat(String(el.value||'').replace(/[^\d.-]/g,'')); return Number.isNaN(v)? null : v; };
+      const manualPrev={
+        sales: num('prev_sales'),
+        recv: num('prev_recv'),
+        cogs: num('prev_cogs'),
+        assets: num('prev_assets'),
+        currAssets: num('prev_currAssets'),
+        fixedAssets: num('prev_fixedAssets'),
+        dep: num('prev_dep'),
+        sga: num('prev_sga'),
+        liab: num('prev_liab'),
+        ni: num('prev_ni'),
+        cfo: num('prev_cfo'),
+      };
+      const sumPrev=(pred)=>tbPrev.filter(pred).reduce((s,a)=>{ const ob_d=parseFloat(a.ob_debit)||0, ob_c=parseFloat(a.ob_credit)||0, mv_d=parseFloat(a.move_debit)||0, mv_c=parseFloat(a.move_credit)||0; return s+Math.abs((ob_d-ob_c)+(mv_d-mv_c)); },0);
+      const salesPrev = manualPrev.sales!=null ? manualPrev.sales : sumPrev(a=>String(a.category||'').toLowerCase()==='revenue');
+      const recvPrev  = manualPrev.recv!=null  ? manualPrev.recv  : sumPrev(a=>String(a.sub_category||'').startsWith('113'));
+      const cogsPrev  = manualPrev.cogs!=null  ? manualPrev.cogs  : sumPrev(a=>String(a.category||'').toLowerCase()==='cogs');
+      const assetsPrev= manualPrev.assets!=null? manualPrev.assets: sumPrev(()=>true);
+      const depPrev   = manualPrev.dep!=null   ? manualPrev.dep   : sumPrev(a=>String(a.sub_category||'')==='depreciation_expense');
+      const sgaPrev   = manualPrev.sga!=null   ? manualPrev.sga   : sumPrev(a=>String(a.category||'').toLowerCase()==='operating_expenses');
+      const liabPrev  = manualPrev.liab!=null  ? manualPrev.liab  : sumPrev(a=>String(a.category||'').toLowerCase()==='liabilities');
+      const currAssetsPrev = manualPrev.currAssets!=null ? manualPrev.currAssets : sumPrev(a=>String(a.sub_category||'').startsWith('11'));
+      const fixedAssetsPrev= manualPrev.fixedAssets!=null? manualPrev.fixedAssets: sumPrev(a=>String(a.sub_category||'').startsWith('12'));
+
+      const salesCurr=curr.revenue, recvCurr=curr.trialBalance.filter(a=>String(a.sub_category||'').startsWith('113')).reduce((s,a)=>s+Math.abs((parseFloat(a.ob_debit)||0)-(parseFloat(a.ob_credit)||0)+(parseFloat(a.move_debit)||0)-(parseFloat(a.move_credit)||0)),0);
+      const cogsCurr=curr.cogs, assetsCurr=curr.assets, depCurr=curr.depreciationExpense, sgaCurr=curr.operatingExpenses, liabCurr=curr.liabilities;
+      const gmCurr=salesCurr>0?(salesCurr-cogsCurr)/salesCurr:0; const gmPrev=salesPrev>0?(salesPrev-cogsPrev)/salesPrev:gmCurr||0.0001;
+
+      const dsri=(recvCurr/Math.max(salesCurr,1))/(recvPrev/Math.max(salesPrev||salesCurr,1));
+      const gmi=gmPrev>0?(gmPrev/Math.max(gmCurr,0.0001)):1;
+      const aqi=(assetsPrev>0?((assetsCurr-curr.currentAssets-curr.fixedAssets)/Math.max(assetsCurr,1))/((assetsPrev-(sumPrev(a=>String(a.sub_category||'').startsWith('11')))-(sumPrev(a=>String(a.sub_category||'').startsWith('12'))))/Math.max(assetsPrev,1)):1);
+      const sgi=(salesPrev>0?(salesCurr/salesPrev):1);
+      const depi=((depPrev/Math.max(sumPrev(a=>String(a.sub_category||'').startsWith('12'))+depPrev,1))/(depCurr/Math.max(curr.fixedAssets+depCurr,1)))||1;
+      const sgai=((sgaCurr/Math.max(salesCurr,1))/(sgaPrev/Math.max(salesPrev||salesCurr,1)))||1;
+      const lvgi=((liabCurr/Math.max(assetsCurr,1))/(liabPrev/Math.max(assetsPrev||assetsCurr,1)))||1;
+      const tata=assetsCurr>0?((curr.netIncome||0)-curr.cashFlow)/assetsCurr:0;
+      const mScore=-4.84 + 0.92*dsri + 0.528*gmi + 0.404*aqi + 0.892*sgi + 0.115*depi - 0.172*sgai + 4.679*tata - 0.327*lvgi;
+      const mani=mScore>-1.78;
+      // تحديث النتائج فقط
+      document.getElementById('dsri').textContent=dsri.toFixed(3);
+      document.getElementById('gmi').textContent=gmi.toFixed(3);
+      document.getElementById('aqi').textContent=aqi.toFixed(3);
+      document.getElementById('sgi').textContent=sgi.toFixed(3);
+      document.getElementById('depi').textContent=depi.toFixed(3);
+      document.getElementById('sgai').textContent=sgai.toFixed(3);
+      document.getElementById('lvgi').textContent=lvgi.toFixed(3);
+      document.getElementById('tata').textContent=tata.toFixed(3);
+      document.getElementById('mscore').textContent=mScore.toFixed(3);
+      document.getElementById('mscoreExplain').innerHTML=`<div class="alert ${mani?'alert-danger':'alert-success'} mt-2"><i class="fas fa-${mani?'exclamation-triangle':'check-circle'}"></i> ${mani?'احتمالية تلاعب مرتفعة':'لا توجد مؤشرات قوية على التلاعب'}. الحد الفاصل: -1.78</div>`;
+      alert('اكتمل الحساب. تم تحديث النتائج أعلاه.');
+    }
+    function handleSavePrior(){
+      const metrics={
+        revenue: parseFloat(document.getElementById('prev_sales').value)||0,
+        receivables: parseFloat(document.getElementById('prev_recv').value)||0,
+        cogs: parseFloat(document.getElementById('prev_cogs').value)||0,
+        assets: parseFloat(document.getElementById('prev_assets').value)||0,
+        currentAssets: parseFloat(document.getElementById('prev_currAssets').value)||0,
+        fixedAssets: parseFloat(document.getElementById('prev_fixedAssets').value)||0,
+        depreciationExpense: parseFloat(document.getElementById('prev_dep').value)||0,
+        operatingExpenses: parseFloat(document.getElementById('prev_sga').value)||0,
+        liabilities: parseFloat(document.getElementById('prev_liab').value)||0,
+        netIncome: parseFloat(document.getElementById('prev_ni').value)||0,
+        cashFlow: parseFloat(document.getElementById('prev_cfo').value)||0,
+      };
+      try{ localStorage.setItem('priorYearDataLoaded', JSON.stringify({ metrics })); alert('تم حفظ بيانات المقارنة للاستخدام المستقبلي.'); }catch{ alert('تعذر الحفظ'); }
+    }
+    function handleSyncReport(){
+      const cid=getCid();
+      const curr=loadCurrent();
+      try{ localStorage.setItem('mScoreLab_currentData', JSON.stringify(curr)); }catch{}
+      if(priorData){ try{ localStorage.setItem('priorYearDataLoaded', JSON.stringify(priorData)); }catch{} }
+      const url = cid ? `reporting-pantheon.html?clientId=${cid}` : 'reporting-pantheon.html';
+      window.open(url,'_blank');
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var btnPull=document.getElementById('pullCurrent'); if(btnPull) btnPull.addEventListener('click', handlePullCurrent);
+      var btnUse=document.getElementById('useSaved'); if(btnUse) btnUse.addEventListener('click', handleUseSaved);
+      var inpPrior=document.getElementById('priorFile'); if(inpPrior) inpPrior.addEventListener('change', handlePriorFileChange);
+      var btnCalc=document.getElementById('calculateBtn'); if(btnCalc) btnCalc.addEventListener('click', handleCalculate);
+      var btnSave=document.getElementById('savePrior'); if(btnSave) btnSave.addEventListener('click', handleSavePrior);
+      var btnSync=document.getElementById('syncReport'); if(btnSync) btnSync.addEventListener('click', handleSyncReport);
+      var btnLoad=document.getElementById('loadBackup'); if(btnLoad) btnLoad.addEventListener('click', handleLoadBackup);
+    });
+  </script>
+</body>
+</html>

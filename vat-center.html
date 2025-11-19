@@ -56,13 +56,34 @@
     </style>
 </head>
 <body>
+<div id="globalNavbar" style="background-color: var(--color-surface); border-bottom: 1px solid var(--color-border);">
+  <div class="container-fluid d-flex align-items-center justify-content-between" style="padding: 0.5rem 1rem;">
+    <div class="d-flex gap-3">
+      <a id="nav_home" href="index.html" class="text-decoration-none" style="color: var(--color-text-primary)"><i class="fas fa-home me-1"></i>الرئيسية</a>
+      <a id="nav_mapping" href="account-mapping.html" class="text-decoration-none" style="color: var(--color-text-primary)"><i class="fas fa-tasks me-1"></i>الاستيعاب</a>
+      <a id="nav_cockpit" href="consolidation-cockpit.html" class="text-decoration-none" style="color: var(--color-text-primary)"><i class="fas fa-sitemap me-1"></i>القوائم المالية</a>
+      <a id="nav_reports" href="reporting-pantheon.html" class="text-decoration-none" style="color: var(--color-text-primary)"><i class="fas fa-book-open me-1"></i>التقارير</a>
+      <a id="nav_zakat" href="zakat-diwan.html" class="text-decoration-none" style="color: var(--color-text-primary)"><i class="fas fa-moon me-1"></i>الزكاة</a>
+      <a id="nav_vat" href="vat-center.html" class="text-decoration-none fw-bold" style="color: var(--color-primary)"><i class="fas fa-percentage me-1"></i>القيمة المضافة</a>
+    </div>
+    <div class="text-secondary">POLARIS</div>
+  </div>
+</div>
 <div class="main-container no-print">
     <nav class="sidebar"><a href="#" class="app-logo" title="Polaris"><i class="fas fa-atom"></i></a></nav>
     <main class="main-content">
         <div class="page-header">
             <h1 class="page-title">مركز تسوية القيمة المضافة</h1>
+            <div class="top-icons">
+              <a id="top_home" href="index.html" title="الرئيسية"><i class="fas fa-home"></i></a>
+              <a id="top_mapping" href="account-mapping.html" title="الاستيعاب"><i class="fas fa-balance-scale"></i></a>
+              <a id="top_cockpit" href="consolidation-cockpit.html" title="القوائم المالية"><i class="fas fa-file-invoice"></i></a>
+              <a id="top_reports" href="reporting-pantheon.html" title="التقارير"><i class="fas fa-book-open"></i></a>
+              <a id="top_vat" href="vat-center.html" title="القيمة المضافة"><i class="fas fa-percentage"></i></a>
+            </div>
             <div class="d-flex gap-2">
                  <button class="btn btn-outline-secondary" id="add-entity-btn" data-bs-toggle="modal" data-bs-target="#addEntityModal"><i class="fas fa-plus-circle me-2"></i>إضافة كيان مستقل</button>
+                 <button class="btn btn-outline-info" id="auto-fill-btn"><i class="fas fa-magic me-2"></i>تعبئة تلقائية من بيانات العميل</button>
                  <button class="btn btn-outline-secondary" id="import-btn"><i class="fas fa-upload me-2"></i>استيراد البيانات</button>
                  <button class="btn btn-outline-secondary" id="export-btn"><i class="fas fa-download me-2"></i>تصدير البيانات</button>
             </div>
@@ -104,8 +125,64 @@
         </div>
 
         <div id="summary-container">
+            <div class="content-pane" data-print-section="kpi_summary">
+                <div class="pane-title mb-3">ملخص سريع</div>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="card bg-dark border-info">
+                            <div class="card-body">
+                                <div class="text-muted">إجمالي المبيعات (قبل الضريبة)</div>
+                                <div id="kpi_sales_base" class="fs-5 fw-bold">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-dark border-warning">
+                            <div class="card-body">
+                                <div class="text-muted">ضريبة القيمة المضافة على المبيعات</div>
+                                <div id="kpi_sales_vat" class="fs-5 fw-bold">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-dark border-info">
+                            <div class="card-body">
+                                <div class="text-muted">إجمالي المشتريات (قبل الضريبة)</div>
+                                <div id="kpi_purchases_base" class="fs-5 fw-bold">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-dark border-success">
+                            <div class="card-body">
+                                <div class="text-muted">ضريبة القيمة المضافة على المشتريات</div>
+                                <div id="kpi_purchases_vat" class="fs-5 fw-bold">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-3">
+                        <div class="card bg-dark border-danger">
+                            <div class="card-body">
+                                <div class="text-muted">صافي الضريبة المستحقة</div>
+                                <div id="kpi_net_vat" class="fs-5 fw-bold">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="content-pane" data-print-section="official_return">
                 <div class="pane-title mb-3">ملخص الإقرار الضريبي المجمع</div>
+                <div class="alert alert-info mb-3" id="return-summary-line">
+                    <div class="d-flex flex-wrap gap-3 align-items-center">
+                        <div>إجمالي المبيعات (قبل الضريبة): <span id="summary_sales_base">0.00</span></div>
+                        <div>ضريبة القيمة المضافة على المبيعات: <span id="summary_sales_vat">0.00</span></div>
+                        <div>إجمالي المشتريات (قبل الضريبة): <span id="summary_purchases_base">0.00</span></div>
+                        <div>ضريبة القيمة المضافة على المشتريات: <span id="summary_purchases_vat">0.00</span></div>
+                        <div class="fw-bold">صافي الضريبة المستحقة: <span id="summary_net_vat">0.00</span></div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered official-return-table">
                         <thead>
@@ -148,6 +225,7 @@
             <div class="control-bar">
                 <button class="btn btn-primary-glow" onclick="alert('تمت أرشفة الإقرار بنجاح!')"><i class="fas fa-archive me-2"></i>أرشفة الإقرار الحالي</button>
                 <div class="btn-group">
+                    <button class="btn btn-outline-secondary" onclick="printContent('kpi_summary')">طباعة الملخص</button>
                     <button class="btn btn-outline-secondary" onclick="printContent('input_table_main')">طباعة جدول الإدخال</button>
                     <button class="btn btn-outline-secondary" onclick="printContent('official_return')">طباعة الإقرار الرسمي</button>
                     <button class="btn btn-outline-secondary" onclick="printContent('settlement_journal')">طباعة قيد التسوية</button>
@@ -192,6 +270,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    (function(){ const params=new URLSearchParams(location.search); const cid=params.get('clientId')||localStorage.getItem('activeClientId'); if(cid){ ['top_home','top_mapping','top_cockpit','top_reports','top_vat','nav_home','nav_mapping','nav_cockpit','nav_reports','nav_vat','nav_zakat'].forEach(id=>{ const el=document.getElementById(id); if(el){ const u=new URL(el.getAttribute('href'), location.origin); if(!u.searchParams.get('clientId')) u.searchParams.set('clientId', cid); el.setAttribute('href', u.pathname+u.search); } }); } })();
     const VAT_RATE = 0.15;
     let newEntityCounter = 0;
 
@@ -380,6 +459,10 @@
         });
         document.getElementById('sales_total_base').value = formatCurrency(totalSalesBase);
         document.getElementById('sales_total_vat').value = formatCurrency(totalSalesVat);
+        document.getElementById('kpi_sales_base').textContent = formatCurrency(totalSalesBase);
+        document.getElementById('kpi_sales_vat').textContent = formatCurrency(totalSalesVat);
+        document.getElementById('summary_sales_base').textContent = formatCurrency(totalSalesBase);
+        document.getElementById('summary_sales_vat').textContent = formatCurrency(totalSalesVat);
 
         let totalPurchasesBase = 0, totalPurchasesVat = 0;
         ['purchases_standard', 'purchases_imports_customs', 'purchases_imports_reverse', 'purchases_zero', 'purchases_exempt'].forEach(id => {
@@ -392,9 +475,15 @@
         });
         document.getElementById('purchases_total_base').value = formatCurrency(totalPurchasesBase);
         document.getElementById('purchases_total_vat').value = formatCurrency(totalPurchasesVat);
+        document.getElementById('kpi_purchases_base').textContent = formatCurrency(totalPurchasesBase);
+        document.getElementById('kpi_purchases_vat').textContent = formatCurrency(totalPurchasesVat);
+        document.getElementById('summary_purchases_base').textContent = formatCurrency(totalPurchasesBase);
+        document.getElementById('summary_purchases_vat').textContent = formatCurrency(totalPurchasesVat);
         
         const netVat = totalSalesVat - totalPurchasesVat;
         document.getElementById('net_vat_due_vat').value = formatCurrency(netVat);
+        document.getElementById('kpi_net_vat').textContent = formatCurrency(netVat);
+        document.getElementById('summary_net_vat').textContent = formatCurrency(netVat);
         
         const corrections = parseFloatOrZero(document.getElementById('corrections_vat')?.value);
         const carried = parseFloatOrZero(document.getElementById('vat_carried_forward_vat')?.value);
@@ -668,6 +757,84 @@
     buildInputTable();
     buildOfficialReturnTable();
     calculateAll();
+
+    // --- CLIENT LINKING & AUTO FILL ---
+    (function(){
+        const params = new URLSearchParams(window.location.search);
+        const cid = params.get('clientId') || localStorage.getItem('activeClientId');
+        const withCid = (url) => cid ? `${url}?clientId=${cid}` : url;
+        const setHref = (id, url) => { const el = document.getElementById(id); if (el) el.href = withCid(url); };
+        setHref('nav_mapping','account-mapping.html');
+        setHref('nav_cockpit','consolidation-cockpit.html');
+        setHref('nav_reports','reporting-pantheon.html');
+        setHref('nav_zakat','zakat-diwan.html');
+        setHref('nav_vat','vat-center.html');
+
+        async function autoFillFromAudit() {
+            if (!cid) { alert('لا يوجد عميل نشط. يرجى تحديد عميل أولًا.'); return; }
+            try {
+                const finalJSON = localStorage.getItem(`finalAudit_${cid}`);
+                const mappingJSON = localStorage.getItem(`accountMappingData_${cid}`);
+                let trialBalance = [];
+                let adjustments = [];
+                if (finalJSON) {
+                    const audit = JSON.parse(finalJSON);
+                    trialBalance = audit.trialBalance || [];
+                    adjustments = audit.adjustments || [];
+                } else if (mappingJSON) {
+                    const map = JSON.parse(mappingJSON);
+                    trialBalance = (map.accounts || []).map(acc => ({
+                        account_id: acc.accountNumber,
+                        name: acc.accountName,
+                        category: acc.category || '',
+                        sub_category: acc.subCategory || '',
+                        ob_debit: (acc.openingBalance || 0) > 0 ? acc.openingBalance : 0,
+                        ob_credit: (acc.openingBalance || 0) < 0 ? Math.abs(acc.openingBalance) : 0,
+                        move_debit: (acc.movementBalance || 0) > 0 ? acc.movementBalance : 0,
+                        move_credit: (acc.movementBalance || 0) < 0 ? Math.abs(acc.movementBalance) : 0
+                    }));
+                    adjustments = map.adjustments || [];
+                } else {
+                    alert('لا توجد بيانات مالية معتمدة لهذا العميل.');
+                    return;
+                }
+
+                const calcFinal = (acc) => {
+                    const ob_debit = parseFloat(acc.ob_debit) || 0;
+                    const ob_credit = parseFloat(acc.ob_credit) || 0;
+                    const move_debit = parseFloat(acc.move_debit) || 0;
+                    const move_credit = parseFloat(acc.move_credit) || 0;
+                    let final = (ob_debit - ob_credit) + (move_debit - move_credit);
+                    adjustments.forEach(adj => {
+                        if (String(adj.debit_account) === String(acc.account_id)) final += (parseFloat(adj.amount) || 0);
+                        if (String(adj.credit_account) === String(acc.account_id)) final -= (parseFloat(adj.amount) || 0);
+                    });
+                    return final;
+                };
+
+                const totalRevenue = trialBalance.filter(acc => (acc.category || '').toLowerCase() === 'revenue')
+                                                .reduce((sum, acc) => sum + calcFinal(acc), 0);
+                const revenueBase = Math.abs(totalRevenue);
+
+                const salesStandardBase = document.getElementById('sales_standard_base');
+                if (salesStandardBase) {
+                    salesStandardBase.value = formatCurrency(revenueBase);
+                }
+
+                // Optional: put same into main group rows if present (flexible groups allow override)
+                const factoryRow = document.querySelector('.entity-row[data-item-id="factory"] [data-type="sales"][data-field="base"]');
+                if (factoryRow && !factoryRow.disabled) factoryRow.value = formatCurrency(revenueBase);
+
+                calculateAll();
+                alert('تمت تعبئة المبيعات من بيانات العميل بنجاح.');
+            } catch (e) {
+                console.error(e);
+                alert('فشل تعبئة البيانات تلقائيًا.');
+            }
+        }
+
+        document.getElementById('auto-fill-btn').addEventListener('click', autoFillFromAudit);
+    })();
 </script>
 </body>
 </html>

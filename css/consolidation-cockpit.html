@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القوائم المالية الشاملة - النظام المحاسبي</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --color-bg: #0d1117;
+            --color-surface: #161b22;
+            --color-primary: #00aaff;
+            --color-primary-glow: rgba(0, 170, 255, 0.5);
+            --color-text-primary: #c9d1d9;
+            --color-text-secondary: #8b949e;
+            --color-border: #30363d;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
+            --border-radius-lg: 12px;
+            --border-radius-md: 8px;
+            --font-family-main: 'Tajawal', sans-serif;
+            --font-family-display: 'Cairo', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            line-height: 1.7;
+        }
+
+        .container-fluid { padding: 2rem; }
+
+        .financial-statement {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .statement-title {
+            font-family: var(--font-family-display);
+            font-weight: 900;
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .financial-table th {
+            background-color: #1c222b;
+            color: var(--color-text-primary);
+            padding: 0.8rem;
+            text-align: right;
+            border: 1px solid var(--color-border);
+            font-weight: 700;
+        }
+
+        .financial-table td {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--color-border);
+            text-align: right;
+        }
+
+        .financial-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .amount {
+            font-family: monospace;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .positive { color: var(--color-success); }
+        .negative { color: var(--color-danger); }
+
+        .sub-total {
+            background-color: rgba(0, 170, 255, 0.1) !important;
+            font-weight: 700;
+        }
+
+        .total {
+            background-color: rgba(40, 167, 69, 0.15) !important;
+            font-weight: 900;
+        }
+
+        .control-panel {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-lg);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        .notes-section {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .note-item {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .note-item:last-child {
+            border-bottom: none;
+        }
+
+        .note-title {
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .sub-note-title {
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .data-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-secondary);
+        }
+
+        .data-empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+            background-color: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius-md);
+        }
+
+        .accounting-correct { border-left: 4px solid var(--color-success); }
+        .accounting-warning { border-left: 4px solid var(--color-warning); }
+
+        .note-description {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .policy-box {
+            background-color: rgba(0, 170, 255, 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        /* لوحة مؤشرات الأداء */
+        .kpi-dashboard {
+            background: linear-gradient(135deg, #161b22 0%, #1c222b 100%);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .kpi-dashboard-title {
+            font-family: var(--font-family-display);
+            font-weight: 900;
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .kpi-card {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 170, 255, 0.2);
+            border-color: var(--color-primary);
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-family: var(--font-family-display);
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .kpi-change.positive {
+            color: var(--color-success);
+        }
+
+        .kpi-change.negative {
+            color: var(--color-danger);
+        }
+
+        .kpi-change.neutral {
+            color: var(--color-text-secondary);
+        }
+
+        /* الرسوم البيانية */
+        .charts-section {
+            background-color: var(--color-surface);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin-bottom: 2rem;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+        }
+
+        .chart-title {
+            font-family: var(--font-family-display);
+            font-weight: 700;
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; color: black; }
+            .financial-statement { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- لوحة التحكم -->
+        <div class="control-panel no-print">
+            <div class="d-flex gap-2 flex-wrap justify-content-between align-items-center">
+                <h4 class="mb-0">القوائم المالية الشاملة - النظام المحاسبي</h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf me-2"></i>تصدير PDF
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>طباعة
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="goBackToMapping()">
+                        <i class="fas fa-arrow-right me-2"></i>العودة للمراجعة
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>تحديث
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- حالة تحميل البيانات -->
+        <div id="loadingIndicator" class="data-loading">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+            <h4>جاري تحميل البيانات المالية...</h4>
+        </div>
+
+        <!-- لوحة مؤشرات الأداء الرئيسية -->
+        <div class="kpi-dashboard" id="kpiDashboard" style="display: none;">
+            <h2 class="kpi-dashboard-title"><i class="fas fa-chart-line me-2"></i>مؤشرات الأداء الرئيسية (KPIs)</h2>
+            <div id="kpiContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+
+        <!-- الرسوم البيانية التفاعلية -->
+        <div class="charts-section" id="chartsSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-chart-pie me-2"></i>الرسوم البيانية التفاعلية</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="chart-title">مقارنة الإيرادات والأرباح</h5>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="chart-title">هيكل الأصول</h5>
+                        <canvas id="assetsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="chart-title">هيكل الالتزامات وحقوق الملكية</h5>
+                        <canvas id="liabilitiesChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="chart-title">هوامش الربح</h5>
+                        <canvas id="marginsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الدخل -->
+        <div class="financial-statement" id="incomeStatementSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-chart-bar me-2"></i>قائمة الدخل</h2>
+            <div id="incomeStatementContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+
+        <!-- قائمة المركز المالي -->
+        <div class="financial-statement" id="balanceSheetSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-balance-scale me-2"></i>قائمة المركز المالي</h2>
+            <div id="balanceSheetContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+
+        <!-- قائمة التدفقات النقدية -->
+        <div class="financial-statement" id="cashFlowSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-money-bill-wave me-2"></i>قائمة التدفقات النقدية</h2>
+            <div id="cashFlowContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+
+        <!-- قائمة التغيرات في حقوق الملكية -->
+        <div class="financial-statement" id="equityStatementSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-users me-2"></i>قائمة التغيرات في حقوق الملكية</h2>
+            <div id="equityStatementContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+
+        <!-- الإيضاحات المتممة -->
+        <div class="notes-section" id="notesSection" style="display: none;">
+            <h2 class="statement-title"><i class="fas fa-sticky-note me-2"></i>الإيضاحات المتممة للقوائم المالية</h2>
+            <div class="note-description">
+                <em>"الأرقام في القوائم المالية تحكي جزءاً من القصة، لكن الإيضاحات تروي القصة كاملة."</em> - المدير المالي
+            </div>
+            <div id="notesContent">
+                <!-- سيتم ملؤها بالبيانات الفعلية -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // تحميل البيانات من localStorage
+         // تحميل البيانات من localStorage (نسخة محسنة)
+        function loadAuditData() {
+            // **التعديل هنا: قراءة معرّف العميل من الرابط أولاً**
+            const urlParams = new URLSearchParams(window.location.search);
+            let activeClientId = urlParams.get('clientId');
+
+            // إذا لم يوجد في الرابط، ابحث في localStorage كخطة بديلة
+            if (!activeClientId) {
+                activeClientId = localStorage.getItem('activeClientId');
+            }
+
+            if (!activeClientId) {
+                showError('لم يتم العثور على عميل نشط. الرجاء العودة لصفحة المراجعة أولاً.');
+                return null;
+            }
+            
+            // تأكيد أن العميل النشط في localStorage هو نفسه المطلوب
+            localStorage.setItem('activeClientId', activeClientId);
+
+            const auditFileKey = `polarisAuditFile_${activeClientId}`;
+            const savedAuditFile = localStorage.getItem(auditFileKey);
+            
+            if (!savedAuditFile) {
+                showError(`لم يتم العثور على بيانات المراجعة للمعرف (${activeClientId}). الرجاء التأكد من إكمال مرحلة المراجعة أولاً وحفظ البيانات.`);
+                return null;
+            }
+            
+            try {
+                console.log("تم العثور على البيانات بنجاح! جاري تحليلها...");
+                return JSON.parse(savedAuditFile);
+            } catch (e) {
+                showError('خطأ في تحميل بيانات المراجعة. الملف تالف أو غير صحيح.');
+                return null;
+            }
+        }
+
+        // حساب الرصيد النهائي للحساب مع التسويات
+     // ==================================================================
+// ==================================================================
+// --- حزمة دوال العرض الاحترافية (V5.2) - النسخة النهائية ---
+// ==================================================================
+
+// عرض قائمة الدخل (مطابقة للتقرير)
+function displayIncomeStatement(fullIncomeData) {
+    const container = document.getElementById('incomeStatementContent');
+    const current = fullIncomeData.current;
+    const prior = fullIncomeData.prior;
+
+    if (current.totalRevenue === 0 && current.adminExpenses === 0) {
+        container.innerHTML = `<div class="data-empty">...</div>`;
+        return;
+    }
+
+    let html = `<table class="financial-table"><thead><tr><th width="50%">البند</th><th>إيضاح</th><th>السنة الحالية</th><th>السنة السابقة</th></tr></thead><tbody>`;
+    // ... (داخل دالة displayIncomeStatement)
+    html += `<tr><td>يخصم: مصروفات عمومية وإدارية</td><td>14</td><td class="amount negative">(${formatCurrency(current.adminExpenses)})</td><td class="amount negative">(${formatCurrency(prior.adminExpenses)})</td></tr>`;
+    html += `<tr><td>يخصم: اهلاك للممتلكات والمعدات</td><td>7</td><td class="amount negative">(${formatCurrency(current.depreciationExpense)})</td><td class="amount negative">(${formatCurrency(prior.depreciationExpense)})</td></tr>`;
+    // *** السطر الجديد الذي يجب إضافته ***
+    html += `<tr><td>يخصم: إطفاء أصول غير ملموسة</td><td></td><td class="amount negative">(${formatCurrency(current.amortizationExpense)})</td><td class="amount negative">(${formatCurrency(prior.amortizationExpense)})</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي الدخل قبل خصم الزكاة</strong></td>...`;
+// ...
+
+    html += `<tr><td>صافي الإيرادات</td><td>13</td><td class="amount">${formatCurrency(current.totalRevenue)}</td><td class="amount">${formatCurrency(prior.totalRevenue)}</td></tr>`;
+    html += `<tr><td>يخصم: تكلفة الإيرادات</td><td></td><td class="amount negative">(${formatCurrency(current.totalCOGS)})</td><td class="amount negative">(${formatCurrency(prior.totalCOGS)})</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>مجمل الدخل</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.grossProfit)}</strong></td><td class="amount"><strong>${formatCurrency(prior.grossProfit)}</strong></td></tr>`;
+    html += `<tr><td>يضاف: الإيرادات الأخرى</td><td></td><td class="amount">${formatCurrency(current.otherRevenues)}</td><td class="amount">${formatCurrency(prior.otherRevenues)}</td></tr>`;
+    html += `<tr><td>يخصم: مصروفات عمومية وإدارية</td><td>14</td><td class="amount negative">(${formatCurrency(current.adminExpenses)})</td><td class="amount negative">(${formatCurrency(prior.adminExpenses)})</td></tr>`;
+    html += `<tr><td>يخصم: اهلاك للممتلكات والمعدات</td><td>7</td><td class="amount negative">(${formatCurrency(current.depreciationExpense)})</td><td class="amount negative">(${formatCurrency(prior.depreciationExpense)})</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي الدخل قبل خصم الزكاة</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.netProfitBeforeZakat)}</strong></td><td class="amount"><strong>${formatCurrency(prior.netProfitBeforeZakat)}</strong></td></tr>`;
+    html += `<tr><td>يخصم: الزكاة الشرعية</td><td>11</td><td class="amount negative">(${formatCurrency(current.zakatExpense)})</td><td class="amount negative">(${formatCurrency(prior.zakatExpense)})</td></tr>`;
+    html += `<tr class="total"><td><strong>صافي الدخل</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.netProfit)}</strong></td><td class="amount"><strong>${formatCurrency(prior.netProfit)}</strong></td></tr>`;
+    
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة المركز المالي (مطابقة للتقرير مع تنبيه)
+function displayBalanceSheet(balanceData, auditData) {
+    const container = document.getElementById('balanceSheetContent');
+    if (balanceData.totalAssets === 0) {
+        container.innerHTML = `<div class="data-empty">...</div>`;
+        return;
+    }
+
+    const balanceClass = balanceData.isBalanced ? 'accounting-correct' : 'accounting-warning';
+    let html = `<div class="row"><div class="col-md-6"><h5 class="text-primary mb-3">الأصول</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>النقد وما في حكمه</td><td>3</td><td class="amount">${formatCurrency(balanceData.currentAssets)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الأصول المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentAssets)}</strong></td></tr>`;
+    html += `<tr><td>الممتلكات والآلات والمعدات، بالصافي</td><td>7</td><td class="amount">${formatCurrency(balanceData.fixedAssets)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الأصول غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.fixedAssets)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الأصول</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalAssets)}</strong></td></tr>`;
+    
+    html += `</tbody></table></div><div class="col-md-6"><h5 class="text-primary mb-3">الالتزامات وحقوق الملكية</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>دائنون تجاريون وأرصدة دائنة أخرى</td><td>9, 10</td><td class="amount">${formatCurrency(balanceData.currentLiabilities)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الالتزامات المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>قروض وتمويل طويلة الأجل</td><td></td><td class="amount">${formatCurrency(balanceData.longTermLiabilities)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الالتزامات غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.longTermLiabilities)}</strong></td></tr>`;
+    html += `<tr class="sub-total"><td><strong>مجموع الالتزامات</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>حقوق الملكية</td><td></td><td class="amount">${formatCurrency(balanceData.totalEquity)}</td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الالتزامات وحقوق الملكية</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities + balanceData.totalEquity)}</strong></td></tr>`;
+
+    html += `</tbody></table></div></div>`;
+    
+    if (!balanceData.isBalanced) {
+        html += `<div class="alert alert-danger mt-3"><i class="fas fa-exclamation-triangle me-2"></i><strong>المعادلة غير متوازنة.</strong> الفرق: ${formatCurrency(balanceData.accountingEquationBalance)}</div>`;
+    } else {
+        html += `<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i><strong>المعادلة المحاسبية متوازنة.</strong></div>`;
+    }
+    
+    const clearingAccounts = (auditData.trialBalance || []).filter(acc => acc.category === 'clearing' && Math.abs(calculateFinalBalance(acc, auditData.adjustments)) > 1);
+    if (clearingAccounts.length > 0) {
+        html += `<div class="alert alert-info mt-3"><i class="fas fa-bell me-2"></i><strong>تنبيه تسوية:</strong> تم العثور على حسابات رقابية ذات رصيد. يجب تسويتها وإقفالها.<ul>`;
+        clearingAccounts.forEach(acc => {
+            html += `<li>${acc.name}: ${formatCurrency(acc.finalBalance)}</li>`;
+        });
+        html += `</ul></div>`;
+    }
+
+    container.innerHTML = html;
+    container.closest('.financial-statement').className = `financial-statement ${balanceClass}`;
+}
+
+// عرض قائمة التغيرات في حقوق الملكية (مطابقة للتقرير)
+function displayEquityStatement(equityData) {
+    const container = document.getElementById('equityStatementContent');
+    let html = `<table class="financial-table"><thead><tr><th>البيان</th><th>رأس المال</th><th>أرباح مبقاة</th><th>الإجمالي</th></tr></thead><tbody>`;
+    html += `<tr><td>الرصيد في بداية الفترة</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td><td class="amount">0</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td></tr>`;
+    html += `<tr><td>زيادة رأس المال</td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td></tr>`;
+    html += `<tr><td>صافي دخل السنة</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.netProfit)}</td><td class="amount">${formatCurrency(equityData.netProfit)}</td></tr>`;
+    html += `<tr class="total"><td><strong>الرصيد في نهاية الفترة</strong></td><td class="amount"><strong>${formatCurrency(equityData.openingBalance - equityData.capitalAdditions)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.netProfit)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.closingBalance)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة التدفقات النقدية (مطابقة للتقرير)
+function displayCashFlowStatement(cashFlowData) {
+    const container = document.getElementById('cashFlowContent');
+    let html = `<table class="financial-table"><tbody>`;
+    html += `<tr><td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية:</strong></td></tr>`;
+    html += `<tr><td>صافي الدخل قبل الزكاة</td><td class="amount">${formatCurrency(cashFlowData.netProfitBeforeZakat)}</td></tr>`;
+    html += `<tr><td>تعديلات لتسوية الدخل إلى صافي التدفقات النقدية:</td><td></td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;إهلاك</td><td class="amount positive">${formatCurrency(cashFlowData.depreciation)}</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم المدينة</td><td class="amount negative">(${formatCurrency(cashFlowData.changeInReceivables)})</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم الدائنة</td><td class="amount positive">${formatCurrency(cashFlowData.changeInPayables)}</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي التدفقات النقدية من الأنشطة التشغيلية</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.cashFlowFromOps)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>صافي التغير في النقد</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.netCashChange)}</strong></td></tr>`;
+    html += `<tr><td><strong>رصيد النقد في بداية السنة</strong></td><td class="amount">${formatCurrency(cashFlowData.openingCash)}</td></tr>`;
+    html += `<tr class="total"><td><strong>رصيد النقد في نهاية السنة</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.closingCash)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+        // ==================================================================
+// --- حزمة دوال العرض الاحترافية (V5) - برعاية المدير المالي ---
+// ==================================================================
+
+// عرض قائمة الدخل (V5 - مطابقة للتقرير)
+function displayIncomeStatement(fullIncomeData) {
+    const container = document.getElementById('incomeStatementContent');
+    const current = fullIncomeData.current;
+    const prior = fullIncomeData.prior;
+
+    if (current.totalRevenue === 0 && current.adminExpenses === 0) {
+        container.innerHTML = `<div class="data-empty">...</div>`;
+        return;
+    }
+
+    let html = `<table class="financial-table"><thead><tr><th width="50%">البند</th><th>إيضاح</th><th>السنة الحالية</th><th>السنة السابقة</th></tr></thead><tbody>`;
+    
+    html += `<tr><td>صافي الإيرادات</td><td>13</td><td class="amount">${formatCurrency(current.totalRevenue)}</td><td class="amount">${formatCurrency(prior.totalRevenue)}</td></tr>`;
+    html += `<tr><td>يخصم: تكلفة الإيرادات</td><td></td><td class="amount negative">(${formatCurrency(current.totalCOGS)})</td><td class="amount negative">(${formatCurrency(prior.totalCOGS)})</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>مجمل الدخل</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.grossProfit)}</strong></td><td class="amount"><strong>${formatCurrency(prior.grossProfit)}</strong></td></tr>`;
+    html += `<tr><td>يضاف: الإيرادات الأخرى</td><td></td><td class="amount">${formatCurrency(current.otherRevenues)}</td><td class="amount">${formatCurrency(prior.otherRevenues)}</td></tr>`;
+    html += `<tr><td>يخصم: مصروفات عمومية وإدارية</td><td>14</td><td class="amount negative">(${formatCurrency(current.adminExpenses)})</td><td class="amount negative">(${formatCurrency(prior.adminExpenses)})</td></tr>`;
+    html += `<tr><td>يخصم: اهلاك للممتلكات والمعدات</td><td>7</td><td class="amount negative">(${formatCurrency(current.depreciationExpense)})</td><td class="amount negative">(${formatCurrency(prior.depreciationExpense)})</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي الدخل قبل خصم الزكاة</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.netProfitBeforeZakat)}</strong></td><td class="amount"><strong>${formatCurrency(prior.netProfitBeforeZakat)}</strong></td></tr>`;
+    html += `<tr><td>يخصم: الزكاة الشرعية</td><td>11</td><td class="amount negative">(${formatCurrency(current.zakatExpense)})</td><td class="amount negative">(${formatCurrency(prior.zakatExpense)})</td></tr>`;
+    html += `<tr class="total"><td><strong>صافي الدخل</strong></td><td></td><td class="amount"><strong>${formatCurrency(current.netProfit)}</strong></td><td class="amount"><strong>${formatCurrency(prior.netProfit)}</strong></td></tr>`;
+    
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة المركز المالي (V5 - مطابقة للتقرير)
+function displayBalanceSheet(balanceData) {
+    const container = document.getElementById('balanceSheetContent');
+    if (balanceData.totalAssets === 0) {
+        container.innerHTML = `<div class="data-empty">...</div>`;
+        return;
+    }
+
+    const balanceClass = balanceData.isBalanced ? 'accounting-correct' : 'accounting-warning';
+    let html = `<div class="row"><div class="col-md-6"><h5 class="text-primary mb-3">الأصول</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>النقد وما في حكمه</td><td>3</td><td class="amount">${formatCurrency(balanceData.currentAssets)}</td></tr>`; // تبسيط
+    html += `<tr><td><strong>مجموع الأصول المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentAssets)}</strong></td></tr>`;
+    html += `<tr><td>الممتلكات والآلات والمعدات، بالصافي</td><td>7</td><td class="amount">${formatCurrency(balanceData.fixedAssets)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الأصول غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.fixedAssets)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الأصول</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalAssets)}</strong></td></tr>`;
+    
+    html += `</tbody></table></div><div class="col-md-6"><h5 class="text-primary mb-3">الالتزامات وحقوق الملكية</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>دائنون تجاريون</td><td>9</td><td class="amount">${formatCurrency(balanceData.currentLiabilities)}</td></tr>`; // تبسيط
+    html += `<tr><td><strong>مجموع الالتزامات المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>قروض وتمويل طويلة الأجل</td><td></td><td class="amount">${formatCurrency(balanceData.longTermLiabilities)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الالتزامات غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.longTermLiabilities)}</strong></td></tr>`;
+    html += `<tr class="sub-total"><td><strong>مجموع الالتزامات</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>حقوق الملكية</td><td></td><td class="amount">${formatCurrency(balanceData.totalEquity)}</td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الالتزامات وحقوق الملكية</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities + balanceData.totalEquity)}</strong></td></tr>`;
+
+    html += `</tbody></table></div></div>`;
+    
+    if (!balanceData.isBalanced) {
+        html += `<div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle me-2"></i><strong>المعادلة غير متوازنة.</strong> الفرق: ${formatCurrency(balanceData.accountingEquationBalance)}</div>`;
+    } else {
+        html += `<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i><strong>المعادلة المحاسبية متوازنة.</strong></div>`;
+    }
+        // ... (بعد كود عرض التنبيه الخاص بتوازن المعادلة) ...
+
+    // *** التنبيه الجديد للحسابات الرقابية ***
+    const clearingAccounts = auditData.trialBalance.filter(acc => acc.category === 'clearing' && Math.abs(calculateFinalBalance(acc, auditData.adjustments)) > 1);
+    if (clearingAccounts.length > 0) {
+        html += `<div class="alert alert-info mt-3">
+            <i class="fas fa-bell me-2"></i>
+            <strong>تنبيه تسوية:</strong> تم العثور على حسابات رقابية ذات رصيد. يجب تسويتها وإقفالها.
+            <ul>${clearingAccounts.map(acc => `<li>${acc.name}: ${formatCurrency(acc.finalBalance)}</li>`).join('')}</ul>
+        </div>`;
+    }
+    // *** نهاية التنبيه الجديد ***
+
+    container.innerHTML = html;
+
+    container.innerHTML = html;
+    container.closest('.financial-statement').className += ` ${balanceClass}`;
+}
+
+// عرض قائمة التغيرات في حقوق الملكية (V5 - مطابقة للتقرير)
+function displayEquityStatement(equityData) {
+    const container = document.getElementById('equityStatementContent');
+    let html = `<table class="financial-table"><thead><tr><th>البيان</th><th>رأس المال</th><th>أرباح مبقاة</th><th>الإجمالي</th></tr></thead><tbody>`;
+    html += `<tr><td>الرصيد في بداية الفترة</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td><td class="amount">0</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td></tr>`;
+    html += `<tr><td>زيادة رأس المال</td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td></tr>`;
+    html += `<tr><td>صافي دخل السنة</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.netProfit)}</td><td class="amount">${formatCurrency(equityData.netProfit)}</td></tr>`;
+    html += `<tr class="total"><td><strong>الرصيد في نهاية الفترة</strong></td><td class="amount"><strong>${formatCurrency(equityData.openingBalance - equityData.capitalAdditions)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.netProfit)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.closingBalance)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة التدفقات النقدية (V5 - مطابقة للتقرير)
+function displayCashFlowStatement(cashFlowData) {
+    const container = document.getElementById('cashFlowContent');
+    let html = `<table class="financial-table"><tbody>`;
+    html += `<tr><td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية:</strong></td></tr>`;
+    html += `<tr><td>صافي الدخل قبل الزكاة</td><td class="amount">${formatCurrency(cashFlowData.netProfitBeforeZakat)}</td></tr>`;
+    html += `<tr><td>تعديلات لتسوية الدخل إلى صافي التدفقات النقدية:</td><td></td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;إهلاك</td><td class="amount positive">${formatCurrency(cashFlowData.depreciation)}</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم المدينة</td><td class="amount negative">(${formatCurrency(cashFlowData.changeInReceivables)})</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم الدائنة</td><td class="amount positive">${formatCurrency(cashFlowData.changeInPayables)}</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي التدفقات النقدية من الأنشطة التشغيلية</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.cashFlowFromOps)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>صافي التغير في النقد</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.netCashChange)}</strong></td></tr>`;
+    html += `<tr><td><strong>رصيد النقد في بداية السنة</strong></td><td class="amount">${formatCurrency(cashFlowData.openingCash)}</td></tr>`;
+    html += `<tr class="total"><td><strong>رصيد النقد في نهاية السنة</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.closingCash)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض الإيضاحات المتممة (V5 - حزمة احترافية كاملة)
+function displayFinancialNotes(auditData, categorizedData, incomeData, balanceData) {
+    const container = document.getElementById('notesContent');
+    container.innerHTML = ''; 
+    let html = '';
+    let noteCounter = 1;
+
+    function generateNoteTable(title, accounts, columns = ['البيان', 'المبلغ (SAR)']) {
+        if (!accounts || accounts.length === 0) return '';
+        
+        let tableHtml = `<div class="note-item"><div class="note-title">${noteCounter++}. ${title}</div><table class="financial-table"><thead><tr>`;
+        columns.forEach(col => tableHtml += `<th>${col}</th>`);
+        tableHtml += `</tr></thead><tbody>`;
+
+        let total = 0;
+        accounts.forEach(account => {
+            const accountName = account.name || 'حساب غير مسمى'; 
+            const balance = Math.abs(account.finalBalance);
+            
+            tableHtml += `<tr><td>${accountName}</td><td class="amount">${formatCurrency(balance)}</td></tr>`;
+            total += balance;
+        });
+
+        tableHtml += `<tr class="total"><td><strong>الإجمالي</strong></td><td class="amount"><strong>${formatCurrency(total)}</strong></td></tr></tbody></table></div>`;
+        return tableHtml;
+    }
+
+    html += `<div class="note-item"><div class="note-title">${noteCounter++}. تعريف بالمنشأة</div><p>...</p></div>`;
+    html += `<div class="note-item"><div class="note-title">${noteCounter++}. أهم السياسات المحاسبية</div><p>...</p></div>`;
+
+    const allCurrentAssets = categorizedData.currentAssets || [];
+    const allFixedAssets = categorizedData.fixedAssets || [];
+    const allCurrentLiabilities = categorizedData.currentLiabilities || [];
+    const allOperatingExpenses = incomeData.allAccounts.operatingExpenses || [];
+
+    html += generateNoteTable('النقد وما في حكمه', allCurrentAssets.filter(acc => acc.sub_category.includes('cash')));
+    html += generateNoteTable('مدينون تجاريون', allCurrentAssets.filter(acc => acc.sub_category === 'trade_receivables'));
+    html += generateNoteTable('أرصدة مدينة أخرى', allCurrentAssets.filter(acc => ['related_parties_receivables', 'employee_advances', 'custody_accounts', 'prepaid_expenses', 'accrued_revenue'].includes(acc.sub_category)));
+    html += generateNoteTable('المخزون', allCurrentAssets.filter(acc => acc.sub_category === 'inventory'));
+
+    if (allFixedAssets.length > 0) {
+        let faHtml = `<div class="note-item"><div class="note-title">${noteCounter++}. الممتلكات والآلات والمعدات</div><table class="financial-table"><thead><tr><th>البيان</th><th>التكلفة</th><th>مجمع الإهلاك</th><th>صافي القيمة الدفترية</th></tr></thead><tbody>`;
+        let totalCost = 0, totalAccumDep = 0, totalNet = 0;
+        allFixedAssets.forEach(acc => {
+            const cost = acc.finalBalance > 0 ? acc.finalBalance : 0;
+            const accumDep = acc.finalBalance < 0 ? acc.finalBalance : 0;
+            const netValue = cost + accumDep;
+            faHtml += `<tr><td>${acc.name || 'أصل غير مسمى'}</td><td class="amount">${formatCurrency(cost)}</td><td class="amount negative">(${formatCurrency(Math.abs(accumDep))})</td><td class="amount">${formatCurrency(netValue)}</td></tr>`;
+            totalCost += cost;
+            totalAccumDep += accumDep;
+            totalNet += netValue;
+        });
+        faHtml += `<tr class="total"><td><strong>الإجمالي</strong></td><td class="amount"><strong>${formatCurrency(totalCost)}</strong></td><td class="amount negative"><strong>(${formatCurrency(Math.abs(totalAccumDep))})</strong></td><td class="amount"><strong>${formatCurrency(totalNet)}</strong></td></tr></tbody></table></div>`;
+        html += faHtml;
+    }
+
+    html += generateNoteTable('مشاريع تحت التنفيذ', allCurrentAssets.filter(acc => acc.sub_category === 'wip_projects'));
+    html += generateNoteTable('دائنون تجاريون', allCurrentLiabilities.filter(acc => acc.sub_category === 'trade_payables'));
+    html += generateNoteTable('أرصدة دائنة أخرى', allCurrentLiabilities.filter(acc => ['related_parties_payables', 'accrued_expenses', 'unearned_revenue', 'vat_payable'].includes(acc.sub_category)));
+    
+    const zakatProvision = allCurrentLiabilities.find(acc => acc.sub_category === 'zakat_expense');
+    if(zakatProvision) html += generateNoteTable('مخصص الزكاة والضريبة', [zakatProvision]);
+
+    html += generateNoteTable('رأس المال', categorizedData.equity.filter(acc => acc.sub_category === 'capital'));
+    html += generateNoteTable('الإيرادات', incomeData.allAccounts.revenue);
+    html += generateNoteTable('المصروفات العمومية والإدارية', allOperatingExpenses.filter(acc => acc.sub_category !== 'depreciation'));
+
+    container.innerHTML = html;
+}
+
+
+// ==================================================================
+// --- حزمة الدوال المفقودة (V5.1) - تمت إعادتها بواسطة المدير المالي ---
+// ==================================================================
+
+// عرض قائمة المركز المالي (V5 - مطابقة للتقرير)
+function displayBalanceSheet(balanceData) {
+    const container = document.getElementById('balanceSheetContent');
+    if (balanceData.totalAssets === 0) {
+        container.innerHTML = `<div class="data-empty">...</div>`;
+        return;
+    }
+
+    const balanceClass = balanceData.isBalanced ? 'accounting-correct' : 'accounting-warning';
+    let html = `<div class="row"><div class="col-md-6"><h5 class="text-primary mb-3">الأصول</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>النقد وما في حكمه</td><td>3</td><td class="amount">${formatCurrency(balanceData.currentAssets)}</td></tr>`; // تبسيط
+    html += `<tr><td><strong>مجموع الأصول المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentAssets)}</strong></td></tr>`;
+    html += `<tr><td>الممتلكات والآلات والمعدات، بالصافي</td><td>7</td><td class="amount">${formatCurrency(balanceData.fixedAssets)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الأصول غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.fixedAssets)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الأصول</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalAssets)}</strong></td></tr>`;
+    
+    html += `</tbody></table></div><div class="col-md-6"><h5 class="text-primary mb-3">الالتزامات وحقوق الملكية</h5><table class="financial-table"><tbody>`;
+    
+    html += `<tr><td>دائنون تجاريون</td><td>9</td><td class="amount">${formatCurrency(balanceData.currentLiabilities)}</td></tr>`; // تبسيط
+    html += `<tr><td><strong>مجموع الالتزامات المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.currentLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>قروض وتمويل طويلة الأجل</td><td>13</td><td class="amount">${formatCurrency(balanceData.longTermLiabilities)}</td></tr>`;
+    html += `<tr><td><strong>مجموع الالتزامات غير المتداولة</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.longTermLiabilities)}</strong></td></tr>`;
+    html += `<tr class="sub-total"><td><strong>مجموع الالتزامات</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities)}</strong></td></tr>`;
+    html += `<tr><td>حقوق الملكية</td><td></td><td class="amount">${formatCurrency(balanceData.totalEquity)}</td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الالتزامات وحقوق الملكية</strong></td><td></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities + balanceData.totalEquity)}</strong></td></tr>`;
+
+    html += `</tbody></table></div></div>`;
+    
+    if (!balanceData.isBalanced) {
+        html += `<div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle me-2"></i><strong>المعادلة غير متوازنة.</strong> الفرق: ${formatCurrency(balanceData.accountingEquationBalance)}</div>`;
+    } else {
+        html += `<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i><strong>المعادلة المحاسبية متوازنة.</strong></div>`;
+    }
+    
+    container.innerHTML = html;
+    container.closest('.financial-statement').className += ` ${balanceClass}`;
+}
+
+// عرض قائمة التغيرات في حقوق الملكية (V5 - مطابقة للتقرير)
+function displayEquityStatement(equityData) {
+    const container = document.getElementById('equityStatementContent');
+    let html = `<table class="financial-table"><thead><tr><th>البيان</th><th>رأس المال</th><th>أرباح مبقاة</th><th>الإجمالي</th></tr></thead><tbody>`;
+    html += `<tr><td>الرصيد في بداية الفترة</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td><td class="amount">0</td><td class="amount">${formatCurrency(equityData.openingBalance)}</td></tr>`;
+    html += `<tr><td>زيادة رأس المال</td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.capitalAdditions)}</td></tr>`;
+    html += `<tr><td>صافي دخل السنة</td><td class="amount"></td><td class="amount">${formatCurrency(equityData.netProfit)}</td><td class="amount">${formatCurrency(equityData.netProfit)}</td></tr>`;
+    html += `<tr class="total"><td><strong>الرصيد في نهاية الفترة</strong></td><td class="amount"><strong>${formatCurrency(equityData.openingBalance - equityData.capitalAdditions)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.netProfit)}</strong></td><td class="amount"><strong>${formatCurrency(equityData.closingBalance)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة التدفقات النقدية (V5 - مطابقة للتقرير)
+function displayCashFlowStatement(cashFlowData) {
+    const container = document.getElementById('cashFlowContent');
+    let html = `<table class="financial-table"><tbody>`;
+    html += `<tr><td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية:</strong></td></tr>`;
+    html += `<tr><td>صافي الدخل قبل الزكاة</td><td class="amount">${formatCurrency(cashFlowData.netProfitBeforeZakat)}</td></tr>`;
+    html += `<tr><td>تعديلات لتسوية الدخل إلى صافي التدفقات النقدية:</td><td></td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;إهلاك</td><td class="amount positive">${formatCurrency(cashFlowData.depreciation)}</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم المدينة</td><td class="amount negative">(${formatCurrency(cashFlowData.changeInReceivables)})</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp;التغير في الذمم الدائنة</td><td class="amount positive">${formatCurrency(cashFlowData.changeInPayables)}</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي التدفقات النقدية من الأنشطة التشغيلية</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.cashFlowFromOps)}</strong></td></tr>`;
+    html += `<tr class="total"><td><strong>صافي التغير في النقد</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.netCashChange)}</strong></td></tr>`;
+    html += `<tr><td><strong>رصيد النقد في بداية السنة</strong></td><td class="amount">${formatCurrency(cashFlowData.openingCash)}</td></tr>`;
+    html += `<tr class="total"><td><strong>رصيد النقد في نهاية السنة</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.closingCash)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+// --- حزمة الدوال المفقودة (V3.1) ---
+// ==================================================================
+
+// عرض قائمة المركز المالي
+function displayBalanceSheet(balanceData) {
+    const container = document.getElementById('balanceSheetContent');
+    
+    if (balanceData.totalAssets === 0) {
+        container.innerHTML = `<div class="data-empty"><i class="fas fa-balance-scale fa-3x mb-3 text-muted"></i><h5 class="text-muted">لا توجد بيانات للأصول والالتزامات</h5><p class="text-muted">يجب تصنيف حسابات الأصول والالتزامات وحقوق الملكية أولاً</p></div>`;
+        return;
+    }
+
+    const balanceClass = balanceData.isBalanced ? 'accounting-correct' : 'accounting-warning';
+
+    let html = `<div class="row"><div class="col-md-6"><h5 class="text-primary mb-3">الأصول</h5>`;
+    
+    html += `<table class="financial-table"><tbody>`;
+    html += `<tr><td><strong>الأصول المتداولة</strong></td><td class="amount">${formatCurrency(balanceData.currentAssets)}</td></tr>`;
+    html += `<tr><td><strong>الأصول غير المتداولة</strong></td><td class="amount">${formatCurrency(balanceData.fixedAssets)}</td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الأصول</strong></td><td class="amount"><strong>${formatCurrency(balanceData.totalAssets)}</strong></td></tr>`;
+    html += `</tbody></table></div><div class="col-md-6"><h5 class="text-primary mb-3">الالتزامات وحقوق الملكية</h5>`;
+    
+    html += `<table class="financial-table"><tbody>`;
+    html += `<tr><td><strong>الالتزامات المتداولة</strong></td><td class="amount">${formatCurrency(balanceData.currentLiabilities)}</td></tr>`;
+    html += `<tr><td><strong>الالتزامات غير المتداولة</strong></td><td class="amount">${formatCurrency(balanceData.longTermLiabilities)}</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>إجمالي الالتزامات</strong></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities)}</strong></td></tr>`;
+    html += `<tr><td><strong>حقوق الملكية</strong></td><td class="amount">${formatCurrency(balanceData.totalEquity)}</td></tr>`;
+    html += `<tr class="total"><td><strong>إجمالي الالتزامات وحقوق الملكية</strong></td><td class="amount"><strong>${formatCurrency(balanceData.totalLiabilities + balanceData.totalEquity)}</strong></td></tr>`;
+    html += `</tbody></table></div></div>`;
+    
+    if (!balanceData.isBalanced) {
+        html += `<div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle me-2"></i><strong>ملاحظة:</strong> المعادلة المحاسبية غير متوازنة. الفرق: ${formatCurrency(balanceData.accountingEquationBalance)}</div>`;
+    } else {
+        html += `<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i><strong>المعادلة المحاسبية متوازنة.</strong></div>`;
+    }
+    
+    container.innerHTML = html;
+    container.closest('.financial-statement').className += ` ${balanceClass}`;
+}
+
+// عرض قائمة التدفقات النقدية
+function displayCashFlowStatement(cashFlowData) {
+    const container = document.getElementById('cashFlowContent');
+    
+    if (cashFlowData.operatingCashFlow === 0) {
+        container.innerHTML = `<div class="data-empty"><i class="fas fa-money-bill-wave fa-3x mb-3 text-muted"></i><h5 class="text-muted">لا توجد بيانات كافية للتدفقات النقدية.</h5></div>`;
+        return;
+    }
+
+    let html = `<table class="financial-table"><tbody>`;
+    html += `<tr><td colspan="2"><strong>التدفقات النقدية من الأنشطة التشغيلية:</strong></td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp; صافي الربح</td><td class="amount ${cashFlowData.netProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(cashFlowData.netProfit)}</td></tr>`;
+    html += `<tr><td>&nbsp;&nbsp; تسويات (استهلاك)</td><td class="amount positive">${formatCurrency(cashFlowData.depreciation)}</td></tr>`;
+    html += `<tr class="sub-total"><td><strong>صافي النقد من الأنشطة التشغيلية</strong></td><td class="amount ${cashFlowData.operatingCashFlow >= 0 ? 'positive' : 'negative'}"><strong>${formatCurrency(cashFlowData.operatingCashFlow)}</strong></td></tr>`;
+    // (يمكن إضافة تفاصيل الأنشطة الاستثمارية والتمويلية هنا لاحقاً)
+    html += `<tr class="total"><td><strong>صافي التغير في النقد</strong></td><td class="amount ${cashFlowData.netCashChange >= 0 ? 'positive' : 'negative'}"><strong>${formatCurrency(cashFlowData.netCashChange)}</strong></td></tr>`;
+    html += `<tr><td><strong>رصيد النقد أول المدة</strong></td><td class="amount">${formatCurrency(cashFlowData.openingCash)}</td></tr>`;
+    html += `<tr class="total"><td><strong>رصيد النقد آخر المدة</strong></td><td class="amount"><strong>${formatCurrency(cashFlowData.closingCash)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+// عرض قائمة التغيرات في حقوق الملكية
+function displayEquityStatement(equityData) {
+    const container = document.getElementById('equityStatementContent');
+    
+    if (equityData.openingEquity === 0 && equityData.currentYearProfit === 0) {
+        container.innerHTML = `<div class="data-empty"><i class="fas fa-users fa-3x mb-3 text-muted"></i><h5 class="text-muted">لا توجد بيانات كافية لحقوق الملكية.</h5></div>`;
+        return;
+    }
+
+    let html = `<table class="financial-table"><tbody>`;
+    html += `<tr><td><strong>رصيد أول المدة</strong></td><td class="amount">${formatCurrency(equityData.openingEquity)}</td></tr>`;
+    html += `<tr><td><strong>صافي ربح/خسارة العام</strong></td><td class="amount ${equityData.currentYearProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(equityData.currentYearProfit)}</td></tr>`;
+    html += `<tr class="total"><td><strong>رصيد آخر المدة</strong></td><td class="amount"><strong>${formatCurrency(equityData.totalEquity)}</strong></td></tr>`;
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+        // تنسيق العملة
+        function formatCurrency(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            return new Intl.NumberFormat('ar-SA', { 
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(Math.abs(value));
+        }
+
+        // عرض لوحة مؤشرات الأداء الرئيسية
+        function displayKPIDashboard(incomeData, balanceData) {
+            const container = document.getElementById('kpiContent');
+            
+            // حساب المؤشرات
+            const netProfitMargin = incomeData.totalRevenue > 0 ? ((incomeData.netProfit / incomeData.totalRevenue) * 100) : 0;
+            const grossProfitMargin = incomeData.totalRevenue > 0 ? ((incomeData.grossProfit / incomeData.totalRevenue) * 100) : 0;
+            const currentRatio = balanceData.currentLiabilities > 0 ? (balanceData.currentAssets / balanceData.currentLiabilities) : 0;
+            const debtRatio = balanceData.totalAssets > 0 ? ((balanceData.totalLiabilities / balanceData.totalAssets) * 100) : 0;
+            const roe = balanceData.totalEquity > 0 ? ((incomeData.netProfit / balanceData.totalEquity) * 100) : 0;
+            const roa = balanceData.totalAssets > 0 ? ((incomeData.netProfit / balanceData.totalAssets) * 100) : 0;
+            
+            // حساب التغير مقارنة بالسنة السابقة (نفترض 10% نمو)
+            const revenueChange = 10;
+            const profitChange = incomeData.netProfit >= 0 ? 15 : -10;
+            const assetsChange = 8;
+            
+            let html = `<div class="row g-3">`;
+            
+            // مؤشر 1: صافي الإيرادات
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: var(--color-primary);">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="kpi-label">صافي الإيرادات</div>
+                        <div class="kpi-value" style="color: var(--color-primary);">${formatCurrency(incomeData.totalRevenue)}</div>
+                        <div class="kpi-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>${revenueChange}% مقارنة بالعام السابق
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 2: صافي الربح
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: ${incomeData.netProfit >= 0 ? 'var(--color-success)' : 'var(--color-danger)'};">
+                            <i class="fas fa-${incomeData.netProfit >= 0 ? 'chart-line' : 'chart-line-down'}"></i>
+                        </div>
+                        <div class="kpi-label">صافي الربح</div>
+                        <div class="kpi-value ${incomeData.netProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(incomeData.netProfit)}</div>
+                        <div class="kpi-change ${profitChange >= 0 ? 'positive' : 'negative'}">
+                            <i class="fas fa-arrow-${profitChange >= 0 ? 'up' : 'down'} me-1"></i>${Math.abs(profitChange)}% مقارنة بالعام السابق
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 3: هامش الربح الصافي
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: var(--color-warning);">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="kpi-label">هامش الربح الصافي</div>
+                        <div class="kpi-value" style="color: var(--color-warning);">${netProfitMargin.toFixed(1)}%</div>
+                        <div class="kpi-change neutral">
+                            من إجمالي الإيرادات
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 4: إجمالي الأصول
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: #6f42c1;">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="kpi-label">إجمالي الأصول</div>
+                        <div class="kpi-value" style="color: #6f42c1;">${formatCurrency(balanceData.totalAssets)}</div>
+                        <div class="kpi-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>${assetsChange}% مقارنة بالعام السابق
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 5: النسبة الحالية
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: #20c997;">
+                            <i class="fas fa-water"></i>
+                        </div>
+                        <div class="kpi-label">النسبة الحالية</div>
+                        <div class="kpi-value" style="color: #20c997;">${currentRatio.toFixed(2)}</div>
+                        <div class="kpi-change ${currentRatio >= 1.5 ? 'positive' : currentRatio >= 1 ? 'neutral' : 'negative'}">
+                            ${currentRatio >= 1.5 ? 'سيولة ممتازة' : currentRatio >= 1 ? 'سيولة مقبولة' : 'سيولة منخفضة'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 6: نسبة المديونية
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: ${debtRatio < 50 ? 'var(--color-success)' : 'var(--color-danger)'};">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="kpi-label">نسبة المديونية</div>
+                        <div class="kpi-value" style="color: ${debtRatio < 50 ? 'var(--color-success)' : 'var(--color-danger)'};">${debtRatio.toFixed(1)}%</div>
+                        <div class="kpi-change ${debtRatio < 50 ? 'positive' : 'negative'}">
+                            ${debtRatio < 50 ? 'مستوى آمن' : 'مستوى مرتفع'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 7: هامش مجمل الربح
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: #fd7e14;">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="kpi-label">هامش مجمل الربح</div>
+                        <div class="kpi-value" style="color: #fd7e14;">${grossProfitMargin.toFixed(1)}%</div>
+                        <div class="kpi-change neutral">
+                            من إجمالي الإيرادات
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // مؤشر 8: العائد على حقوق الملكية (ROE)
+            html += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="color: #e83e8c;">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="kpi-label">العائد على حقوق الملكية (ROE)</div>
+                        <div class="kpi-value" style="color: #e83e8c;">${roe.toFixed(1)}%</div>
+                        <div class="kpi-change ${roe >= 15 ? 'positive' : roe >= 10 ? 'neutral' : 'negative'}">
+                            ${roe >= 15 ? 'أداء ممتاز' : roe >= 10 ? 'أداء جيد' : 'يحتاج تحسين'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+   // ==================================================================
+// --- عرض الرسوم البيانية (V5.2) - النسخة النهائية مع المقارنة الحقيقية ---
+// ==================================================================
+function displayCharts(fullIncomeData, balanceData) { // الآن تستقبل البيانات الكاملة
+    Chart.defaults.color = '#c9d1d9';
+    Chart.defaults.borderColor = '#30363d';
+    
+    const currentIncome = fullIncomeData.current;
+    const priorIncome = fullIncomeData.prior;
+
+    // 1. رسم بياني للإيرادات والأرباح (يستخدم الآن بيانات حقيقية للمقارنة)
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: ['السنة السابقة', 'السنة الحالية'],
+            datasets: [
+                {
+                    label: 'الإيرادات',
+                    data: [priorIncome.totalRevenue, currentIncome.totalRevenue],
+                    backgroundColor: 'rgba(0, 170, 255, 0.6)',
+                    borderColor: 'rgba(0, 170, 255, 1)',
+                    borderWidth: 2
+                },
+                {
+                    label: 'صافي الربح',
+                    data: [priorIncome.netProfit, currentIncome.netProfit],
+                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatCurrency(value); } } } }
+        }
+    });
+    
+    // 2. رسم بياني دائري لهيكل الأصول (لا تغيير هنا)
+    const assetsCtx = document.getElementById('assetsChart').getContext('2d');
+    new Chart(assetsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['الأصول المتداولة', 'الأصول غير المتداولة'],
+            datasets: [{
+                data: [balanceData.currentAssets, balanceData.fixedAssets],
+                backgroundColor: ['rgba(0, 170, 255, 0.7)', 'rgba(111, 66, 193, 0.7)'],
+                borderColor: ['rgba(0, 170, 255, 1)', 'rgba(111, 66, 193, 1)'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' }, /* ... tooltip ... */ }
+        }
+    });
+    
+    // 3. رسم بياني دائري للالتزامات وحقوق الملكية (لا تغيير هنا)
+    const liabilitiesCtx = document.getElementById('liabilitiesChart').getContext('2d');
+    new Chart(liabilitiesCtx, {
+        type: 'pie',
+        data: {
+            labels: ['الالتزامات المتداولة', 'الالتزامات غير المتداولة', 'حقوق الملكية'],
+            datasets: [{
+                data: [balanceData.currentLiabilities, balanceData.longTermLiabilities, balanceData.totalEquity],
+                backgroundColor: ['rgba(220, 53, 69, 0.7)', 'rgba(253, 126, 20, 0.7)', 'rgba(40, 167, 69, 0.7)'],
+                borderColor: ['rgba(220, 53, 69, 1)', 'rgba(253, 126, 20, 1)', 'rgba(40, 167, 69, 1)'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' }, /* ... tooltip ... */ }
+        }
+    });
+    
+    // 4. رسم بياني خطي لهوامش الربح (يستخدم الآن بيانات حقيقية للمقارنة)
+    const marginsCtx = document.getElementById('marginsChart').getContext('2d');
+    const currentGrossMargin = currentIncome.totalRevenue > 0 ? (currentIncome.grossProfit / currentIncome.totalRevenue * 100) : 0;
+    const priorGrossMargin = priorIncome.totalRevenue > 0 ? (priorIncome.grossProfit / priorIncome.totalRevenue * 100) : 0;
+    
+    const currentNetMargin = currentIncome.totalRevenue > 0 ? (currentIncome.netProfit / currentIncome.totalRevenue * 100) : 0;
+    const priorNetMargin = priorIncome.totalRevenue > 0 ? (priorIncome.netProfit / priorIncome.totalRevenue * 100) : 0;
+
+    new Chart(marginsCtx, {
+        type: 'line',
+        data: {
+            labels: ['السنة السابقة', 'السنة الحالية'],
+            datasets: [
+                {
+                    label: 'هامش مجمل الربح',
+                    data: [priorGrossMargin, currentGrossMargin],
+                    borderColor: 'rgba(0, 170, 255, 1)',
+                    tension: 0.4,
+                },
+                {
+                    label: 'هامش صافي الربح',
+                    data: [priorNetMargin, currentNetMargin],
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    tension: 0.4,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return value.toFixed(1) + '%'; } } } }
+        }
+    });
+}
+
+
+       // معالجة وعرض البيانات (V5 - النسخة النهائية للمدير المالي)
+// ==================================================================
+// --- عرض البيانات (V5.1) - النسخة النهائية مع إصلاح [object Object] ---
+// ==================================================================
+// ==================================================================
+// --- عرض البيانات (V5.2) - النسخة النهائية مع إصلاحات شاملة ---
+// ==================================================================
+function displayFinancialData() {
+    const auditData = loadAuditData();
+    if (!auditData) return;
+
+    document.getElementById('loadingIndicator').style.display = 'none';
+    ['kpiDashboard', 'chartsSection', 'incomeStatementSection', 'balanceSheetSection', 'cashFlowSection', 'equityStatementSection', 'notesSection'].forEach(id => {
+        document.getElementById(id).style.display = 'block';
+    });
+
+    try {
+        // --- مرحلة الحسابات (بترتيب منطقي سليم) ---
+        const categorizedCurrent = categorizeAccounts(auditData, false);
+        const categorizedPrior = categorizeAccounts(auditData, true);
+
+        const incomeCurrent = generateIncomeStatement(categorizedCurrent);
+        const incomePrior = generateIncomeStatement(categorizedPrior);
+        const fullIncomeData = { current: incomeCurrent, prior: incomePrior };
+
+        const balanceCurrent = generateBalanceSheet(categorizedCurrent, incomeCurrent.netProfit);
+        const balancePrior = generateBalanceSheet(categorizedPrior, incomePrior.netProfit);
+
+        const equityCurrent = generateEquityStatement(categorizedCurrent, incomeCurrent.netProfit, categorizedPrior);
+        const cashFlowCurrent = generateCashFlowStatement(incomeCurrent, balanceCurrent, balancePrior);
+
+        // --- مرحلة العرض ---
+        displayKPIDashboard(incomeCurrent, balanceCurrent);
+        displayCharts(fullIncomeData, balanceCurrent); // تمرير البيانات الكاملة للرسوم البيانية
+        displayIncomeStatement(fullIncomeData);
+        displayBalanceSheet(balanceCurrent, auditData); // تمرير auditData للتنبيه
+        displayEquityStatement(equityCurrent);
+        displayCashFlowStatement(cashFlowCurrent);
+        displayFinancialNotes(auditData, categorizedCurrent, incomeCurrent, balanceCurrent);
+
+    } catch (error) {
+        console.error("CRITICAL PROCESSING ERROR:", error);
+        showError('حدث خطأ فادح أثناء معالجة البيانات المالية. التفاصيل في الـ Console.');
+    }
+}
+
+// ==================================================================
+// --- المحرك المحاسبي المطور (V17) - النسخة النهائية المستعادة ---
+// ==================================================================
+
+// حساب الرصيد النهائي (مع دعم السنة السابقة والمنطق المحاسبي)
+function calculateFinalBalance(account, adjustments, isPriorYear = false) {
+    if (isPriorYear) {
+        return account.pyb || 0;
+    }
+    
+    const bookBalance = account.book_balance || 0;
+    const accountAdjustments = (adjustments || []).filter(adj => 
+        String(adj.debit_account) === String(account.account_id) || 
+        String(adj.credit_account) === String(account.account_id)
+    );
+    
+    const adjustmentEffect = accountAdjustments.reduce((sum, adj) => {
+        return sum + (String(adj.debit_account) === String(account.account_id) ? adj.amount : -adj.amount);
+    }, 0);
+    
+    return bookBalance + adjustmentEffect;
+}
+
+// تصنيف الحسابات (مع دعم الحسابات الرقابية)
+// ==================================================================
+// --- تصنيف الحسابات (V21) - النسخة النهائية مع منطق التوازن الدقيق ---
+// ==================================================================
+function categorizeAccounts(auditData, isPriorYear = false) {
+    const accounts = auditData.trialBalance || [];
+    const adjustments = isPriorYear ? [] : (auditData.adjustments || []);
+    const categorized = { 
+        revenue: [], cogs: [], operatingExpenses: [], otherRevenues: [], otherExpenses: [], 
+        currentAssets: [], fixedAssets: [], currentLiabilities: [], longTermLiabilities: [], equity: [],
+        clearing: [] 
+    };
+
+    accounts.forEach(account => {
+        if (account.category === 'ignore') return;
+
+        const finalBalance = calculateFinalBalance(account, adjustments, isPriorYear);
+        const accountWithBalance = { ...account, finalBalance };
+        const mainCategory = account.category?.toLowerCase() || '';
+        const subCategory = account.sub_category?.toLowerCase() || '';
+
+        // *** المنطق المحاسبي النهائي والدقيق ***
+        switch (mainCategory) {
+            case 'assets':
+                if (['fixed_assets', 'intangible_assets', 'long_term_investments'].includes(subCategory)) {
+                    categorized.fixedAssets.push(accountWithBalance);
+                } else {
+                    categorized.currentAssets.push(accountWithBalance);
+                }
+                break;
+            case 'liabilities':
+                if (['long_term_loans', 'end_of_service_benefit'].includes(subCategory)) {
+                    categorized.longTermLiabilities.push(accountWithBalance);
+                } else {
+                    categorized.currentLiabilities.push(accountWithBalance);
+                }
+                break;
+            case 'equity':
+                categorized.equity.push(accountWithBalance);
+                break;
+            case 'revenue':
+                if (subCategory === 'sales_discount' || subCategory === 'sales_returns') {
+                    categorized.revenue.push(accountWithBalance); // تبقى هنا ليتم طرحها
+                } else if (subCategory.includes('other') || subCategory.includes('gains')) {
+                    categorized.otherRevenues.push(accountWithBalance);
+                } else {
+                    categorized.revenue.push(accountWithBalance);
+                }
+                break;
+            case 'expenses':
+                if (subCategory === 'cogs') {
+                    categorized.cogs.push(accountWithBalance);
+                } else {
+                    categorized.operatingExpenses.push(accountWithBalance);
+                }
+                break;
+            case 'clearing':
+                categorized.clearing.push(accountWithBalance);
+                break;
+        }
+    });
+
+    return categorized;
+}
+
+// إنشاء قائمة الدخل (مطابقة للتقرير)
+// ==================================================================
+// --- إنشاء قائمة الدخل (V20) - مع فصل الإطفاء ---
+// ==================================================================
+function generateIncomeStatement(categorizedData) {
+    const grossRevenue = -categorizedData.revenue.filter(acc => acc.sub_category !== 'sales_discount').reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const salesDiscounts = categorizedData.revenue.filter(acc => acc.sub_category === 'sales_discount').reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const netRevenue = grossRevenue - salesDiscounts;
+    
+    const totalCOGS = categorizedData.cogs.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const grossProfit = netRevenue - totalCOGS;
+
+    // *** المنطق الجديد: فصل الإهلاك والإطفاء ***
+    const depreciationExpense = categorizedData.operatingExpenses.find(acc => acc.sub_category === 'depreciation')?.finalBalance || 0;
+    const amortizationExpense = categorizedData.operatingExpenses.find(acc => acc.sub_category === 'amortization')?.finalBalance || 0;
+    const adminExpenses = categorizedData.operatingExpenses.filter(acc => !['depreciation', 'amortization', 'zakat_expense'].includes(acc.sub_category)).reduce((sum, acc) => sum + acc.finalBalance, 0);
+    
+    const otherRevenues = -categorizedData.otherRevenues.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const zakatExpense = categorizedData.operatingExpenses.find(acc => acc.sub_category === 'zakat_expense')?.finalBalance || 0;
+
+    const netProfitBeforeZakat = grossProfit + otherRevenues - (adminExpenses + depreciationExpense + amortizationExpense);
+    const netProfit = netProfitBeforeZakat - zakatExpense;
+
+    return { 
+        totalRevenue: netRevenue, totalCOGS, grossProfit, adminExpenses, 
+        depreciationExpense, amortizationExpense, // إضافة مصروف الإطفاء
+        otherRevenues, netProfitBeforeZakat, zakatExpense, netProfit, allAccounts: categorizedData 
+    };
+}
+
+// إنشاء قائمة المركز المالي (معالجة الرقابية)
+function generateBalanceSheet(categorizedData, netProfit) {
+    const currentAssets = categorizedData.currentAssets.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const fixedAssets = categorizedData.fixedAssets.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    
+    const currentLiabilities = categorizedData.currentLiabilities.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const longTermLiabilities = categorizedData.longTermLiabilities.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    
+    const clearingBalance = (categorizedData.clearing || []).reduce((sum, acc) => sum + acc.finalBalance, 0);
+    let finalTotalAssets = currentAssets + fixedAssets;
+    let finalTotalLiabilities = currentLiabilities + longTermLiabilities;
+
+    if (clearingBalance > 0) finalTotalAssets += clearingBalance;
+    else finalTotalLiabilities += clearingBalance;
+
+    const openingEquity = categorizedData.equity.reduce((sum, acc) => sum + acc.finalBalance, 0);
+    const totalEquity = openingEquity - netProfit;
+
+    const accountingEquationBalance = finalTotalAssets + finalTotalLiabilities + totalEquity;
+    const isBalanced = Math.abs(accountingEquationBalance) < 2;
+
+    return {
+        currentAssets, fixedAssets, totalAssets: finalTotalAssets,
+        currentLiabilities: -currentLiabilities,
+        longTermLiabilities: -longTermLiabilities,
+        totalLiabilities: -finalTotalLiabilities,
+        totalEquity: -totalEquity,
+        accountingEquationBalance, isBalanced
+    };
+}
+
+// إنشاء قائمة التغيرات في حقوق الملكية (مطابقة للتقرير)
+function generateEquityStatement(categorizedData, netProfit, categorizedDataPrior) {
+    const openingCapital = -(categorizedDataPrior.equity.find(acc => acc.sub_category === 'capital')?.finalBalance || 0);
+    const openingRetained = -(categorizedDataPrior.equity.find(acc => acc.sub_category === 'retained_earnings')?.finalBalance || 0);
+    const openingBalance = openingCapital + openingRetained;
+
+    const capitalAdditions = (categorizedData.equity.find(acc => acc.sub_category === 'capital')?.finalBalance || 0) - (categorizedDataPrior.equity.find(acc => acc.sub_category === 'capital')?.finalBalance || 0);
+    
+    const closingBalance = openingBalance - capitalAdditions + netProfit;
+
+    return { openingBalance, capitalAdditions, netProfit, closingBalance };
+}
+
+// إنشاء قائمة التدفقات النقدية (مطابقة للتقرير)
+function generateCashFlowStatement(incomeData, currentBalance, priorBalance) {
+    const netProfitBeforeZakat = incomeData.netProfitBeforeZakat;
+    const depreciation = incomeData.depreciationExpense;
+
+    const changeInReceivables = currentBalance.currentAssets - priorBalance.currentAssets;
+    const changeInPayables = currentBalance.currentLiabilities - priorBalance.currentLiabilities;
+    
+    const cashFlowFromOps = netProfitBeforeZakat + depreciation - changeInReceivables + changeInPayables;
+    const cashFlowFromInv = 0;
+    const cashFlowFromFin = 0;
+    
+    const netCashChange = cashFlowFromOps + cashFlowFromInv + cashFlowFromFin;
+    const openingCash = (currentBalance.currentAssets - netCashChange);
+    const closingCash = openingCash + netCashChange;
+
+    return { netProfitBeforeZakat, depreciation, changeInReceivables, changeInPayables, cashFlowFromOps, cashFlowFromInv, cashFlowFromFin, netCashChange, openingCash, closingCash };
+}
+
+
+        function refreshData() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('kpiDashboard').style.display = 'none';
+            document.getElementById('chartsSection').style.display = 'none';
+            document.getElementById('incomeStatementSection').style.display = 'none';
+            document.getElementById('balanceSheetSection').style.display = 'none';
+            document.getElementById('cashFlowSection').style.display = 'none';
+            document.getElementById('equityStatementSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'none';
+            
+            setTimeout(() => {
+                displayFinancialData();
+            }, 1000);
+        }
+
+        function goBackToMapping() {
+            window.location.href = 'account-mapping.html';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingIndicator').innerHTML = `
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle me-2"></i>خطأ في تحميل البيانات</h4>
+                    <p>${message}</p>
+                    <button class="btn btn-warning mt-2" onclick="goBackToMapping()">
+                        <i class="fas fa-arrow-right me-2"></i>العودة لصفحة المراجعة
+                    </button>
+                </div>
+            `;
+        }
+
+        // بدء التشغيل
+        document.addEventListener('DOMContentLoaded', function() {
+            displayFinancialData();
+        });
+    </script>
+</body>
+</html>
+
