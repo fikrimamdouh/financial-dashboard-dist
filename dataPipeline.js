@@ -58,10 +58,13 @@
         if (page === 'account-mapping.html') {
             setTimeout(() => injectScript('polaris-equity-ratio-fix.js?v=20260617a', 'data-polaris-equity-ratio-fix'), 800);
         }
+        if (page === 'consolidation-cockpit.html') {
+            setTimeout(() => injectScript('polaris-consolidation-qa-patch.js?v=20260617a', 'data-polaris-consolidation-qa-patch'), 250);
+        }
     };
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.7-qa-equity-ratio-fix',
+        VERSION: '1.0.8-qa-consolidation-fix',
         STEPS,
         STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
