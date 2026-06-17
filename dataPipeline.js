@@ -43,13 +43,14 @@
         if (page === 'consolidation-cockpit.html') setTimeout(() => injectScript('polaris-consolidation-qa-patch.js?v=20260617a', 'data-polaris-consolidation-qa-patch'), 250);
         if (page === 'reporting-pantheon.html') {
             setTimeout(() => injectScript('polaris-reporting-qa-patch.js?v=20260617a', 'data-polaris-reporting-qa-patch'), 650);
-            setTimeout(() => injectScript('polaris-reporting-cfo-override.js?v=20260617a', 'data-polaris-reporting-cfo-override'), 1300);
-            setTimeout(() => injectScript('polaris-reporting-selftest.js?v=20260617a', 'data-polaris-reporting-selftest'), 2600);
+            setTimeout(() => injectScript('polaris-reporting-cfo-override.js?v=20260617b', 'data-polaris-reporting-cfo-override'), 1300);
+            setTimeout(() => injectScript('polaris-reporting-cfo-remaining.js?v=20260617a', 'data-polaris-reporting-cfo-remaining'), 2100);
+            setTimeout(() => injectScript('polaris-reporting-selftest.js?v=20260617a', 'data-polaris-reporting-selftest'), 3200);
         }
     };
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.11-cfo-reporting-override', STEPS, STEP_ALIASES,
+        VERSION: '1.0.12-cfo-all-reporting', STEPS, STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
         save(step, data) { const normalizedStep = normalizeStep(step); if (!STEPS.includes(normalizedStep)) return false; const payload = { step: normalizedStep, data, timestamp: new Date().toISOString(), version: this.VERSION, checksum: this._hash(data) }; this._saveEncrypted(`polaris_step_${normalizedStep}`, payload); this._updateProgress(normalizedStep); return true; },
         load(step) { const normalizedStep = normalizeStep(step); if (!STEPS.includes(normalizedStep)) return null; const payload = this._loadDecrypted(`polaris_step_${normalizedStep}`); if (!payload || payload.checksum !== this._hash(payload.data)) return null; return payload.data; },
