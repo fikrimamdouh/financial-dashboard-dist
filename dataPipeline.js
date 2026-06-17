@@ -42,19 +42,26 @@
         return 0;
     };
 
-    const loadQaPatch = () => {
-        const page = (location.pathname || '').split('/').pop();
-        if (!['data-ingestion.html', 'account-mapping.html', 'consolidation-cockpit.html'].includes(page)) return;
-        if (document.querySelector('[data-polaris-accounting-qa-patch]')) return;
+    const injectScript = (src, attr) => {
+        if (document.querySelector(`[${attr}]`)) return;
         const s = document.createElement('script');
-        s.src = 'polaris-accounting-qa-patch-v2.js?v=20260617d';
+        s.src = src;
         s.defer = true;
-        s.setAttribute('data-polaris-accounting-qa-patch', 'true');
+        s.setAttribute(attr, 'true');
         document.head.appendChild(s);
     };
 
+    const loadQaPatch = () => {
+        const page = (location.pathname || '').split('/').pop();
+        if (!['data-ingestion.html', 'account-mapping.html', 'consolidation-cockpit.html'].includes(page)) return;
+        injectScript('polaris-accounting-qa-patch-v2.js?v=20260617d', 'data-polaris-accounting-qa-patch');
+        if (page === 'account-mapping.html') {
+            setTimeout(() => injectScript('polaris-equity-ratio-fix.js?v=20260617a', 'data-polaris-equity-ratio-fix'), 800);
+        }
+    };
+
     window.PolarisDataFlow = {
-        VERSION: '1.0.6-qa-accounting-patch-v3',
+        VERSION: '1.0.7-qa-equity-ratio-fix',
         STEPS,
         STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
