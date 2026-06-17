@@ -2,398 +2,294 @@
   'use strict';
 
   const TOLERANCE = 0.10;
-  const COST_CODES = ['303011'];
-  const CONTRA_REVENUE_CODES = ['410099'];
   const ACCOUNT_OVERRIDES = {
-    '10203071': {
-      category: 'assets',
-      sub_category: '121002',
-      note: 'مصاريف تأسيس النشاط هنا تخص تجهيزات مباني/أصول ثابتة ولا تدخل بالكامل في قائمة الدخل.'
-    },
-    '201040001': {
-      category: 'liabilities',
-      sub_category: '212099',
-      note: 'مصروف أجور ورواتب مستحقة التزام مستحق وليس مصروف تشغيل.'
-    },
-    '101080004': {
-      category: 'assets',
-      sub_category: '116004',
-      note: 'مخزن قطع غيار أصل/مخزون ولا يدخل في قائمة الدخل إلا عند الصرف أو الاستهلاك.'
-    }
+    '10203071': { category: 'assets', sub_category: '121002', note: 'مصاريف تأسيس النشاط تخص تجهيزات/مباني ضمن الأصول الثابتة ولا تدخل بالكامل في قائمة الدخل.' },
+    '101080004': { category: 'assets', sub_category: '116004', note: 'مخزن قطع غيار أصل/مخزون ولا يدخل في قائمة الدخل إلا عند الصرف أو الاستهلاك.' },
+    '201040001': { category: 'liabilities', sub_category: '212099', note: 'أجور ورواتب مستحقة التزام مستحق وليس مصروف تشغيل.' },
+    '303011': { category: 'expenses', sub_category: '510002', note: 'تكلفة المبيعات ضمن تكلفة الإيرادات.' },
+    '401010001': { category: 'revenue', sub_category: '410001', note: 'مبيعات الخرسانة الجاهزة ضمن الإيرادات.' },
+    '401010003': { category: 'revenue', sub_category: '410099', note: 'خصم مسموح به: إيراد عكسي يخصم من المبيعات.' },
+    '401020001': { category: 'revenue', sub_category: '410001', note: 'مبيعات البلوك ضمن الإيرادات.' },
+    '401020003': { category: 'revenue', sub_category: '410099', note: 'خصم مسموح به: إيراد عكسي يخصم من المبيعات.' }
   };
 
   function num(v) {
     if (v === null || v === undefined || v === '') return 0;
     if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
-    const x = String(v).replace(/[\s,]/g, '').replace(/[()]/g, function(m){ return m === '(' ? '-' : ''; }).replace(/[^0-9.\-]/g, '');
-    const p = parseFloat(x);
-    return Number.isFinite(p) ? p : 0;
+    const parsed = parseFloat(String(v).replace(/[\s,]/g, '').replace(/[()]/g, m => m === '(' ? '-' : '').replace(/[^0-9.\-]/g, ''));
+    return Number.isFinite(parsed) ? parsed : 0;
   }
+  const r2 = v => Math.round((Number(v) || 0) * 100) / 100;
+  const pct = v => Number.isFinite(v) ? `${v.toFixed(1)}%` : 'غير قابل للقياس';
+  const times = v => Number.isFinite(v) ? `${v.toFixed(1)}x` : 'غير قابل للقياس';
+  const days = v => Number.isFinite(v) ? `${Math.round(v)}` : 'غير قابل للقياس';
 
-  function r2(v) { return Math.round((Number(v) || 0) * 100) / 100; }
-  function pct(v) { return Number.isFinite(v) ? v.toFixed(1) + '%' : 'غير قابل للقياس'; }
-  function times(v) { return Number.isFinite(v) ? v.toFixed(1) + 'x' : 'غير قابل للقياس'; }
-  function days(v) { return Number.isFinite(v) ? Math.round(v).toString() : 'غير قابل للقياس'; }
+  function code(a) { return String(a?.account_id || '').trim(); }
+  function sub(a) { return String(a?.sub_category || '').trim(); }
+  function cat(a) { return String(a?.category || '').trim().toLowerCase(); }
+  function name(a) { return String(a?.name || '').trim().toLowerCase(); }
+  function hasName(a, re) { return re.test(name(a)); }
 
   function bal(a) {
     if (!a) return 0;
     if (a.book_balance !== undefined && a.book_balance !== null && a.book_balance !== '') return num(a.book_balance);
+    if (a.finalBalance !== undefined && a.finalBalance !== null && a.finalBalance !== '') return num(a.finalBalance);
     return num(a.ob_debit) - num(a.ob_credit) + num(a.move_debit) - num(a.move_credit);
   }
-
   function openingBal(a) { return num(a?.ob_debit) - num(a?.ob_credit); }
-
   function adj(a) {
     if (!a || !window.auditFile || !Array.isArray(auditFile.adjustments)) return 0;
-    const id = String(a.account_id);
-    return auditFile.adjustments.reduce(function(sum, j) {
+    const id = code(a);
+    return auditFile.adjustments.reduce((s, j) => {
       const amount = num(j.amount);
-      if (String(j.debit_account) === id) return sum + amount;
-      if (String(j.credit_account) === id) return sum - amount;
-      return sum;
+      if (String(j.debit_account) === id) return s + amount;
+      if (String(j.credit_account) === id) return s - amount;
+      return s;
     }, 0);
   }
-
   function finalBal(a) { return bal(a) + adj(a); }
 
-  function isContraRevenue(a) {
-    const sub = String((a && a.sub_category) || '');
-    const name = String((a && a.name) || '').toLowerCase();
-    return CONTRA_REVENUE_CODES.indexOf(sub) >= 0 || name.indexOf('خصم مسموح') >= 0 || name.indexOf('مرتجع') >= 0 || name.indexOf('مردود') >= 0;
+  function isRevenue(a) { return cat(a) === 'revenue' || cat(a).includes('إيراد') || code(a).startsWith('4'); }
+  function isContraRevenue(a) { return sub(a) === '410099' || hasName(a, /خصم مسموح|مرتجع|مردود/); }
+  function isCostOfSales(a) { return code(a) === '303011' || cat(a) === 'cost_of_revenue' || sub(a).startsWith('51') || sub(a).startsWith('510') || hasName(a, /تكلفة المبيعات|تكلفة البضاعة/); }
+  function isExpense(a) {
+    const id = code(a);
+    if (ACCOUNT_OVERRIDES[id] && ACCOUNT_OVERRIDES[id].category !== 'expenses') return false;
+    return cat(a) === 'expenses' || cat(a).includes('مصروف') || code(a).startsWith('6') || code(a).startsWith('7') || sub(a).startsWith('6') || sub(a).startsWith('7') || hasName(a, /مصروف|مصاريف/);
+  }
+  function isEquity(a) { return cat(a) === 'equity' || cat(a).includes('حقوق') || code(a).startsWith('201080') || code(a).startsWith('201110'); }
+  function isAsset(a) { return cat(a) === 'assets' || cat(a).includes('أصول') || cat(a).includes('اصول') || (code(a).startsWith('1') && !isLiability(a)); }
+  function isLiability(a) { return cat(a) === 'liabilities' || cat(a).includes('التزام') || cat(a).includes('التزامات') || (code(a).startsWith('2') && !isEquity(a)); }
+  function isCurrentAsset(a) { return isAsset(a) && (code(a).startsWith('101') || sub(a).startsWith('11') || hasName(a, /الصندوق|البنك|ذمم العملاء|عملاء|عهدة|سلفة|مخزن|مخزون|مصروف مقدم/)); }
+  function isInventory(a) { return isAsset(a) && (code(a).startsWith('10108') || sub(a).startsWith('116') || hasName(a, /مخزن|مخزون/)); }
+  function isReceivable(a) { return isAsset(a) && (code(a).startsWith('101041') || ['113001','113002','113003','113004','113099'].includes(sub(a)) || hasName(a, /ذمم العملاء|عملاء/)); }
+  function isCurrentLiability(a) { return isLiability(a) && !hasName(a, /قروض|تمويل/) && (code(a).startsWith('201') || sub(a).startsWith('21') || hasName(a, /الموردين|مستحقات|مستحق/)); }
+
+  function inferRule(a) {
+    const id = code(a);
+    if (ACCOUNT_OVERRIDES[id]) return ACCOUNT_OVERRIDES[id];
+    if (isRevenue(a)) return { category: 'revenue', sub_category: isContraRevenue(a) ? '410099' : '410001' };
+    if (isCostOfSales(a)) return { category: 'expenses', sub_category: '510002' };
+    if (isExpense(a)) return { category: 'expenses', sub_category: sub(a) || '620099' };
+    if (isEquity(a)) return { category: 'equity', sub_category: sub(a) || '310099' };
+    if (isLiability(a)) return { category: 'liabilities', sub_category: sub(a) || '210099' };
+    if (isAsset(a)) return { category: 'assets', sub_category: sub(a) || (code(a).startsWith('102') ? '121002' : '110099') };
+    return null;
   }
 
-  function isCostOfSales(a) {
-    const code = String((a && a.account_id) || '');
-    const sub = String((a && a.sub_category) || '');
-    const cat = String((a && a.category) || '');
-    const name = String((a && a.name) || '').toLowerCase();
-    return COST_CODES.indexOf(code) >= 0 || cat === 'cost_of_revenue' || sub.indexOf('5') === 0 || name.indexOf('تكلفة المبيعات') >= 0;
-  }
-
-  function isOperatingExpense(a) {
-    const sub = String((a && a.sub_category) || '');
-    const cat = String((a && a.category) || '');
-    const name = String((a && a.name) || '').toLowerCase();
-    const code = String((a && a.account_id) || '');
-    if (ACCOUNT_OVERRIDES[code] && ACCOUNT_OVERRIDES[code].category !== 'expenses') return false;
-    return cat === 'expenses' || sub.indexOf('6') === 0 || sub.indexOf('7') === 0 || name.indexOf('مصاريف') >= 0 || name.indexOf('مصروف') >= 0;
-  }
-
-  function applyAccountOverrides() {
-    if (!window.auditFile || !Array.isArray(auditFile.trialBalance)) return [];
-    const changed = [];
-    auditFile.trialBalance.forEach(function(a) {
-      const id = String(a.account_id || '');
-      const override = ACCOUNT_OVERRIDES[id];
-      if (!override) return;
-      const before = { category: a.category, sub_category: a.sub_category };
-      a.category = override.category;
-      a.sub_category = override.sub_category;
-      a.review_status = 'reviewed';
-      a.qa_note = override.note;
-      changed.push({ code: id, name: a.name, before, after: { category: a.category, sub_category: a.sub_category }, note: override.note });
+  function applyCFOClassificationRules(force = false) {
+    if (!window.auditFile || !Array.isArray(auditFile.trialBalance)) return 0;
+    let changed = 0;
+    auditFile.trialBalance.forEach(a => {
+      if (!force && a.is_user_locked) return;
+      const rule = inferRule(a);
+      if (!rule) return;
+      if (force || !a.category || !a.sub_category || ACCOUNT_OVERRIDES[code(a)]) {
+        if (a.category !== rule.category || a.sub_category !== rule.sub_category) {
+          a.category = rule.category;
+          a.sub_category = rule.sub_category;
+          a.review_status = ACCOUNT_OVERRIDES[code(a)] ? 'reviewed' : (a.review_status || 'pending');
+          a.qa_note = rule.note || a.qa_note || 'تصنيف CFO تلقائي من رقم/اسم الحساب.';
+          changed++;
+        }
+      }
     });
-    if (changed.length && typeof saveAuditFile === 'function') saveAuditFile();
+    if (changed && typeof saveAuditFile === 'function') saveAuditFile();
     return changed;
   }
 
   function profitCalc() {
-    applyAccountOverrides();
-    const tb = window.auditFile && Array.isArray(auditFile.trialBalance) ? auditFile.trialBalance : [];
-    let revenue = 0;
-    let discounts = 0;
-    let cost = 0;
-    let opex = 0;
-
-    tb.forEach(function(a) {
+    applyCFOClassificationRules(false);
+    const tb = Array.isArray(window.auditFile?.trialBalance) ? auditFile.trialBalance : [];
+    let revenue = 0, discounts = 0, cost = 0, opex = 0;
+    tb.forEach(a => {
       const b = finalBal(a);
-      const cat = String((a && a.category) || '');
-      const code = String((a && a.account_id) || '');
-
-      if (cat === 'revenue' || code.indexOf('4') === 0) {
+      if (isRevenue(a)) {
         if (isContraRevenue(a)) discounts += b > 0 ? b : Math.abs(b);
         else revenue += b < 0 ? Math.abs(b) : -b;
-        return;
-      }
-
-      if (isCostOfSales(a)) {
+      } else if (isCostOfSales(a)) {
         cost += b > 0 ? b : Math.abs(b);
-        return;
-      }
-
-      if (isOperatingExpense(a)) {
+      } else if (isExpense(a)) {
         opex += b > 0 ? b : Math.abs(b);
       }
     });
-
     const netRevenue = revenue - discounts;
     const grossProfit = netRevenue - cost;
     const profitAfter = grossProfit - opex;
-
-    return {
-      grossRevenue: r2(revenue),
-      contraRevenue: r2(discounts),
-      netRevenue: r2(netRevenue),
-      costOfSales: r2(cost),
-      grossProfit: r2(grossProfit),
-      operatingExpenses: r2(opex),
-      expenses: r2(cost + opex),
-      profitBefore: r2(profitAfter),
-      adjustmentsEffect: 0,
-      profitAfter: r2(profitAfter),
-      profitForEquity: r2(-profitAfter),
-      isLoss: profitAfter < 0
-    };
+    return { grossRevenue: r2(revenue), contraRevenue: r2(discounts), netRevenue: r2(netRevenue), costOfSales: r2(cost), grossProfit: r2(grossProfit), operatingExpenses: r2(opex), expenses: r2(cost + opex), profitBefore: r2(profitAfter), adjustmentsEffect: 0, profitAfter: r2(profitAfter), profitForEquity: r2(-profitAfter), isLoss: profitAfter < 0 };
   }
 
-  function balanceCalc() {
-    applyAccountOverrides();
-    const tb = window.auditFile && Array.isArray(auditFile.trialBalance) ? auditFile.trialBalance : [];
-    let d = 0;
-    let c = 0;
-    tb.forEach(function(a) {
-      const b = finalBal(a);
-      if (b > 0) d += b;
-      if (b < 0) c += Math.abs(b);
-    });
-    const diff = r2(d - c);
-    return { totalDebits: r2(d), totalCredits: r2(c), difference: diff, isBalanced: Math.abs(diff) <= TOLERANCE, tolerance: TOLERANCE, error: null };
+  function sumRows(filter, balanceFn = finalBal) {
+    const tb = Array.isArray(window.auditFile?.trialBalance) ? auditFile.trialBalance : [];
+    return tb.filter(filter).reduce((s, a) => s + balanceFn(a), 0);
   }
-
-  function sumRows(filter, balanceFn) {
-    const tb = window.auditFile && Array.isArray(auditFile.trialBalance) ? auditFile.trialBalance : [];
-    return tb.filter(filter).reduce(function(s, a) { return s + balanceFn(a); }, 0);
-  }
-
   function avgBalance(filter) {
-    const closing = sumRows(filter, finalBal);
-    const opening = sumRows(filter, openingBal);
-    return (Math.abs(opening) + Math.abs(closing)) / 2;
+    const tb = Array.isArray(window.auditFile?.trialBalance) ? auditFile.trialBalance : [];
+    const filtered = tb.filter(filter);
+    const closing = filtered.reduce((s, a) => s + Math.abs(finalBal(a)), 0);
+    const opening = filtered.reduce((s, a) => s + Math.abs(openingBal(a)), 0);
+    return (opening + closing) / 2;
   }
 
   function calculateRatiosCore() {
-    applyAccountOverrides();
+    applyCFOClassificationRules(false);
     const p = profitCalc();
-    const tb = window.auditFile && Array.isArray(auditFile.trialBalance) ? auditFile.trialBalance : [];
-
-    const isCurrentAsset = a => String(a.category) === 'assets' && String(a.sub_category || '').startsWith('11');
-    const isInventory = a => String(a.sub_category || '').startsWith('116');
-    const isReceivable = a => ['113001', '113002', '113003', '113004', '113099'].includes(String(a.sub_category || ''));
-    const isCurrentLiability = a => String(a.category) === 'liabilities' && String(a.sub_category || '').startsWith('21');
-    const isLiability = a => String(a.category) === 'liabilities';
-    const isAsset = a => String(a.category) === 'assets';
-    const isEquity = a => String(a.category) === 'equity';
-
-    const currentAssets = Math.abs(sumRows(isCurrentAsset, finalBal));
-    const inventory = Math.abs(sumRows(isInventory, finalBal));
-    const currentLiabilities = Math.abs(sumRows(isCurrentLiability, finalBal));
-    const totalAssets = Math.abs(sumRows(isAsset, finalBal));
-    const totalLiabilities = Math.abs(sumRows(isLiability, finalBal));
-    const equityRaw = sumRows(isEquity, finalBal) + p.profitAfter;
-    const equityAbs = Math.abs(equityRaw);
-
-    const avgAssets = avgBalance(isAsset);
+    const currentAssets = Math.max(0, sumRows(isCurrentAsset));
+    const inventory = Math.abs(sumRows(isInventory));
+    const currentLiabilities = Math.abs(sumRows(isCurrentLiability));
+    const totalAssets = Math.abs(sumRows(isAsset));
+    const totalLiabilities = Math.abs(sumRows(isLiability));
+    const equityRaw = -sumRows(isEquity) + p.profitAfter;
+    const avgAssets = avgBalance(isAsset) || totalAssets;
     const avgReceivables = avgBalance(isReceivable);
-    const avgInventory = avgBalance(isInventory);
-
+    const avgInventory = avgBalance(isInventory) || inventory;
     const safeDiv = (a, b) => Math.abs(b) > 0.000001 ? a / b : NaN;
+
     const grossMargin = safeDiv(p.grossProfit, p.netRevenue) * 100;
     const netMargin = safeDiv(p.profitAfter, p.netRevenue) * 100;
-    const roa = safeDiv(p.profitAfter, avgAssets || totalAssets) * 100;
+    const roa = safeDiv(p.profitAfter, avgAssets) * 100;
     const roe = equityRaw > 0 ? safeDiv(p.profitAfter, equityRaw) * 100 : NaN;
     const currentRatio = safeDiv(currentAssets, currentLiabilities);
     const quickRatio = safeDiv(currentAssets - inventory, currentLiabilities);
     const debtToEquity = equityRaw > 0 ? safeDiv(totalLiabilities, equityRaw) : NaN;
-    const assetTurnover = safeDiv(p.netRevenue, avgAssets || totalAssets);
+    const assetTurnover = safeDiv(p.netRevenue, avgAssets);
     const collectionPeriod = safeDiv(avgReceivables, p.netRevenue / 365);
-    const inventoryTurnover = safeDiv(p.costOfSales, avgInventory || inventory);
+    const inventoryTurnover = safeDiv(p.costOfSales, avgInventory);
     const debtRatio = safeDiv(totalLiabilities, totalAssets) * 100;
     const workingCapital = currentAssets - currentLiabilities;
-    const interestCoverage = NaN;
-    const ebitdaMargin = NaN;
 
     return {
-      grossMargin: { value: grossMargin, display: pct(grossMargin), unit: '%', priorValue: null, indicator: grossMargin >= 20 ? 'good' : grossMargin >= 10 ? 'warning' : 'danger', explanation: 'مجمل الربح ÷ صافي الإيرادات' },
-      netMargin: { value: netMargin, display: pct(netMargin), unit: '%', priorValue: null, indicator: netMargin >= 10 ? 'good' : netMargin >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ صافي الإيرادات' },
-      roa: { value: roa, display: pct(roa), unit: '%', priorValue: null, indicator: roa >= 5 ? 'good' : roa >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ متوسط الأصول' },
-      roe: { value: roe, display: Number.isFinite(roe) ? pct(roe) : 'غير قابل للقياس: حقوق الملكية سالبة', unit: '%', priorValue: null, indicator: Number.isFinite(roe) && roe >= 15 ? 'good' : Number.isFinite(roe) && roe >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ حقوق الملكية. لا يعرض كنسبة إيجابية إذا كانت حقوق الملكية سالبة.' },
-      currentRatio: { value: currentRatio, display: times(currentRatio), unit: 'x', priorValue: null, indicator: currentRatio >= 1.5 ? 'good' : currentRatio >= 1 ? 'warning' : 'danger', explanation: 'الأصول المتداولة ÷ الالتزامات المتداولة' },
-      quickRatio: { value: quickRatio, display: times(quickRatio), unit: 'x', priorValue: null, indicator: quickRatio >= 1 ? 'good' : quickRatio >= 0.5 ? 'warning' : 'danger', explanation: '(الأصول المتداولة - المخزون) ÷ الالتزامات المتداولة' },
-      debtToEquity: { value: debtToEquity, display: Number.isFinite(debtToEquity) ? times(debtToEquity) : 'غير قابل للقياس: حقوق الملكية سالبة', unit: 'x', priorValue: null, indicator: Number.isFinite(debtToEquity) && debtToEquity <= 1 ? 'good' : Number.isFinite(debtToEquity) && debtToEquity <= 1.5 ? 'warning' : 'danger', explanation: 'إجمالي الالتزامات ÷ حقوق الملكية. لا تعرض إذا كانت حقوق الملكية سالبة.' },
-      assetTurnover: { value: assetTurnover, display: times(assetTurnover), unit: 'x', priorValue: null, indicator: assetTurnover >= 1 ? 'good' : assetTurnover >= 0.5 ? 'warning' : 'danger', explanation: 'صافي الإيرادات ÷ متوسط الأصول' },
-      collectionPeriod: { value: collectionPeriod, display: days(collectionPeriod), unit: 'يوم', priorValue: null, indicator: collectionPeriod <= 45 ? 'good' : collectionPeriod <= 75 ? 'warning' : 'danger', explanation: 'متوسط العملاء ÷ (صافي الإيرادات ÷ 365)' },
-      inventoryTurnover: { value: inventoryTurnover, display: times(inventoryTurnover), unit: 'x', priorValue: null, indicator: inventoryTurnover >= 6 ? 'good' : inventoryTurnover >= 3 ? 'warning' : 'danger', explanation: 'تكلفة الإيرادات ÷ متوسط المخزون' },
-      debtRatio: { value: debtRatio, display: pct(debtRatio), unit: '%', priorValue: null, indicator: debtRatio <= 50 ? 'good' : debtRatio <= 70 ? 'warning' : 'danger', explanation: 'إجمالي الالتزامات ÷ إجمالي الأصول' },
-      workingCapital: { value: workingCapital, display: Number.isFinite(workingCapital) ? r2(workingCapital).toLocaleString('ar-SA') : 'غير قابل للقياس', unit: 'ر.س', priorValue: null, indicator: workingCapital > 0 ? 'good' : 'danger', explanation: 'الأصول المتداولة - الالتزامات المتداولة' },
-      ebitdaMargin: { value: ebitdaMargin, display: 'يتطلب فصل الإهلاك والفوائد', unit: '%', priorValue: null, indicator: 'warn', explanation: 'EBITDA ÷ صافي الإيرادات. يحتاج تحديد مصروف الإهلاك والفوائد.' },
-      interestCoverage: { value: interestCoverage, display: 'يتطلب مصروف فوائد', unit: 'x', priorValue: null, indicator: 'warn', explanation: 'EBIT ÷ مصروف الفوائد. يحتاج حساب فوائد واضح.' }
+      grossMargin: { value: grossMargin, display: pct(grossMargin), indicator: grossMargin >= 20 ? 'good' : grossMargin >= 10 ? 'warning' : 'danger', explanation: 'مجمل الربح ÷ صافي الإيرادات' },
+      netMargin: { value: netMargin, display: pct(netMargin), indicator: netMargin >= 10 ? 'good' : netMargin >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ صافي الإيرادات' },
+      roa: { value: roa, display: pct(roa), indicator: roa >= 5 ? 'good' : roa >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ متوسط الأصول' },
+      roe: { value: roe, display: Number.isFinite(roe) ? pct(roe) : 'غير قابل للقياس: حقوق الملكية صفر/سالبة', indicator: Number.isFinite(roe) && roe >= 15 ? 'good' : Number.isFinite(roe) && roe >= 0 ? 'warning' : 'danger', explanation: 'صافي الربح ÷ حقوق الملكية. لا يعرض كنسبة إذا كانت حقوق الملكية صفر/سالبة.' },
+      currentRatio: { value: currentRatio, display: times(currentRatio), indicator: currentRatio >= 1.5 ? 'good' : currentRatio >= 1 ? 'warning' : 'danger', explanation: 'الأصول المتداولة ÷ الالتزامات المتداولة' },
+      quickRatio: { value: quickRatio, display: times(quickRatio), indicator: quickRatio >= 1 ? 'good' : quickRatio >= 0.5 ? 'warning' : 'danger', explanation: '(الأصول المتداولة - المخزون) ÷ الالتزامات المتداولة' },
+      debtToEquity: { value: debtToEquity, display: Number.isFinite(debtToEquity) ? times(debtToEquity) : 'غير قابل للقياس: حقوق الملكية صفر/سالبة', indicator: Number.isFinite(debtToEquity) && debtToEquity <= 1 ? 'good' : Number.isFinite(debtToEquity) && debtToEquity <= 1.5 ? 'warning' : 'danger', explanation: 'إجمالي الالتزامات ÷ حقوق الملكية.' },
+      assetTurnover: { value: assetTurnover, display: times(assetTurnover), indicator: assetTurnover >= 1 ? 'good' : assetTurnover >= 0.5 ? 'warning' : 'danger', explanation: 'صافي الإيرادات ÷ متوسط الأصول' },
+      collectionPeriod: { value: collectionPeriod, display: days(collectionPeriod), indicator: collectionPeriod <= 45 ? 'good' : collectionPeriod <= 75 ? 'warning' : 'danger', explanation: 'متوسط العملاء ÷ (صافي الإيرادات ÷ 365)' },
+      inventoryTurnover: { value: inventoryTurnover, display: times(inventoryTurnover), indicator: inventoryTurnover >= 6 ? 'good' : inventoryTurnover >= 3 ? 'warning' : 'danger', explanation: 'تكلفة الإيرادات ÷ متوسط المخزون' },
+      debtRatio: { value: debtRatio, display: pct(debtRatio), indicator: debtRatio <= 50 ? 'good' : debtRatio <= 70 ? 'warning' : 'danger', explanation: 'إجمالي الالتزامات ÷ إجمالي الأصول' },
+      workingCapital: { value: workingCapital, display: Number.isFinite(workingCapital) ? r2(workingCapital).toLocaleString('ar-SA') : 'غير قابل للقياس', indicator: workingCapital > 0 ? 'good' : 'danger', explanation: 'الأصول المتداولة - الالتزامات المتداولة' }
     };
+  }
+
+  function installRatioHelpPopover() {
+    if (document.getElementById('ratioHelpStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'ratioHelpStyle';
+    style.textContent = `.ratio-card{position:relative;cursor:help}.ratio-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,170,255,.12)}.ratio-help-popover{position:fixed;z-index:99999;width:min(390px,calc(100vw - 24px));background:#0f172a;color:#e5e7eb;border:1px solid #334155;border-radius:12px;padding:14px 16px;box-shadow:0 18px 45px rgba(0,0,0,.45);font-size:.9rem;line-height:1.7;direction:rtl;text-align:right;display:none}.ratio-help-popover h6{color:#38bdf8;font-weight:800;margin-bottom:8px}.ratio-help-popover .formula{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.18);border-radius:8px;padding:7px 9px;margin:8px 0;color:#bae6fd;font-family:monospace}.ratio-help-popover .decision{color:#facc15;margin-top:8px}`;
+    document.head.appendChild(style);
+  }
+  function ratioMeaning(id) {
+    const map = {
+      grossMargin: ['هامش الربح الإجمالي','مجمل الربح ÷ صافي الإيرادات','يقيس ربحية النشاط قبل المصروفات الإدارية والتشغيلية.','راجع التسعير وتكلفة الإنتاج والخصومات.'],
+      netMargin: ['هامش صافي الربح','صافي الربح ÷ صافي الإيرادات','يوضح المتبقي من كل ريال مبيعات بعد كل المصروفات.','إذا كان سالبًا فهناك خسارة تحتاج خطة علاج.'],
+      roa: ['العائد على الأصول','صافي الربح ÷ متوسط الأصول','يقيس كفاءة استخدام الأصول في توليد الربح.','انخفاضه يعني أصول غير مستغلة أو ربحية ضعيفة.'],
+      roe: ['العائد على حقوق الملكية','صافي الربح ÷ حقوق الملكية','يقيس عائد الملاك.','إذا كانت حقوق الملكية سالبة فالمؤشر غير صالح للعرض كرقم عادي.'],
+      currentRatio: ['نسبة التداول','الأصول المتداولة ÷ الالتزامات المتداولة','تقيس قدرة السداد القصير.','أقل من 1 ضغط سيولة، وأكثر من 2 قد يعني أموالًا معطلة.'],
+      quickRatio: ['نسبة السيولة السريعة','(الأصول المتداولة - المخزون) ÷ الالتزامات المتداولة','تقيس السيولة بدون الاعتماد على بيع المخزون.','لو أقل بكثير من التداول فالسيولة محبوسة في المخزون.'],
+      debtToEquity: ['الديون إلى حقوق الملكية','إجمالي الالتزامات ÷ حقوق الملكية','تقيس الرافعة المالية.','مع حقوق ملكية سالبة لا تعرض كنسبة.'],
+      assetTurnover: ['معدل دوران الأصول','صافي الإيرادات ÷ متوسط الأصول','يقيس قدرة الأصول على إنتاج مبيعات.','انخفاضه يعني طاقة غير مستغلة.'],
+      collectionPeriod: ['فترة التحصيل','متوسط العملاء ÷ (الإيرادات ÷ 365)','تقيس عدد أيام التحصيل.','كلما زادت ضغطت السيولة.'],
+      inventoryTurnover: ['معدل دوران المخزون','تكلفة الإيرادات ÷ متوسط المخزون','يقيس سرعة تحويل المخزون لمبيعات.','ضعفه يعني مخزون راكد أو شراء زائد.'],
+      debtRatio: ['نسبة الديون','إجمالي الالتزامات ÷ إجمالي الأصول','تقيس نسبة تمويل الأصول من الغير.','ارتفاعها يزيد مخاطر التمويل.']
+    };
+    return map[id];
+  }
+  function bindRatioHelpPopover() {
+    installRatioHelpPopover();
+    let pop = document.getElementById('ratioHelpPopover');
+    if (!pop) { pop = document.createElement('div'); pop.id = 'ratioHelpPopover'; pop.className = 'ratio-help-popover'; document.body.appendChild(pop); }
+    document.querySelectorAll('.ratio-card[data-ratio]').forEach(card => {
+      if (card.dataset.helpBound === 'true') return;
+      card.dataset.helpBound = 'true';
+      const show = () => {
+        const info = ratioMeaning(card.dataset.ratio);
+        if (!info) return;
+        const value = card.querySelector('.ratio-value')?.textContent?.trim() || '';
+        const comp = card.querySelector('.ratio-comparison')?.textContent?.trim() || '';
+        pop.innerHTML = `<h6>${info[0]}</h6><div><strong>القيمة الحالية:</strong> ${value}</div><div><strong>المقارنة:</strong> ${comp}</div><div class="formula">${info[1]}</div><div>${info[2]}</div><div class="decision"><strong>قراءة المدير المالي:</strong> ${info[3]}</div>`;
+        const rect = card.getBoundingClientRect();
+        pop.style.top = `${Math.min(window.innerHeight - 20, rect.bottom + 10)}px`;
+        pop.style.left = `${Math.max(12, Math.min(window.innerWidth - 405, rect.left))}px`;
+        pop.style.display = 'block';
+      };
+      const hide = () => { pop.style.display = 'none'; };
+      card.addEventListener('mouseenter', show);
+      card.addEventListener('mousemove', show);
+      card.addEventListener('mouseleave', hide);
+      card.addEventListener('click', show);
+    });
+  }
+
+  function updateCardsFromRatios() {
+    const ratios = calculateRatiosCore();
+    Object.keys(ratios).forEach(ratioId => {
+      const card = document.querySelector(`[data-ratio="${ratioId}"]`);
+      if (!card) return;
+      const data = ratios[ratioId];
+      const valueEl = card.querySelector('.ratio-value');
+      const compEl = card.querySelector('.ratio-comparison');
+      const indicatorEl = card.querySelector('.ratio-indicator');
+      if (valueEl) valueEl.textContent = data.display;
+      if (compEl) { compEl.className = 'ratio-comparison neutral'; compEl.innerHTML = '<i class="fas fa-info-circle"></i> لا توجد سنة سابقة معتمدة'; }
+      if (indicatorEl) indicatorEl.className = `ratio-indicator indicator-${data.indicator || 'warn'}`;
+      card.title = data.explanation || '';
+    });
+    bindRatioHelpPopover();
   }
 
   function patchKpiCards() {
-    if (typeof calculateFinancialRatios === 'function') {
-      calculateFinancialRatios = calculateRatiosCore;
+    if (typeof calculateFinancialRatios === 'function') calculateFinancialRatios = calculateRatiosCore;
+    if (typeof updateKpiPane === 'function' && !updateKpiPane.__cfoPatched) {
+      const original = updateKpiPane;
+      const patched = function() { const res = original.apply(this, arguments); updateCardsFromRatios(); return res; };
+      patched.__cfoPatched = true;
+      updateKpiPane = patched;
     }
-    if (typeof updateKpiPane === 'function') {
-      const originalUpdate = updateKpiPane;
-      updateKpiPane = function() {
-        const result = originalUpdate.apply(this, arguments);
-        const ratios = calculateRatiosCore();
-        Object.keys(ratios).forEach(function(ratioId) {
-          const card = document.querySelector(`[data-ratio="${ratioId}"]`);
-          if (!card) return;
-          const data = ratios[ratioId];
-          const valueEl = card.querySelector('.ratio-value');
-          const compEl = card.querySelector('.ratio-comparison');
-          const indicatorEl = card.querySelector('.ratio-indicator');
-          if (valueEl) valueEl.textContent = data.display;
-          if (compEl) {
-            compEl.className = 'ratio-comparison neutral';
-            compEl.innerHTML = '<i class="fas fa-info-circle"></i> لا توجد سنة سابقة معتمدة';
-          }
-          if (indicatorEl) indicatorEl.className = `ratio-indicator ${data.indicator}`;
-          card.title = data.explanation || '';
-        });
-        return result;
-      };
-    }
-    window.PolarisRatiosQA = { calculate: calculateRatiosCore };
+    window.PolarisRatiosQA = { calculate: calculateRatiosCore, update: updateCardsFromRatios };
   }
 
-  function attachFormulaTooltips() {
-    const explainMap = {
-      'صافي الإيرادات': '<strong>صافي الإيرادات</strong><br>إجمالي المبيعات والإيرادات التشغيلية - خصومات ومردودات المبيعات.',
-      'يخصم: تكلفة الإيرادات': '<strong>تكلفة الإيرادات</strong><br>تكلفة المبيعات + الأجور المباشرة + الديزل/المواد المباشرة المرتبطة بالإنتاج.',
-      'مجمل الربح': '<strong>مجمل الربح</strong><br>صافي الإيرادات - تكلفة الإيرادات.',
-      'يضاف: إيرادات أخرى': '<strong>إيرادات أخرى</strong><br>إيرادات غير رئيسية أو غير مباشرة مثل الإيرادات العرضية والخصم المكتسب.',
-      'يخصم: مصروفات التشغيل': '<strong>مصروفات التشغيل</strong><br>مصروفات البيع والتشغيل غير المباشرة بعد استبعاد الأصول والمخزون والمستحقات.',
-      'يخصم: مصروفات عمومية وإدارية': '<strong>مصروفات عمومية وإدارية</strong><br>رواتب الإدارة والرسوم والإيجارات والمصروفات الإدارية.',
-      'يخصم: اهلاك للممتلكات والمعدات': '<strong>الإهلاك</strong><br>نصيب الفترة من استهلاك الأصول الثابتة، وليس مجمع الإهلاك كاملًا.',
-      'صافي الدخل قبل خصم الزكاة': '<strong>صافي الدخل قبل الزكاة</strong><br>مجمل الربح + إيرادات أخرى - مصروفات التشغيل - المصروفات الإدارية - الإهلاك.',
-      'يخصم: الزكاة الشرعية': '<strong>الزكاة</strong><br>مصروف الزكاة المحتسب أو المسجل للفترة.',
-      'صافي الخسارة النهائية': '<strong>صافي الخسارة النهائية</strong><br>صافي الدخل قبل الزكاة - الزكاة.',
-      'النقدية في بداية الفترة': '<strong>النقدية في بداية الفترة</strong><br>رصيد افتتاحي لحسابات النقد والبنوك.',
-      'النقدية في نهاية الفترة': '<strong>النقدية في نهاية الفترة</strong><br>النقدية بداية الفترة + صافي الزيادة/النقص في النقدية.',
-      'صافي النقدية من الأنشطة التشغيلية': '<strong>التدفقات التشغيلية</strong><br>صافي الربح + الإهلاك ± تغيرات رأس المال العامل.',
-      'صافي النقدية من الأنشطة الاستثمارية': '<strong>التدفقات الاستثمارية</strong><br>حركة شراء/بيع الأصول الثابتة والاستثمارات.',
-      'صافي النقدية من الأنشطة التمويلية': '<strong>التدفقات التمويلية</strong><br>حركة القروض وحقوق الملكية والتوزيعات/المساهمات.'
+  function patchAutoCategorization() {
+    const originalAuto = typeof autoCategorizeAccounts === 'function' ? autoCategorizeAccounts : null;
+    if (originalAuto && !originalAuto.__cfoPatched) {
+      const patchedAuto = function() {
+        const originalResult = originalAuto.apply(this, arguments);
+        const changed = applyCFOClassificationRules(false);
+        if (changed && typeof refreshAllUI === 'function') refreshAllUI();
+        return originalResult;
+      };
+      patchedAuto.__cfoPatched = true;
+      autoCategorizeAccounts = patchedAuto;
+    }
+
+    window.applyCFOClassificationRules = applyCFOClassificationRules;
+    window.runAutoCategorization = function() {
+      const action = () => {
+        const changed = applyCFOClassificationRules(true);
+        if (originalAuto) originalAuto();
+        applyCFOClassificationRules(true);
+        if (typeof saveAuditFile === 'function') saveAuditFile();
+        if (typeof refreshAllUI === 'function') refreshAllUI();
+        if (typeof showNotification === 'function') showNotification(`تمت إعادة التصنيف حسب قواعد CFO. تم تعديل ${changed} حساب.`, 'success');
+      };
+      if (typeof showConfirmation === 'function') {
+        showConfirmation('إعادة التصنيف التلقائي', 'هل أنت متأكد من رغبتك في إعادة التصنيف حسب قواعد المدير المالي؟', action);
+      } else if (confirm('هل أنت متأكد من رغبتك في إعادة التصنيف حسب قواعد المدير المالي؟')) action();
     };
-
-    let tip = document.getElementById('formulaTooltip');
-    if (!tip) {
-      tip = document.createElement('div');
-      tip.id = 'formulaTooltip';
-      tip.style.cssText = 'position:fixed;display:none;max-width:460px;background:#0d1117;border:1px solid #00aaff;color:#c9d1d9;padding:12px 14px;border-radius:10px;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:13px;line-height:1.7;text-align:right;direction:rtl;';
-      document.body.appendChild(tip);
-    }
-
-    document.querySelectorAll('table.financial-table tbody tr').forEach(function(row) {
-      const labelCell = row.querySelector('td');
-      if (!labelCell) return;
-      const label = labelCell.textContent.trim();
-      const key = Object.keys(explainMap).find(function(k) { return label.indexOf(k) >= 0; });
-      if (!key) return;
-      row.style.cursor = 'help';
-      row.querySelectorAll('td').forEach(function(cell) {
-        cell.dataset.explain = explainMap[key];
-        cell.style.cursor = 'help';
-      });
-    });
-
-    document.querySelectorAll('[data-explain]').forEach(function(el) {
-      if (el.dataset.tooltipAttached === 'true') return;
-      el.dataset.tooltipAttached = 'true';
-      el.addEventListener('mouseenter', function(e) {
-        tip.innerHTML = e.currentTarget.dataset.explain;
-        tip.style.display = 'block';
-      });
-      el.addEventListener('mousemove', function(e) {
-        tip.style.top = (e.clientY + 15) + 'px';
-        tip.style.left = (e.clientX + 15) + 'px';
-      });
-      el.addEventListener('mouseleave', function() {
-        tip.style.display = 'none';
-      });
-    });
-  }
-
-  function patchAccountMapping() {
-    applyAccountOverrides();
-    if (typeof calculateNetProfit === 'function') calculateNetProfit = function(final) { return profitCalc(); };
-    if (typeof calculateTrialBalanceBalance === 'function') calculateTrialBalanceBalance = function() { return balanceCalc(); };
-    if (typeof validateDataForTransfer === 'function') {
-      validateDataForTransfer = function() {
-        const issues = [];
-        const b = balanceCalc();
-        const p = profitCalc();
-        if (!b.isBalanced) issues.push('ميزان المراجعة غير متوازن: الفرق ' + b.difference.toFixed(2) + ' ريال');
-        if (!Number.isFinite(p.profitAfter)) issues.push('صافي الربح غير صالح');
-        return { isValid: issues.length === 0, issues: issues, profitData: p, balanceData: b };
-      };
-    }
-    patchKpiCards();
-
-    window.PolarisAccountingQA = {
-      ROUNDING_TOLERANCE: TOLERANCE,
-      ACCOUNT_OVERRIDES,
-      applyAccountOverrides,
-      calculateProfitCore: profitCalc,
-      calculateBalanceCore: balanceCalc,
-      calculateRatiosCore,
-      finalBalance: finalBal,
-      isContraRevenue: isContraRevenue,
-      isExpenseLike: function(a) { return isCostOfSales(a) || isOperatingExpense(a); },
-      diagnostic: function() {
-        const p = profitCalc();
-        const b = balanceCalc();
-        const ratios = calculateRatiosCore();
-        console.table({
-          grossRevenue: p.grossRevenue,
-          contraRevenue: p.contraRevenue,
-          netRevenue: p.netRevenue,
-          costOfSales: p.costOfSales,
-          grossProfit: p.grossProfit,
-          operatingExpenses: p.operatingExpenses,
-          expenses: p.expenses,
-          profitAfter: p.profitAfter,
-          totalDebits: b.totalDebits,
-          totalCredits: b.totalCredits,
-          difference: b.difference,
-          isBalanced: b.isBalanced,
-          netMargin: ratios.netMargin.display,
-          roa: ratios.roa.display,
-          roe: ratios.roe.display,
-          debtToEquity: ratios.debtToEquity.display
-        });
-        return { profit: p, balance: b, ratios, overrides: applyAccountOverrides() };
-      }
-    };
-  }
-
-  function patchConsolidation() {
-    const run = function() { attachFormulaTooltips(); };
-    setTimeout(run, 400);
-    setTimeout(run, 1200);
-    setTimeout(run, 2500);
-    ['displayIncomeStatement', 'displayCashFlowStatement'].forEach(function(fnName) {
-      if (typeof window[fnName] !== 'function') return;
-      const original = window[fnName];
-      window[fnName] = function() {
-        const out = original.apply(this, arguments);
-        setTimeout(attachFormulaTooltips, 0);
-        return out;
-      };
-    });
-    window.PolarisFormulaTooltips = { attach: attachFormulaTooltips };
   }
 
   function boot() {
-    const page = location.pathname.split('/').pop();
-    if (page === 'account-mapping.html') patchAccountMapping();
-    if (page === 'consolidation-cockpit.html') patchConsolidation();
-    console.log('Polaris accounting QA patch v4 loaded', page);
+    if (!['account-mapping', 'account-mapping.html'].includes((location.pathname.split('/').pop() || '').replace('.html',''))) return;
+    patchAutoCategorization();
+    patchKpiCards();
+    bindRatioHelpPopover();
+    setTimeout(() => { patchAutoCategorization(); patchKpiCards(); updateCardsFromRatios(); }, 1200);
+    setTimeout(() => { patchAutoCategorization(); patchKpiCards(); updateCardsFromRatios(); }, 2500);
+    console.log('Polaris accounting QA patch v2 loaded: robust ratios + CFO reclassification');
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 0); });
-  else setTimeout(boot, 0);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
