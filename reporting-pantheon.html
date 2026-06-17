@@ -287,7 +287,7 @@ body {
         <div class="page-header">
             <div>
                 <h1 class="page-title">ديوان الحكمة المالية</h1>
-                <p class="text-secondary">44 تقريرًا استراتيجيًا موزعة على 7 أجنحة - نسخة 2025</p>
+                <p class="text-secondary">51 تقريرًا استراتيجيًا ومحاسبيًا موزعة على 8 أجنحة - نسخة 2025</p>
                 <div class="top-icons">
                     <a id="top_home" href="index.html" class="sidebar-icon" title="الرئيسية"><i class="fas fa-home"></i></a>
                     <a id="top_mapping" href="account-mapping.html" class="sidebar-icon" title="الاستيعاب" onclick="goToAccountMapping(); return false;"><i class="fas fa-balance-scale"></i></a>
@@ -324,13 +324,12 @@ body {
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="stats-card">
-                    <h3>44</h3>
-                    <p>إجمالي التقارير</p>
+<h3>51</h3>                    <p>إجمالي التقارير</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stats-card">
-                    <h3>7</h3>
+                    <h3>8</h3>
                     <p>الأجنحة الرئيسية</p>
                 </div>
             </div>
@@ -361,6 +360,7 @@ body {
     <button class="filter-btn" onclick="filterWing('strategy', this)">ديوان الاستراتيجية</button>
     <button class="filter-btn" onclick="filterWing('risk', this)">ديوان المخاطر</button>
     <button class="filter-btn" onclick="filterWing('investment', this)">ديوان الاستثمار</button>
+    <button class="filter-btn" onclick="filterWing('quality', this)">ديوان جودة الأرباح</button>
 </div>
 
 
@@ -444,7 +444,7 @@ body {
             <h3 class="wing-title">ديوان المالية</h3>
             <p class="wing-subtitle">التقارير المالية الأساسية والالتزامات القانونية</p>
         </div>
-        <span class="wing-badge">8 تقارير</span>
+<span class="wing-badge">8 تقارير</span>
     </div>
     <div class="report-grid">
         <div class="report-card" onclick="openReport('yearend-checklist', 'إغلاق نهاية العام')">
@@ -487,6 +487,47 @@ body {
             <h6><i class="fas fa-exchange-alt"></i> مصادر واستخدامات</h6>
             <p>مصادر الأموال، استخداماتها (رسوم دائرية)</p>
         </div>
+        <div class="report-card" onclick="openReport('trial-balance-audit', 'ميزان مراجعة معتمد')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-balance-scale"></i> ميزان مراجعة معتمد</h6>
+    <p>ميزان المراجعة بعد التصنيف والتسويات والفحص الآلي</p>
+</div>
+
+<div class="report-card" onclick="openReport('receivables-aging', 'أعمار الذمم المدينة')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-user-clock"></i> أعمار الذمم المدينة</h6>
+    <p>تحليل أرصدة العملاء والتحصيل ومخاطر الائتمان</p>
+</div>
+
+<div class="report-card" onclick="openReport('payables-aging', 'أعمار الموردين')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-file-invoice-dollar"></i> أعمار الموردين</h6>
+    <p>تحليل أرصدة الموردين والالتزامات التجارية</p>
+</div>
+
+<div class="report-card" onclick="openReport('fixed-assets-register', 'سجل الأصول والإهلاك')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-industry"></i> سجل الأصول والإهلاك</h6>
+    <p>تكلفة الأصول، مجمع الإهلاك، وصافي القيمة الدفترية</p>
+</div>
+
+<div class="report-card" onclick="openReport('vat-reconciliation', 'مطابقة ضريبة القيمة المضافة')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-receipt"></i> مطابقة ضريبة القيمة المضافة</h6>
+    <p>مطابقة حسابات ضريبة القيمة المضافة مع الأرصدة المالية</p>
+</div>
+
+<div class="report-card" onclick="openReport('zakat-base', 'الوعاء الزكوي التقديري')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-mosque"></i> الوعاء الزكوي التقديري</h6>
+    <p>احتساب أولي للوعاء الزكوي من بيانات الميزان</p>
+</div>
+
+<div class="report-card" onclick="openReport('related-parties', 'الأطراف ذات العلاقة')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-people-arrows"></i> الأطراف ذات العلاقة</h6>
+    <p>جاري الشركاء والمنشآت الشقيقة والحسابات المرتبطة</p>
+</div>
     </div>
 </div>
 
@@ -506,6 +547,7 @@ body {
                 <span class="wing-badge">4 تقارير</span>
             </div>
             <div class="report-grid">
+             
                 <div class="report-card" onclick="openReport('kpi-dashboard', 'KPIs Dashboard')">
                     <span class="report-status status-ready">جاهز</span>
                     <h6><i class="fas fa-tachometer-alt"></i> KPIs Dashboard</h6>
@@ -613,7 +655,7 @@ body {
                     <h3 class="wing-title">ديوان المخاطر</h3>
                     <p class="wing-subtitle">نماذج التنبؤ بالإفلاس وإدارة المخاطر</p>
                 </div>
-                <span class="wing-badge">8 تقارير</span>
+                <span class="wing-badge">15 تقريرًا</span>
             </div>
             <div class="report-grid">
                 <div class="report-card" onclick="openReport('altman-zscore', 'نموذج ألتمان Z-Score')">
@@ -670,7 +712,11 @@ body {
                 <span class="wing-badge">4 تقارير</span>
             </div>
             <div class="report-grid">
-  
+  <div class="report-card" onclick="openReport('capm-model', 'CAPM Model')">
+    <span class="report-status status-ready">جاهز</span>
+    <h6><i class="fas fa-chart-line"></i> CAPM Model</h6>
+    <p>تكلفة حقوق الملكية: معدل خالي من المخاطر + بيتا × علاوة السوق</p>
+</div>
                 <div class="report-card" onclick="openReport('famafrench-model', 'Fama-French 3-Factor')">
                     <span class="report-status status-ready">جاهز</span>
                     <h6><i class="fas fa-cubes"></i> Fama-French 3-Factor</h6>
