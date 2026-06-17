@@ -53,7 +53,7 @@
 
     const loadQaPatch = () => {
         const page = (location.pathname || '').split('/').pop();
-        if (!['data-ingestion.html', 'account-mapping.html', 'consolidation-cockpit.html'].includes(page)) return;
+        if (!['data-ingestion.html', 'account-mapping.html', 'consolidation-cockpit.html', 'reporting-pantheon.html'].includes(page)) return;
         injectScript('polaris-accounting-qa-patch-v2.js?v=20260617d', 'data-polaris-accounting-qa-patch');
         if (page === 'account-mapping.html') {
             setTimeout(() => injectScript('polaris-equity-ratio-fix.js?v=20260617a', 'data-polaris-equity-ratio-fix'), 800);
@@ -61,10 +61,13 @@
         if (page === 'consolidation-cockpit.html') {
             setTimeout(() => injectScript('polaris-consolidation-qa-patch.js?v=20260617a', 'data-polaris-consolidation-qa-patch'), 250);
         }
+        if (page === 'reporting-pantheon.html') {
+            setTimeout(() => injectScript('polaris-reporting-qa-patch.js?v=20260617a', 'data-polaris-reporting-qa-patch'), 650);
+        }
     };
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.8-qa-consolidation-fix',
+        VERSION: '1.0.9-qa-reporting-fix',
         STEPS,
         STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
