@@ -47,14 +47,14 @@
         if (!['data-ingestion.html', 'account-mapping.html'].includes(page)) return;
         if (document.querySelector('[data-polaris-accounting-qa-patch]')) return;
         const s = document.createElement('script');
-        s.src = 'polaris-accounting-qa-patch.js?v=20260617b';
+        s.src = 'polaris-accounting-qa-patch-v2.js?v=20260617c';
         s.defer = true;
         s.setAttribute('data-polaris-accounting-qa-patch', 'true');
         document.head.appendChild(s);
     };
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.4-qa-accounting-patch',
+        VERSION: '1.0.5-qa-accounting-patch-v2',
         STEPS,
         STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
@@ -155,12 +155,13 @@
                 const category = account.category;
                 const sub = String(account.sub_category || '');
                 const name = String(account.name || '').toLowerCase();
+                const code = String(account.account_id || '');
                 const isContraRevenue = sub === '410099' || name.includes('خصم مسموح') || name.includes('مردود') || name.includes('مرتجع');
-                const isExpenseLike = category === 'expenses' || category === 'cost_of_revenue' || sub.startsWith('5') || sub.startsWith('6') || sub.startsWith('7') || name.includes('تكلفة المبيعات');
-                if (category === 'revenue') {
+                const isExpenseLike = category === 'expenses' || category === 'cost_of_revenue' || sub.startsWith('5') || sub.startsWith('6') || sub.startsWith('7') || code === '303011' || name.includes('تكلفة المبيعات');
+                if (category === 'revenue' || code.startsWith('4')) {
                     if (isContraRevenue) contraRevenue += balance > 0 ? balance : Math.abs(balance);
                     else revenues += balance < 0 ? Math.abs(balance) : -balance;
-                } else if (isExpenseLike) expenses += balance > 0 ? balance : -Math.abs(balance);
+                } else if (isExpenseLike) expenses += balance > 0 ? balance : Math.abs(balance);
             });
             const before = revenues - contraRevenue - expenses;
             return { before, adjustments: 0, after: before, revenues, contraRevenue, expenses };
