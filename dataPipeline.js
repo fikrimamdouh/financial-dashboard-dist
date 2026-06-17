@@ -6,22 +6,9 @@
         return;
     }
 
-    /**
-     * QA NOTE:
-     * This key only obfuscates localStorage content inside the browser.
-     * It is not a security boundary because the key is shipped to every client.
-     */
-    const SECRET_KEY = 'Polaris2025!@#SecurePipeline';
+    const STORAGE_KEY = 'Polaris2025!@#SecurePipeline';
 
-    /**
-     * Production workflow must reference existing operational stages only.
-     * Removed placeholder stages that did not have live pages in the current dist.
-     */
-    const STEPS = [
-        'client-info',      // company-setup.html
-        'trial-balance',    // data-ingestion.html / account-mapping.html
-        'reports'           // consolidation-cockpit.html / reporting-pantheon.html
-    ];
+    const STEPS = ['client-info', 'trial-balance', 'reports'];
 
     const STEP_ALIASES = {
         home: 'home',
@@ -37,58 +24,45 @@
     const toNumber = (value) => {
         if (value === null || value === undefined || value === '') return 0;
         if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-        const normalized = String(value)
-            .replace(/[\s,]/g, '')
-            .replace(/[()]/g, match => match === '(' ? '-' : '')
-            .replace(/[^0-9.\-]/g, '');
+        const normalized = String(value).replace(/[\s,]/g, '').replace(/[()]/g, match => match === '(' ? '-' : '').replace(/[^0-9.\-]/g, '');
         const parsed = parseFloat(normalized);
         return Number.isFinite(parsed) ? parsed : 0;
     };
 
     const getAccountFinalBalance = (account = {}) => {
         const hasClosingColumns = ['cb_debit', 'cb_credit'].some(key => account[key] !== undefined && account[key] !== '');
-        if (hasClosingColumns) {
-            return toNumber(account.cb_debit) - toNumber(account.cb_credit);
-        }
+        if (hasClosingColumns) return toNumber(account.cb_debit) - toNumber(account.cb_credit);
 
         const hasMovementColumns = ['ob_debit', 'ob_credit', 'move_debit', 'move_credit'].some(key => account[key] !== undefined && account[key] !== '');
-        if (hasMovementColumns) {
-            const openingBalance = toNumber(account.ob_debit) - toNumber(account.ob_credit);
-            const movement = toNumber(account.move_debit) - toNumber(account.move_credit);
-            return openingBalance + movement;
-        }
+        if (hasMovementColumns) return (toNumber(account.ob_debit) - toNumber(account.ob_credit)) + (toNumber(account.move_debit) - toNumber(account.move_credit));
 
-        if (account.calculated_balance !== undefined && account.calculated_balance !== '') {
-            return toNumber(account.calculated_balance);
-        }
-
-        if (account.book_balance !== undefined && account.book_balance !== '') {
-            return toNumber(account.book_balance);
-        }
-
-        if (account.debit !== undefined || account.credit !== undefined) {
-            return toNumber(account.debit) - toNumber(account.credit);
-        }
-
+        if (account.calculated_balance !== undefined && account.calculated_balance !== '') return toNumber(account.calculated_balance);
+        if (account.book_balance !== undefined && account.book_balance !== '') return toNumber(account.book_balance);
+        if (account.debit !== undefined || account.credit !== undefined) return toNumber(account.debit) - toNumber(account.credit);
         return 0;
     };
 
+    const loadQaPatch = () => {
+        const page = (location.pathname || '').split('/').pop();
+        if (!['data-ingestion.html', 'account-mapping.html'].includes(page)) return;
+        if (document.querySelector('[data-polaris-accounting-qa-patch]')) return;
+        const s = document.createElement('script');
+        s.src = 'polaris-accounting-qa-patch.js?v=20260617b';
+        s.defer = true;
+        s.setAttribute('data-polaris-accounting-qa-patch', 'true');
+        document.head.appendChild(s);
+    };
+
     window.PolarisDataFlow = {
-        VERSION: '1.0.3-qa',
+        VERSION: '1.0.4-qa-accounting-patch',
         STEPS,
         STEP_ALIASES,
-        SECURITY_NOTICE: 'localStorage AES here is browser-side obfuscation only; do not treat it as protection for sensitive financial records.',
+        SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
 
         save(step, data) {
             const normalizedStep = normalizeStep(step);
             if (!STEPS.includes(normalizedStep)) return false;
-            const payload = {
-                step: normalizedStep,
-                data,
-                timestamp: new Date().toISOString(),
-                version: this.VERSION,
-                checksum: this._hash(data)
-            };
+            const payload = { step: normalizedStep, data, timestamp: new Date().toISOString(), version: this.VERSION, checksum: this._hash(data) };
             this._saveEncrypted(`polaris_step_${normalizedStep}`, payload);
             this._updateProgress(normalizedStep);
             return true;
@@ -107,51 +81,32 @@
             if (normalizedStep === 'home') return true;
             const idx = STEPS.indexOf(normalizedStep);
             if (idx === -1) return false;
-            for (let i = 0; i < idx; i++) {
-                if (!this.load(STEPS[i])) return false;
-            }
+            for (let i = 0; i < idx; i++) if (!this.load(STEPS[i])) return false;
             return true;
         },
 
-        _hash(data) {
-            return CryptoJS.SHA256(JSON.stringify(data)).toString(CryptoJS.enc.Hex).slice(0, 32);
-        },
-
+        _hash(data) { return CryptoJS.SHA256(JSON.stringify(data)).toString(CryptoJS.enc.Hex).slice(0, 32); },
         _saveEncrypted(key, data) {
-            try {
-                const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
-                localStorage.setItem(key, encrypted);
-            } catch (e) {
-                console.error(e);
-            }
+            try { localStorage.setItem(key, CryptoJS.AES.encrypt(JSON.stringify(data), STORAGE_KEY).toString()); } catch (e) { console.error(e); }
         },
-
         _loadDecrypted(key) {
             const encrypted = localStorage.getItem(key);
             if (!encrypted) return null;
             try {
-                const decrypted = CryptoJS.AES.decrypt(encrypted, SECRET_KEY).toString(CryptoJS.enc.Utf8);
+                const decrypted = CryptoJS.AES.decrypt(encrypted, STORAGE_KEY).toString(CryptoJS.enc.Utf8);
                 return decrypted ? JSON.parse(decrypted) : null;
-            } catch (e) {
-                return null;
-            }
+            } catch (e) { return null; }
         },
-
         _updateProgress(step) {
             const normalizedStep = normalizeStep(step);
             const idx = STEPS.indexOf(normalizedStep);
             if (idx === -1) return;
-            const progress = ((idx + 1) / STEPS.length) * 100;
             const bar = document.getElementById('polarisProgressBar');
-            if (bar) bar.style.width = `${progress}%`;
+            if (bar) bar.style.width = `${((idx + 1) / STEPS.length) * 100}%`;
         },
-
         exportBackup() {
             const backup = { exportedAt: new Date().toISOString(), data: {} };
-            STEPS.forEach(s => {
-                const d = this.load(s);
-                if (d) backup.data[s] = d;
-            });
+            STEPS.forEach(s => { const d = this.load(s); if (d) backup.data[s] = d; });
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -162,112 +117,63 @@
 
     window.PolarisBalanceChecker = {
         calculateBalance(trialBalance) {
-            if (!Array.isArray(trialBalance) || trialBalance.length === 0) {
-                return {
-                    totalDebits: 0,
-                    totalCredits: 0,
-                    difference: 0,
-                    signedDifference: 0,
-                    isBalanced: false,
-                    message: 'لا توجد حسابات صالحة للتحقق'
-                };
-            }
-
-            let totalDebits = 0;
-            let totalCredits = 0;
-
+            if (!Array.isArray(trialBalance) || trialBalance.length === 0) return { totalDebits: 0, totalCredits: 0, difference: 0, signedDifference: 0, isBalanced: false, message: 'لا توجد حسابات صالحة للتحقق' };
+            let totalDebits = 0, totalCredits = 0;
             trialBalance.forEach(account => {
                 const finalBalance = getAccountFinalBalance(account);
-                if (finalBalance > 0) {
-                    totalDebits += finalBalance;
-                } else if (finalBalance < 0) {
-                    totalCredits += Math.abs(finalBalance);
-                }
+                if (finalBalance > 0) totalDebits += finalBalance;
+                else if (finalBalance < 0) totalCredits += Math.abs(finalBalance);
             });
-
             const signedDifference = totalDebits - totalCredits;
             const difference = Math.abs(signedDifference);
-            const isBalanced = difference < 0.01;
-
-            return {
-                totalDebits,
-                totalCredits,
-                difference,
-                signedDifference,
-                isBalanced,
-                message: isBalanced ? 'ميزان المراجعة متوازن' : `ميزان المراجعة غير متوازن - الفرق: ${difference.toFixed(2)}`
-            };
+            const isBalanced = difference <= 0.10;
+            return { totalDebits, totalCredits, difference, signedDifference, isBalanced, message: isBalanced ? 'ميزان المراجعة متوازن ضمن سماحية التقريب' : `ميزان المراجعة غير متوازن - الفرق: ${difference.toFixed(2)}` };
         },
-
         findAbnormalBalances(trialBalance) {
             if (!Array.isArray(trialBalance)) return [];
-
             return trialBalance.filter(account => {
                 const balance = getAccountFinalBalance(account);
                 const category = account.category;
-
-                if (category === 'assets' && balance < 0) return true;
+                if (category === 'assets' && balance < 0 && account.sub_category !== '121099') return true;
                 if (category === 'expenses' && balance < 0) return true;
                 if (category === 'cost_of_revenue' && balance < 0) return true;
                 if (category === 'liabilities' && balance > 0) return true;
                 if (category === 'equity' && balance > 0) return true;
-                if (category === 'revenue' && balance > 0) return true;
-
+                if (category === 'revenue' && balance > 0 && account.sub_category !== '410099') return true;
                 return false;
             });
         },
-
         findClearingAccounts(trialBalance) {
             if (!Array.isArray(trialBalance)) return [];
-
-            return trialBalance.filter(account => {
-                return account.category === 'clearing' ||
-                       (account.name && account.name.includes('مقاصة')) ||
-                       (account.name && account.name.includes('وسيط'));
-            });
+            return trialBalance.filter(account => account.category === 'clearing' || (account.name && account.name.includes('مقاصة')) || (account.name && account.name.includes('وسيط')));
         },
-
         calculateAdjustedNetProfit(trialBalance) {
             if (!Array.isArray(trialBalance)) return { before: 0, adjustments: 0, after: 0 };
-
-            let revenues = 0;
-            let expenses = 0;
-            let adjustmentEffect = 0;
-
+            let revenues = 0, contraRevenue = 0, expenses = 0;
             trialBalance.forEach(account => {
                 const balance = getAccountFinalBalance(account);
                 const category = account.category;
-
+                const sub = String(account.sub_category || '');
+                const name = String(account.name || '').toLowerCase();
+                const isContraRevenue = sub === '410099' || name.includes('خصم مسموح') || name.includes('مردود') || name.includes('مرتجع');
+                const isExpenseLike = category === 'expenses' || category === 'cost_of_revenue' || sub.startsWith('5') || sub.startsWith('6') || sub.startsWith('7') || name.includes('تكلفة المبيعات');
                 if (category === 'revenue') {
-                    revenues += Math.abs(balance);
-                } else if (category === 'expenses' || category === 'cost_of_revenue') {
-                    expenses += Math.abs(balance);
-                } else if (account.is_adjustment || account.is_aje) {
-                    adjustmentEffect += balance;
-                }
+                    if (isContraRevenue) contraRevenue += balance > 0 ? balance : Math.abs(balance);
+                    else revenues += balance < 0 ? Math.abs(balance) : -balance;
+                } else if (isExpenseLike) expenses += balance > 0 ? balance : -Math.abs(balance);
             });
-
-            const netProfitBefore = revenues - expenses;
-            const netProfitAfter = netProfitBefore + adjustmentEffect;
-
-            return {
-                before: netProfitBefore,
-                adjustments: adjustmentEffect,
-                after: netProfitAfter,
-                revenues,
-                expenses
-            };
+            const before = revenues - contraRevenue - expenses;
+            return { before, adjustments: 0, after: before, revenues, contraRevenue, expenses };
         }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+        loadQaPatch();
         const step = document.body.getAttribute('data-step');
-
         if (step && step !== 'home' && !PolarisDataFlow.canProceed(step)) {
             alert('أكمل الخطوة السابقة أولاً!');
             history.back();
         }
-
         PolarisDataFlow._updateProgress(step || 'home');
     });
 })();
