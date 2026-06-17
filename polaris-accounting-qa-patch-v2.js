@@ -24,10 +24,10 @@
     '401020003': ['revenue', '410099', 'خصم مسموح به: إيراد عكسي يخصم من المبيعات.']
   };
 
-  const code = a => String(a?.account_id || '').trim();
+  const code = a => String(a?.account_id || a?.account_code || a?.code || a?.accountNo || a?.account_no || '').trim();
   const sub = a => String(a?.sub_category || '').trim();
   const cat = a => String(a?.category || '').trim().toLowerCase();
-  const nm = a => String(a?.name || '').trim().toLowerCase();
+  const nm = a => String(a?.name || a?.account_name || '').trim().toLowerCase();
   const has = (a, words) => words.some(w => nm(a).includes(w));
   const rows = () => Array.isArray(window.auditFile?.trialBalance) ? auditFile.trialBalance : [];
   const openBal = a => N(a?.ob_debit) - N(a?.ob_credit);
@@ -155,30 +155,37 @@
 
   function updateProfitDisplay() {
     const p = profitCore(adjBal);
-    document.querySelectorAll('*').forEach(el => {
-      const t = (el.textContent || '').trim();
-      if (t.includes('صافي الربح') && t.includes('قبل التسويات')) {
-        const value = el.querySelector('.metric-value,.value,h3,h4,strong,span');
-        if (value) value.textContent = money(p.profitBefore);
-      }
-    });
+    const before = document.getElementById('profitBeforeDisplay');
+    const after = document.getElementById('netProfitDisplay');
+    const aje = document.getElementById('adjustmentsEffectDisplay');
+    if (before) before.textContent = money(p.profitBefore);
+    if (after) after.textContent = money(p.profitAfter);
+    if (aje) aje.textContent = money(0);
     return p;
+  }
+
+  function repaintTables() {
+    if (typeof preProcessAccountAnalysis === 'function') { try { preProcessAccountAnalysis(); } catch(e){} }
+    if (typeof processAndRender === 'function') { try { processAndRender(); return; } catch(e){} }
+    if (typeof renderAll === 'function') { try { renderAll(); return; } catch(e){} }
+    if (typeof updateAccountTable === 'function') { try { updateAccountTable(); } catch(e){} }
   }
 
   function cfoFullRefresh(silent=false) {
     const changed = applyCFOClassificationRules(true);
     if (typeof saveAuditFile === 'function') saveAuditFile();
-    if (typeof preProcessAccountAnalysis === 'function') { try { preProcessAccountAnalysis(); } catch(e){} }
-    if (typeof updateAccountTable === 'function') { try { updateAccountTable(); } catch(e){} }
+    repaintTables();
     if (typeof updateCockpit === 'function') { try { updateCockpit(); } catch(e){} }
     if (typeof cleanupAndRebuildKpiCards === 'function') { try { cleanupAndRebuildKpiCards(); } catch(e){} }
     updateKpiCardsCFO();
     const p = updateProfitDisplay();
     if (!silent) {
-      const msg = `تم تحديث وتصحيح الصفحة: ${changed} تصنيف، صافي الربح ${money(p.profitAfter)}`;
-      if (typeof showNotification === 'function') showNotification(msg, 'success'); else console.log(msg);
+      const total = rows().length;
+      const missing = rows().filter(a => !a.category || !a.sub_category).length;
+      const msg = `تم تحديث وتصحيح الصفحة: ${changed} تعديل، غير المصنف ${missing}/${total}، صافي الربح ${money(p.profitAfter)}`;
+      if (typeof showNotification === 'function') showNotification(msg, missing ? 'warning' : 'success'); else console.log(msg);
     }
-    return { changed, profit: p, ratios: calculateRatiosCore() };
+    return { changed, missing: rows().filter(a => !a.category || !a.sub_category).map(a => ({ id: code(a), name: a.name, category: a.category, sub_category: a.sub_category })), profit: p, ratios: calculateRatiosCore() };
   }
 
   function patchFunctions() {
@@ -208,8 +215,9 @@
     patchFunctions(); bindHelp(); bindRefreshButtons();
     setTimeout(() => { patchFunctions(); bindRefreshButtons(); cfoFullRefresh(true); }, 900);
     setTimeout(() => { patchFunctions(); bindRefreshButtons(); cfoFullRefresh(true); }, 2500);
-    console.log('Polaris accounting QA patch v2 loaded: CFO full refresh button binding');
+    console.log('Polaris accounting QA patch v2 loaded: CFO refresh rerenders account table');
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
