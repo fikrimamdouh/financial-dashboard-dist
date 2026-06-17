@@ -7,7 +7,6 @@
     }
 
     const STORAGE_KEY = 'Polaris2025!@#SecurePipeline';
-
     const STEPS = ['client-info', 'trial-balance', 'reports'];
 
     const STEP_ALIASES = {
@@ -32,10 +31,8 @@
     const getAccountFinalBalance = (account = {}) => {
         const hasClosingColumns = ['cb_debit', 'cb_credit'].some(key => account[key] !== undefined && account[key] !== '');
         if (hasClosingColumns) return toNumber(account.cb_debit) - toNumber(account.cb_credit);
-
         const hasMovementColumns = ['ob_debit', 'ob_credit', 'move_debit', 'move_credit'].some(key => account[key] !== undefined && account[key] !== '');
         if (hasMovementColumns) return (toNumber(account.ob_debit) - toNumber(account.ob_credit)) + (toNumber(account.move_debit) - toNumber(account.move_credit));
-
         if (account.calculated_balance !== undefined && account.calculated_balance !== '') return toNumber(account.calculated_balance);
         if (account.book_balance !== undefined && account.book_balance !== '') return toNumber(account.book_balance);
         if (account.debit !== undefined || account.credit !== undefined) return toNumber(account.debit) - toNumber(account.credit);
@@ -63,15 +60,15 @@
         }
         if (page === 'reporting-pantheon.html') {
             setTimeout(() => injectScript('polaris-reporting-qa-patch.js?v=20260617a', 'data-polaris-reporting-qa-patch'), 650);
+            setTimeout(() => injectScript('polaris-reporting-selftest.js?v=20260617a', 'data-polaris-reporting-selftest'), 1500);
         }
     };
 
     window.PolarisDataFlow = {
-        VERSION: '1.0.9-qa-reporting-fix',
+        VERSION: '1.0.10-qa-reporting-selftest',
         STEPS,
         STEP_ALIASES,
         SECURITY_NOTICE: 'localStorage AES هنا إخفاء داخل المتصفح فقط وليس حماية فعلية لبيانات مالية حساسة.',
-
         save(step, data) {
             const normalizedStep = normalizeStep(step);
             if (!STEPS.includes(normalizedStep)) return false;
@@ -80,7 +77,6 @@
             this._updateProgress(normalizedStep);
             return true;
         },
-
         load(step) {
             const normalizedStep = normalizeStep(step);
             if (!STEPS.includes(normalizedStep)) return null;
@@ -88,7 +84,6 @@
             if (!payload || payload.checksum !== this._hash(payload.data)) return null;
             return payload.data;
         },
-
         canProceed(currentStep) {
             const normalizedStep = normalizeStep(currentStep);
             if (normalizedStep === 'home') return true;
@@ -97,7 +92,6 @@
             for (let i = 0; i < idx; i++) if (!this.load(STEPS[i])) return false;
             return true;
         },
-
         _hash(data) { return CryptoJS.SHA256(JSON.stringify(data)).toString(CryptoJS.enc.Hex).slice(0, 32); },
         _saveEncrypted(key, data) {
             try { localStorage.setItem(key, CryptoJS.AES.encrypt(JSON.stringify(data), STORAGE_KEY).toString()); } catch (e) { console.error(e); }
