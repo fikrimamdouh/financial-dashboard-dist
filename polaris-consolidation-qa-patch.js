@@ -27,6 +27,10 @@
     return book + aje;
   }
 
+  function openingBalance(account) {
+    return num(account?.ob_debit) - num(account?.ob_credit);
+  }
+
   function mapSub(account) {
     return subMap()[String(account?.sub_category || '')] || '';
   }
@@ -129,6 +133,87 @@
     };
   }
 
+  function accountSum(auditData, filter, mode = 'closing') {
+    const adjustments = auditData?.adjustments || [];
+    return (auditData?.trialBalance || []).filter(filter).reduce((sum, account) => {
+      if (mode === 'opening') return sum + openingBalance(account);
+      return sum + finalBalance(account, adjustments, false);
+    }, 0);
+  }
+
+  function cashFlowDiagnostics(auditData, cf) {
+    const cashFilter = acc => mapSub(acc) === 'cash';
+    const openingCashActual = accountSum(auditData, cashFilter, 'opening');
+    const closingCashActual = accountSum(auditData, cashFilter, 'closing');
+    const computedClosingCash = num(cf.openingCash) + num(cf.netCashChange);
+    const reconciliationDiff = r2(closingCashActual - computedClosingCash);
+    const qualityRatio = Math.abs(num(cf.netIncome)) > 0.000001 ? num(cf.cashFlowFromOps) / Math.abs(num(cf.netIncome)) : NaN;
+    const warnings = [];
+    if (Math.abs(reconciliationDiff) > 1) warnings.push('النقدية الختامية في التدفقات لا تطابق أرصدة النقد والبنوك.');
+    if (num(cf.netIncome) < 0 && num(cf.cashFlowFromOps) < 0) warnings.push('خسارة تشغيلية ونقدية تشغيلية سالبة: مؤشر ضغط سيولة.');
+    if (Number.isFinite(qualityRatio) && qualityRatio < 0) warnings.push('جودة الربح/الخسارة نقديًا ضعيفة: التدفق التشغيلي عكس اتجاه النتيجة.');
+    return { openingCashActual: r2(openingCashActual), closingCashActual: r2(closingCashActual), computedClosingCash: r2(computedClosingCash), reconciliationDiff, qualityRatio: Number.isFinite(qualityRatio) ? r2(qualityRatio) : null, warnings };
+  }
+
+  function patchCashFlow() {
+    window.generateCashFlowUnified = function(auditData, incomeData) {
+      const getClosing = filter => accountSum(auditData, filter, 'closing');
+      const getOpening = filter => accountSum(auditData, filter, 'opening');
+      const mapped = key => acc => mapSub(acc) === key;
+      const mappedAny = keys => acc => keys.includes(mapSub(acc));
+      const isFixedAssetCost = acc => mapSub(acc) === 'fixed_assets';
+      const isLongDebt = acc => String(acc.sub_category || '').startsWith('22') || mapSub(acc) === 'long_term_loans';
+      const isEquity = acc => String(acc.category || '').toLowerCase() === 'equity';
+
+      const netIncome = num(incomeData.netProfit || incomeData.finalNetIncome || 0);
+      const depreciation = Math.abs(num(incomeData.depreciationExpense || 0));
+      const changeInReceivables = getClosing(mappedAny(['trade_receivables', 'other_receivables'])) - getOpening(mappedAny(['trade_receivables', 'other_receivables']));
+      const changeInInventory = getClosing(mapped('inventory')) - getOpening(mapped('inventory'));
+      const changeInPrepaidExpenses = getClosing(mapped('prepaid_expenses')) - getOpening(mapped('prepaid_expenses'));
+      const changeInPayablesSigned = getClosing(mapped('trade_payables')) - getOpening(mapped('trade_payables'));
+      const changeInOtherPayablesSigned = getClosing(mappedAny(['other_payables', 'accrued_expenses'])) - getOpening(mappedAny(['other_payables', 'accrued_expenses']));
+      const changeInZakatSigned = getClosing(mapped('zakat_tax_provision')) - getOpening(mapped('zakat_tax_provision'));
+      const changeInPayables = -changeInPayablesSigned;
+      const changeInOtherPayables = -changeInOtherPayablesSigned;
+      const changeInZakat = -changeInZakatSigned;
+      const cashFlowFromOps = netIncome + depreciation - changeInReceivables - changeInInventory - changeInPrepaidExpenses + changeInPayables + changeInOtherPayables + changeInZakat;
+
+      const changeInFixedAssetsCost = getClosing(isFixedAssetCost) - getOpening(isFixedAssetCost);
+      const cashFlowFromInv = -changeInFixedAssetsCost;
+      const changeInLongTermLiabilities = -(getClosing(isLongDebt) - getOpening(isLongDebt));
+      const equityMovementBeforeResult = -(getClosing(isEquity) - getOpening(isEquity));
+      const changeInEquity = equityMovementBeforeResult - netIncome;
+      const cashFlowFromFin = changeInLongTermLiabilities + changeInEquity;
+      const netCashChange = cashFlowFromOps + cashFlowFromInv + cashFlowFromFin;
+      const openingCash = getOpening(mapped('cash'));
+      const closingCash = openingCash + netCashChange;
+
+      const cf = { netIncome: r2(netIncome), depreciation: r2(depreciation), changeInReceivables: r2(changeInReceivables), changeInInventory: r2(changeInInventory), changeInPrepaidExpenses: r2(changeInPrepaidExpenses), changeInPayables: r2(changeInPayables), changeInOtherPayables: r2(changeInOtherPayables), changeInZakat: r2(changeInZakat), cashFlowFromOps: r2(cashFlowFromOps), changeInFixedAssets: r2(changeInFixedAssetsCost), cashFlowFromInv: r2(cashFlowFromInv), changeInLongTermLiabilities: r2(changeInLongTermLiabilities), changeInEquity: r2(changeInEquity), cashFlowFromFin: r2(cashFlowFromFin), netCashChange: r2(netCashChange), openingCash: r2(openingCash), closingCash: r2(closingCash) };
+      cf.diagnostics = cashFlowDiagnostics(auditData, cf);
+      return cf;
+    };
+
+    window.generateCashFlowStatement = function(incomeData, currentBalance, priorBalance, auditData) {
+      return window.generateCashFlowUnified(auditData, { netProfit: incomeData.finalNetIncome || incomeData.netProfit || 0, depreciationExpense: incomeData.depreciationExpense || 0 });
+    };
+
+    if (typeof window.displayCashFlowStatement === 'function') {
+      const originalDisplayCashFlow = window.displayCashFlowStatement;
+      window.displayCashFlowStatement = function(cashFlowData, categorizedData, categorizedDataPrior, auditData, comparisonMode, currentYear, priorYear) {
+        const out = originalDisplayCashFlow.apply(this, arguments);
+        const cf = cashFlowData?.current || {};
+        const diag = cf.diagnostics || cashFlowDiagnostics(auditData, cf);
+        const container = document.getElementById('cashFlowContent');
+        if (container && !document.getElementById('cashFlowDiagnosticsBox')) {
+          const statusClass = Math.abs(num(diag.reconciliationDiff)) <= 1 ? 'alert-success' : 'alert-danger';
+          const warnings = (diag.warnings || []).map(w => `<li>${w}</li>`).join('');
+          container.insertAdjacentHTML('beforeend', `<div id="cashFlowDiagnosticsBox" class="alert ${statusClass} mt-3"><strong>فحص التدفقات النقدية:</strong><br>النقدية الفعلية آخر الفترة: ${formatCurrency(diag.closingCashActual)}<br>النقدية حسب قائمة التدفقات: ${formatCurrency(diag.computedClosingCash)}<br>فرق المطابقة: ${formatCurrency(diag.reconciliationDiff)}${warnings ? `<ul class="mb-0 mt-2">${warnings}</ul>` : '<div class="mt-2">قائمة التدفقات النقدية متطابقة مع أرصدة النقد والبنوك ضمن حد السماحية.</div>'}</div>`);
+        }
+        return out;
+      };
+    }
+  }
+
   function patchCharts() {
     if (typeof Chart === 'undefined') return;
     window.initializeCharts = function(incomeData, balanceData) {
@@ -162,9 +247,10 @@
     patchCategorizeAccounts();
     patchIncomeStatement();
     patchBalanceSheet();
+    patchCashFlow();
     patchCharts();
     patchWorkingCapitalNote();
-    window.PolarisConsolidationQA = { patched: true, finalBalance, isContraRevenue, isMainRevenue };
+    window.PolarisConsolidationQA = { patched: true, finalBalance, isContraRevenue, isMainRevenue, cashFlowDiagnostics };
     console.log('Polaris consolidation QA patch loaded');
   }
 
